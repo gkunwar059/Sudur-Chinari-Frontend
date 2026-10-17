@@ -1,0 +1,194 @@
+{
+  "nav": {
+    "home": "Home",
+    "news": "News",
+    "province": "Sudurpashchim",
+    "districts": "Districts",
+    "allDistricts": "All Districts",
+    "videos": "Videos",
+    "photos": "Photos",
+    "search": "Search",
+    "more": "More",
+    "admin": "Admin",
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "myAccount": "My Account",
+    "yatayat": "Sudur Yatayat"
+  },
+  "brand": {
+    "name": "Sudur Chinari",
+    "tagline": "Our History • Our Identity",
+    "subtitle": "Digital",
+    "description": "Authentic heritage, cultural identity, and digital journalism across all 9 districts of Sudurpashchim Province."
+  },
+  "hero": {
+    "breaking": "Breaking",
+    "exclusive": "Exclusive",
+    "latestNews": "Latest News",
+    "popularNews": "Popular News",
+    "viewAll": "View All",
+    "readMore": "Read More",
+    "moreNews": "Load More News",
+    "fullRead": "Full Read",
+    "minRead": "min read"
+  },
+  "sections": {
+    "districtExplorerTag": "Explore Districts",
+    "districtExplorerTitle": "9 Districts of Sudurpashchim",
+    "districtNewsTitle": "District News",
+    "shortsTitle": "Shorts & Reels",
+    "shortsSubtitle": "Beauty of Sudurpashchim in short clips",
+    "photoStoriesTitle": "Photo Stories",
+    "photoStoriesSubtitle": "Sudurpashchim life, culture and nature in pictures",
+    "opinionTitle": "Opinion & Editorial",
+    "opinionSubtitle": "Perspectives and analysis from local experts and writers",
+    "topStories": "Top Stories",
+    "mostRead": "Most Read",
+    "spotlight": "Spotlight",
+    "lifeAndArts": "Life & Arts"
+  },
+  "article": {
+    "publishedOn": "Published",
+    "updatedOn": "Updated",
+    "byAuthor": "By",
+    "readTime": "min read",
+    "views": "views",
+    "shareArticle": "Share this article",
+    "relatedArticles": "Related Stories",
+    "aboutAuthor": "About the Author",
+    "allArticlesByAuthor": "All articles by author",
+    "backToNews": "← Back to News",
+    "comments": "Comments",
+    "stories": "Stories"
+  },
+  "search": {
+    "title": "Search Articles",
+    "placeholder": "Search news, topics, authors or districts...",
+    "resultsFound": "{count} results found",
+    "noResults": "No results found",
+    "noResultsDesc": "Try different keywords or remove filters.",
+    "allCategories": "All Categories",
+    "allDistricts": "All Districts (9)",
+    "filterByDistrict": "Filter by District",
+    "filterByCategory": "Filter by Category",
+    "sortBy": "Sort By",
+    "latest": "Latest",
+    "popular": "Most Read",
+    "activeFilter": "Filter active",
+    "clearAll": "Clear All",
+    "trendingTopics": "Trending:",
+    "browseDistricts": "Browse by 9 Districts:",
+    "instantResults": "Instant Results",
+    "matches": "matches",
+    "viewAllResults": "View all {count} results",
+    "submit": "Search",
+    "clear": "Clear"
+  },
+  "district": {
+    "pageTitle": "9 Districts of Sudurpaschim",
+    "pageDesc": "Latest news, local governance, development, society, and investigative journalism from all 9 districts of Sudurpashchim Province.",
+    "breadcrumb": "9 Districts of Sudurpaschim",
+    "directoryLabel": "Sudurpaschim Province • Digital District Directory",
+    "totalDistricts": "Total Districts",
+    "totalArea": "Total Area",
+    "geoRegions": "Geo Regions",
+    "districts9": "9 Districts",
+    "belts3": "3 Belts",
+    "headquartersLabel": "Headquarters:",
+    "districtNews": "District News",
+    "allNews": "All {name} News",
+    "latestFromDistrict": "Latest from this district"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "ourDistricts": "Our Districts",
+    "newsletter": "Our Newsletter",
+    "newsletterDesc": "Get breaking news delivered straight to your inbox.",
+    "emailPlaceholder": "Your email address",
+    "subscribe": "Subscribe",
+    "subscribedSuccess": "Thank you! Subscription successful.",
+    "allRightsReserved": "© 2026 Sudurpashchim Digital. All rights reserved.",
+    "sitemap": "Sitemap",
+    "rss": "RSS",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use",
+    "about": "About Us",
+    "contact": "Contact",
+    "editorialPolicy": "Editorial Policy",
+    "advertise": "Advertise"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong.",
+    "retry": "Try Again",
+    "noContent": "No content available.",
+    "addArticlesPrompt": "Please add articles from the backend admin panel.",
+    "language": "Language",
+    "nepali": "Nepali",
+    "english": "English",
+    "switchToNepali": "नेपाली",
+    "switchToEnglish": "English",
+    "darkMode": "Dark Mode",
+    "lightMode": "Light Mode",
+    "close": "Close",
+    "open": "Open",
+    "part": "Part",
+    "stories": "Stories"
+  },
+  "auth": {
+    "login": "Login",
+    "logout": "Logout",
+    "register": "Register",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "loginTitle": "Welcome Back",
+    "loginSubtitle": "Sign in to your account",
+    "registerTitle": "Create Account",
+    "registerSubtitle": "Join Sudur Chinari",
+    "loggingIn": "Logging in...",
+    "registering": "Creating account...",
+    "loginSuccess": "Welcome back!",
+    "logoutSuccess": "Logged out successfully.",
+    "registerSuccess": "Account created! Welcome!",
+    "forgotPassword": "Forgot password?",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?"
+  },
+  "errors": {
+    "notFound": "Page Not Found",
+    "notFoundDesc": "The page you are looking for does not exist.",
+    "serverError": "Server Error",
+    "backHome": "Go Home",
+    "articleNotFound": "Article not found.",
+    "districtNotFound": "District not found."
+  },
+  "meta": {
+    "home": {
+      "title": "Our History • Our Identity",
+      "description": "The first digital broadsheet of Sudurpashchim Province — reliable and independent journalism."
+    },
+    "news": {
+      "title": "All News",
+      "description": "All the latest news from Sudurpashchim Province."
+    },
+    "search": {
+      "title": "Search News",
+      "description": "Search for all latest news from Sudurpashchim Province."
+    },
+    "district": {
+      "title": "Districts — 9 Districts of Sudurpashchim",
+      "description": "News, governance, and stories from all 9 districts of Sudurpashchim Province."
+    },
+    "videos": {
+      "title": "Videos",
+      "description": "Watch video reports and documentaries from Sudurpashchim Province."
+    },
+    "photos": {
+      "title": "Photo Stories",
+      "description": "Photo journalism and stories from Sudurpashchim Province."
+    }
+  }
+}

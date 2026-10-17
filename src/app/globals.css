@@ -1,0 +1,595 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ============================================================
+   SUDURPASHCHIM DIGITAL — Design Tokens
+   ============================================================ */
+
+@theme inline {
+  /* Typography */
+  --font-sans: var(--font-mukta), var(--font-inter), var(--font-devanagari), system-ui, -apple-system, sans-serif;
+  --font-devanagari: var(--font-mukta), var(--font-devanagari), system-ui, sans-serif;
+  --font-serif: var(--font-martel), var(--font-noto-serif), "Martel", "Noto Serif Devanagari", Georgia, serif;
+
+  /* Spacing */
+  --spacing-section: 3.5rem;
+  --spacing-section-sm: 2rem;
+
+  /* Semantic Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-surface-tint: var(--surface-tint);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
+  --color-rule: var(--rule);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-dark: var(--brand-dark);
+  --color-brand-secondary: var(--brand-secondary);
+  --color-brand-secondary-foreground: var(--brand-secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-ring: var(--ring);
+  --color-overlay: var(--overlay);
+}
+
+/* ============================================================
+   BASE STYLES — Clean Light Editorial Broadsheet
+   ============================================================ */
+
+:root {
+  --background: #FFFFFF;
+  --foreground: #1A1A1A;
+  --surface: #F8F6F2;
+  --surface-hover: #F3F4F6;
+  --surface-tint: #F0EBE1;
+  --card: #FFFFFF;
+  --card-foreground: #1A1A1A;
+  --border: #E8E5DF;
+  --border-subtle: #EAE6DF;
+  --rule: #D4CFCA;
+  --muted: #F3F4F6;
+  --muted-foreground: #6B7280;
+  --primary: #05965B;
+  --primary-foreground: #FFFFFF;
+  --brand: #05965B;
+  --brand-foreground: #FFFFFF;
+  --brand-dark: #047849;
+  --brand-secondary: #0C6FB3;
+  --brand-secondary-foreground: #FFFFFF;
+  --accent: #0C6FB3;
+  --accent-foreground: #FFFFFF;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --warning: #D97706;
+  --warning-foreground: #FFFFFF;
+  --ring: #05965B;
+  --overlay: rgba(0, 0, 0, 0.6);
+}
+
+.dark {
+  --background: #111827;
+  --foreground: #F9FAFB;
+  --surface: #0a0f1a;
+  --surface-hover: #1f2937;
+  --surface-tint: #1e293b;
+  --card: #111827;
+  --card-foreground: #F9FAFB;
+  --border: #374151;
+  --border-subtle: #2d3748;
+  --rule: #4b5563;
+  --muted: #1f2937;
+  --muted-foreground: #9CA3AF;
+  --primary: #10B981;
+  --primary-foreground: #022c22;
+  --brand: #10B981;
+  --brand-foreground: #022c22;
+  --brand-dark: #05965B;
+  --brand-secondary: #38BDF8;
+  --brand-secondary-foreground: #082f49;
+  --accent: #38BDF8;
+  --accent-foreground: #082f49;
+  --destructive: #EF4444;
+  --destructive-foreground: #450a0a;
+  --warning: #F59E0B;
+  --warning-foreground: #451a03;
+  --ring: #10B981;
+  --overlay: rgba(0, 0, 0, 0.8);
+}
+
+html {
+  font-size: 17px;
+  scroll-behavior: smooth;
+  -webkit-tap-highlight-color: transparent;
+  background-color: var(--background);
+  color: var(--foreground);
+  max-width: 100vw;
+  width: 100%;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-mukta), var(--font-inter), var(--font-devanagari), system-ui, sans-serif;
+  font-size: 1.0625rem;
+  line-height: 1.85;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  max-width: 100vw;
+  width: 100%;
+}
+
+button, [role="button"] {
+  cursor: pointer;
+}
+
+/* Nepali text gets Devanagari font automatically with generous line height for ascenders & descenders */
+:lang(ne), .text-ne {
+  font-family: var(--font-mukta), var(--font-devanagari), system-ui, sans-serif;
+  line-height: 1.9;
+}
+
+/* Ensure Devanagari headings have vertical room for upper/lower matras */
+:lang(ne) h1, :lang(ne) h2, :lang(ne) h3, :lang(ne) h4, :lang(ne) h5, :lang(ne) h6,
+.text-ne h1, .text-ne h2, .text-ne h3, .text-ne h4, .text-ne h5, .text-ne h6 {
+  line-height: 1.55 !important;
+  letter-spacing: normal !important;
+}
+
+/* ============================================================
+   UTILITY CLASSES
+   ============================================================ */
+
+.container-editorial {
+  max-width: 1280px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .container-editorial {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  .container-editorial {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  .container-editorial {
+    padding-left: 2.5rem;
+    padding-right: 2.5rem;
+  }
+}
+
+/* Section dividers */
+.section-divider {
+  border-top: 1px solid var(--color-border);
+}
+
+/* Article reading column */
+.article-body {
+  max-width: 720px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Editorial Headline Typography (Financial Times Financier Equivalent) */
+.font-headline {
+  font-family: var(--font-serif);
+  line-height: 1.5;
+}
+
+.font-serif-np {
+  font-family: var(--font-serif);
+  line-height: 1.5;
+}
+
+/* FT Stippled / Dotted Double Rule Separator */
+.ft-dotted-rule {
+  border-top: 1px dotted var(--rule);
+  border-bottom: 1px dotted var(--rule);
+  height: 5px;
+}
+
+/* FT Section Title Banner */
+.ft-section-title {
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  color: var(--foreground);
+  text-align: center;
+  margin-top: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* FT Claret/Burgundy Kicker Tag */
+.ft-kicker {
+  color: var(--brand-secondary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 0.4rem;
+  display: inline-block;
+  letter-spacing: -0.01em;
+}
+
+/* FT Teal Quote Mark */
+.ft-quote {
+  color: var(--accent);
+  font-size: 1.75rem;
+  font-family: Georgia, serif;
+  line-height: 1;
+  font-weight: bold;
+}
+
+/* FT Pill Badges */
+.ft-badge-exclusive {
+  background-color: var(--surface-tint);
+  color: var(--muted-foreground);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.45rem;
+  display: inline-block;
+}
+
+.ft-badge-live {
+  background-color: var(--destructive);
+  color: var(--destructive-foreground);
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.15rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* Link hover underline animation */
+.hover-underline {
+  position: relative;
+  text-decoration: none;
+}
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 0;
+  height: 1px;
+  background: currentColor;
+  transition: width 0.25s ease;
+}
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Breaking news ticker */
+@keyframes ticker {
+  0%   { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+.ticker-animate {
+  animation: ticker 30s linear infinite;
+}
+
+/* Smooth image reveal */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+  animation: fadeInUp 0.5s ease forwards;
+}
+
+/* Editorial card hover */
+.editorial-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.editorial-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px -8px rgba(22, 122, 82, 0.15);
+}
+
+/* Editorial bordered card hover */
+.editorial-card-bordered {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.editorial-card-bordered:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.08);
+}
+
+/* Video card aspect ratio */
+.aspect-video-9-16 {
+  aspect-ratio: 9 / 16;
+}
+
+/* Line clamp utilities */
+.line-clamp-2 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.line-clamp-3 {
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 0; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted-foreground); }
+
+/* Hide scrollbar for Chrome, Safari, Edge, Firefox */
+.no-scrollbar::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+/* Focus ring */
+*:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Prose article body */
+.prose-editorial {
+  font-size: 1.0625rem;
+  line-height: 1.8;
+  color: var(--foreground);
+}
+.prose-editorial p { margin-bottom: 1.5rem; }
+.prose-editorial h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.3;
+}
+.prose-editorial h3 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+}
+.prose-editorial blockquote {
+  border-left: 3px solid var(--brand);
+  padding-left: 1.25rem;
+  margin: 2rem 0;
+  color: var(--muted-foreground);
+  font-size: 1.125rem;
+  font-style: italic;
+}
+.prose-editorial img {
+  width: 100%;
+  border-radius: 4px;
+  margin: 2rem 0;
+}
+.prose-editorial a {
+  color: var(--brand);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Admin sidebar */
+.admin-sidebar-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 1rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+  transition: background 0.15s, color 0.15s;
+  text-decoration: none;
+}
+.admin-sidebar-item:hover {
+  background: var(--surface-hover);
+  color: var(--foreground);
+}
+.admin-sidebar-item.active {
+  background: var(--surface-tint);
+  color: var(--brand);
+  font-weight: 500;
+}
+
+/* Category label — pure editorial typography, no badge styling */
+.category-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--brand);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+
+/* Breaking news editorial indicator — clean text with pulsing dot */
+.breaking-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--destructive);
+  background: transparent;
+  padding: 0;
+  border-radius: 0;
+}
+.breaking-badge::before {
+  content: '';
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Mobile bottom nav */
+@media (max-width: 767px) {
+  .mobile-safe-bottom {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom));
+  }
+}
+
+/* ============================================================
+   ANIMATIONS & SKELETON LOADERS
+   ============================================================ */
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.skeleton-shimmer {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--muted);
+}
+
+.skeleton-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.6) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  animation: shimmer 1.8s infinite;
+}
+
+.dark .skeleton-shimmer {
+  background-color: var(--surface-hover);
+}
+
+.dark .skeleton-shimmer::after {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.35s ease-out forwards;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-slideDown {
+  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.animate-scaleUp {
+  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes floatSlow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.animate-float {
+  animation: floatSlow 4s ease-in-out infinite;
+}
+
+/* Hero banner seamless photo blend without any edge seams */
+.seamless-mask-banner {
+  mask-image: linear-gradient(to bottom, black 0%, black 20%, rgba(0, 0, 0, 0.4) 50%, transparent 80%);
+  -webkit-mask-image: linear-gradient(to bottom, black 0%, black 20%, rgba(0, 0, 0, 0.4) 50%, transparent 80%);
+}
+
+@media (min-width: 640px) {
+  .seamless-mask-banner {
+    mask-image: linear-gradient(to right, transparent 0%, transparent 15%, rgba(0, 0, 0, 0.05) 30%, rgba(0, 0, 0, 0.55) 60%, rgba(0, 0, 0, 0.95) 85%, black 100%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 15%, rgba(0, 0, 0, 0.05) 30%, rgba(0, 0, 0, 0.55) 60%, rgba(0, 0, 0, 0.95) 85%, black 100%);
+  }
+}
+
+/* Directory card seamless photo blend */
+.seamless-mask-card {
+  mask-image: linear-gradient(to right, transparent 0%, transparent 15%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.55) 70%, black 95%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 15%, rgba(0, 0, 0, 0.1) 40%, rgba(0, 0, 0, 0.55) 70%, black 95%);
+}
+
+@media (min-width: 640px) {
+  .seamless-mask-card {
+    mask-image: linear-gradient(to right, transparent 0%, transparent 18%, rgba(0, 0, 0, 0.08) 35%, rgba(0, 0, 0, 0.6) 65%, black 95%);
+    -webkit-mask-image: linear-gradient(to right, transparent 0%, transparent 18%, rgba(0, 0, 0, 0.08) 35%, rgba(0, 0, 0, 0.6) 65%, black 95%);
+  }
+}
+
+/* Flowing white border animation for interactive province map */
+@keyframes flowingBorder {
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animate-flowing-border {
+  animation: flowingBorder 2.8s linear infinite;
+}
+
+
+

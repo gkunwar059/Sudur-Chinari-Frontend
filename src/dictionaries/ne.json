@@ -1,0 +1,194 @@
+{
+  "nav": {
+    "home": "मुख्यपृष्ठ",
+    "news": "समाचार",
+    "province": "सुदूरपश्चिम",
+    "districts": "जिल्ला",
+    "allDistricts": "सबै जिल्ला",
+    "videos": "भिडियो",
+    "photos": "फोटो",
+    "search": "खोज",
+    "more": "थप",
+    "admin": "प्रशासन",
+    "login": "लगइन",
+    "logout": "लगआउट",
+    "register": "दर्ता",
+    "myAccount": "मेरो खाता",
+    "yatayat": "सुदूर यातायात"
+  },
+  "brand": {
+    "name": "सुदूर चिनारी",
+    "tagline": "हाम्रो इतिहास • हाम्रो पहिचान",
+    "subtitle": "डिजिटल",
+    "description": "सुदूरपश्चिम प्रदेशको मौलिक इतिहास, सांस्कृतिक पहिचान, ९ जिल्लाका ताजा समाचार, विश्लेषण र विशेष रिपोर्टहरू।"
+  },
+  "hero": {
+    "breaking": "ताजा",
+    "exclusive": "विशेष",
+    "latestNews": "ताजा समाचार",
+    "popularNews": "लोकप्रिय समाचार",
+    "viewAll": "सबै हेर्नुहोस्",
+    "readMore": "थप पढ्नुहोस्",
+    "moreNews": "थप समाचार हेर्नुहोस्",
+    "fullRead": "पूर्ण पठन",
+    "minRead": "मिनेट पढाइ"
+  },
+  "sections": {
+    "districtExplorerTag": "जिल्ला खोज्नुहोस्",
+    "districtExplorerTitle": "सुदूरपश्चिमका ९ जिल्ला",
+    "districtNewsTitle": "जिल्लागत समाचार",
+    "shortsTitle": "छोटो भिडियो (Shorts)",
+    "shortsSubtitle": "छोटो भिडियोमा सुदूरपश्चिमको सुन्दरता",
+    "photoStoriesTitle": "फोटो कथा",
+    "photoStoriesSubtitle": "तस्वीरमा सुदूरपश्चिमको जीवन, संस्कृति र प्रकृति",
+    "opinionTitle": "विचार र दृष्टिकोण",
+    "opinionSubtitle": "सुदूरपश्चिमका विषयमा विज्ञ तथा लेखकहरूको विचार",
+    "topStories": "प्रमुख समाचार",
+    "mostRead": "धेरै पढिएका",
+    "spotlight": "स्पटलाइट",
+    "lifeAndArts": "जीवन र कला"
+  },
+  "article": {
+    "publishedOn": "प्रकाशित",
+    "updatedOn": "अद्यावधिक",
+    "byAuthor": "लेखक",
+    "readTime": "मिनेट पढाइ",
+    "views": "पटक हेरिएको",
+    "shareArticle": "यो समाचार सेयर गर्नुहोस्",
+    "relatedArticles": "सम्बन्धित समाचार",
+    "aboutAuthor": "लेखकका बारेमा",
+    "allArticlesByAuthor": "लेखकका सबै लेखहरू",
+    "backToNews": "← समाचारमा फर्कनुहोस्",
+    "comments": "प्रतिक्रियाहरू",
+    "stories": "सामग्री"
+  },
+  "search": {
+    "title": "समाचार खोज्नुहोस्",
+    "placeholder": "समाचार, विषय, लेखक वा जिल्ला खोज्नुहोस्...",
+    "resultsFound": "{count} वटा समाचार फेला परे",
+    "noResults": "कुनै समाचार फेला परेन",
+    "noResultsDesc": "कृपया फरक शब्द प्रयोग गर्नुहोस् वा फिल्टरहरू हटाउनुहोस्।",
+    "allCategories": "सबै विधा",
+    "allDistricts": "सबै जिल्ला (९ वटा)",
+    "filterByDistrict": "जिल्ला अनुसार",
+    "filterByCategory": "विधा / श्रेणी अनुसार",
+    "sortBy": "क्रमबद्ध गर्नुहोस्",
+    "latest": "हालै प्रकाशित",
+    "popular": "धेरै पढिएका",
+    "activeFilter": "फिल्टर सक्रिय",
+    "clearAll": "सबै हटाउनुहोस्",
+    "trendingTopics": "चर्चित खोज:",
+    "browseDistricts": "९ जिल्ला अनुसार खोज्नुहोस्:",
+    "instantResults": "ताजा नतिजाहरू",
+    "matches": "समाचार फेला परे",
+    "viewAllResults": "सबै {count} नतिजा हेर्नुहोस्",
+    "submit": "खोज्नुहोस्",
+    "clear": "हटाउनुहोस्"
+  },
+  "district": {
+    "pageTitle": "सुदूरपश्चिमका ९ जिल्लाहरू",
+    "pageDesc": "तराईका समथर फाँटदेखि अपि र साइपाल हिमालसम्म फैलिएका सुदूरपश्चिम प्रदेशका ९ वटै जिल्लाका ताजा समाचार, स्थानीय शासन, विकास, समाज र खोज पत्रकारिता।",
+    "breadcrumb": "सुदूरपश्चिमका ९ जिल्लाहरू",
+    "directoryLabel": "सुदूरपश्चिम प्रदेश • डिजिटल जिल्ला निर्देशिका",
+    "totalDistricts": "कुल जिल्ला",
+    "totalArea": "कुल क्षेत्रफल",
+    "geoRegions": "भौगोलिक क्षेत्र",
+    "districts9": "९ जिल्लाहरू",
+    "belts3": "३ भेगहरू",
+    "headquartersLabel": "सदरमुकाम:",
+    "districtNews": "जिल्ला समाचार",
+    "allNews": "{name}का सबै समाचार",
+    "latestFromDistrict": "यस जिल्लाका ताजा समाचार"
+  },
+  "footer": {
+    "quickLinks": "छिटो लिंक",
+    "ourDistricts": "हाम्रा जिल्लाहरू",
+    "newsletter": "हाम्रो न्यूजलेटर",
+    "newsletterDesc": "ताजा समाचार सिधै इमेलमा प्राप्त गर्नुहोस्।",
+    "emailPlaceholder": "इमेल ठेगाना",
+    "subscribe": "सदस्यता लिनुहोस्",
+    "subscribedSuccess": "धन्यवाद! सदस्यता सफल भयो।",
+    "allRightsReserved": "© २०२६ सुदूर चिनारी। हाम्रो इतिहास • हाम्रो पहिचान। सर्वाधिकार सुरक्षित।",
+    "sitemap": "साइटम्याप",
+    "rss": "RSS",
+    "privacy": "गोपनीयता नीति",
+    "terms": "प्रयोग सर्तहरू",
+    "about": "हाम्रोबारे",
+    "contact": "सम्पर्क",
+    "editorialPolicy": "सम्पादकीय नीति",
+    "advertise": "विज्ञापन"
+  },
+  "common": {
+    "loading": "लोड हुँदैछ...",
+    "error": "केही गडबड भयो।",
+    "retry": "पुनः प्रयास गर्नुहोस्",
+    "noContent": "कुनै सामग्री उपलब्ध छैन।",
+    "addArticlesPrompt": "कृपया ब्याकएन्ड एडमिन प्यानलबाट लेखहरू थप्नुहोस्।",
+    "language": "भाषा",
+    "nepali": "नेपाली",
+    "english": "English",
+    "switchToNepali": "नेपाली",
+    "switchToEnglish": "English",
+    "darkMode": "अँध्यारो मोड",
+    "lightMode": "उज्यालो मोड",
+    "close": "बन्द गर्नुहोस्",
+    "open": "खोल्नुहोस्",
+    "part": "भाग",
+    "stories": "सामग्री"
+  },
+  "auth": {
+    "login": "लगइन",
+    "logout": "लगआउट",
+    "register": "दर्ता",
+    "username": "प्रयोगकर्ता नाम",
+    "email": "इमेल",
+    "password": "पासवर्ड",
+    "confirmPassword": "पासवर्ड पुष्टि",
+    "loginTitle": "स्वागत छ",
+    "loginSubtitle": "आफ्नो खातामा साइन इन गर्नुहोस्",
+    "registerTitle": "खाता बनाउनुहोस्",
+    "registerSubtitle": "सुदूर चिनारीमा सामेल हुनुहोस्",
+    "loggingIn": "लगइन हुँदैछ...",
+    "registering": "खाता बनाउँदैछ...",
+    "loginSuccess": "स्वागत छ!",
+    "logoutSuccess": "सफलतापूर्वक लगआउट भयो।",
+    "registerSuccess": "खाता बनाइयो! स्वागत छ!",
+    "forgotPassword": "पासवर्ड भुल्नुभयो?",
+    "noAccount": "खाता छैन?",
+    "haveAccount": "पहिले नै खाता छ?"
+  },
+  "errors": {
+    "notFound": "पृष्ठ भेटिएन",
+    "notFoundDesc": "तपाईँ खोज्नुभएको पृष्ठ अवस्थित छैन।",
+    "serverError": "सर्भर त्रुटि",
+    "backHome": "मुख्यपृष्ठमा जानुहोस्",
+    "articleNotFound": "समाचार फेला परेन।",
+    "districtNotFound": "जिल्ला फेला परेन।"
+  },
+  "meta": {
+    "home": {
+      "title": "हाम्रो इतिहास • हाम्रो पहिचान",
+      "description": "सुदूरपश्चिम प्रदेशको पहिलो डिजिटल ब्रोडसिट — विश्वसनीय र निष्पक्ष पत्रकारिता।"
+    },
+    "news": {
+      "title": "सबै समाचार",
+      "description": "सुदूरपश्चिम प्रदेशका सबै ताजा समाचारहरू।"
+    },
+    "search": {
+      "title": "समाचार खोज",
+      "description": "सुदूरपश्चिम प्रदेशका सबै ताजा समाचारहरू खोज्नुहोस्।"
+    },
+    "district": {
+      "title": "जिल्लाहरू — सुदूरपश्चिमका ९ जिल्ला",
+      "description": "सुदूरपश्चिम प्रदेशका ९ वटै जिल्लाका समाचार, शासन र कथाहरू।"
+    },
+    "videos": {
+      "title": "भिडियो",
+      "description": "सुदूरपश्चिम प्रदेशका भिडियो रिपोर्ट र डकुमेन्ट्री हेर्नुहोस्।"
+    },
+    "photos": {
+      "title": "फोटो कथा",
+      "description": "सुदूरपश्चिम प्रदेशका फोटो पत्रकारिता र कथाहरू।"
+    }
+  }
+}
