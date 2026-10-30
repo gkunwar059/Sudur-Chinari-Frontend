@@ -1,8 +1,16 @@
 import { cache } from 'react';
 import type { Locale } from '@/lib/i18n/config';
-import type { Category } from '@/types';
+import type { Article, Category, District } from '@/types';
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
+const CLIENT_ARTICLE_LIMIT = 24;
+const FULL_LIST_LIMIT = 100;
 
 export type ApiLang = Locale | 'all';
+
+export type ApiDistrictRecord = Omit<District, 'id'> & {
+  id: number | string;
+};
 
 export interface PaginatedResponse<T> {
   count: number;
@@ -125,10 +133,27 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
 
 export const serverFetch = apiFetch;
 
+
+export interface PartnerRecord {
+  id: number | string;
+  name?: string;
+  nameNe?: string;
+  nameEn?: string;
+  role?: string;
+  roleNe?: string;
+  roleEn?: string;
+  image?: string | null;
+  url?: string | null;
+  district?: number | string | null;
+  district_slug?: string | null;
+  district_name?: string | null;
+}
+
 export const newsApi = {
-  // Client side fetch using native fetch + TanStack Query
-  getArticlesClient: async (params: Record<string, any> = {}) => {
-    return apiFetch<PaginatedResponse<any>>('/articles/', { params });
+  getArticlesClient: async (params: Record<string, string | number | boolean | undefined> = {}) => {
+    return apiFetch<PaginatedResponse<Article>>('/articles/', {
+      params: { limit: CLIENT_ARTICLE_LIMIT, ...params },
+    });
   },
 
   // Server side fetch with caching per locale
@@ -164,7 +189,10 @@ export const newsApi = {
   }),
 
   getDistrictsClient: async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/districts/', { lang });
+    return apiFetch<PaginatedResponse<ApiDistrictRecord>>('/districts/', {
+      lang,
+      params: { limit: FULL_LIST_LIMIT },
+    });
   },
 
   getCategoriesServer: cache(async (lang?: ApiLang) => {

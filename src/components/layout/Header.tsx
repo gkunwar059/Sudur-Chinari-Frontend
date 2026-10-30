@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Search, Menu, X, Sun, Moon, User, ChevronDown } from "lucide-react";
@@ -53,11 +54,19 @@ const FIXED_NAV_ITEMS: NavItem[] = [
   },
 ];
 
-const categoryHref = (cat: any) => {
+const LAYOUT_ROUTES = new Set([
+  "news",
+  "politics",
+  "sports",
+  "tourism",
+  "stay",
+]);
+
+const categoryHref = (cat: Category) => {
   const isTopLevel = !cat.parent && !cat.parent_slug;
   const layout = cat.layout_type === "stayor_hotel" ? "stay" : cat.layout_type;
 
-  if (layout && layout !== "base") {
+  if (layout && LAYOUT_ROUTES.has(layout)) {
     return isTopLevel ? `/${layout}` : `/${layout}/category/${cat.slug}`;
   }
 
@@ -147,10 +156,31 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 bg-background border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
+        "sticky top-0 isolate border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
         menuOpen ? "z-[200]" : "z-50",
       )}
     >
+      {/* ── Shared background for header + menu bar ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-20 bg-background"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <Image
+          src="/images/ghodaghodi_lake.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          quality={70}
+          className="object-cover object-[center_45%] opacity-35 dark:opacity-25"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/70 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand/10 via-transparent to-brand-secondary/10" />
+      </div>
+
       {/* ── Top Bar: Logo & Utility Row ── */}
       <div className="container-editorial py-3.5">
         <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
@@ -281,7 +311,7 @@ export default function Header() {
 
       {/* ── Bottom Row: Navigation Bar with Horizontal Swipe on Mobile & Tablet ── */}
       <div onMouseLeave={() => setHoveredKey(null)}>
-        <div className="border-t border-border bg-surface/90 w-full overflow-hidden">
+        <div className="w-full overflow-hidden">
           <div className="container-editorial flex items-center justify-between">
             {/* Main Nav Items - Swipeable on mobile/tablet, full on desktop */}
             <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
@@ -307,7 +337,9 @@ export default function Header() {
                           : "text-muted-foreground hover:text-brand",
                       )}
                     >
-                      {item.icon && <item.icon size={16} className="shrink-0" />}
+                      {item.icon && (
+                        <item.icon size={16} className="shrink-0" />
+                      )}
                       {t(item.label)}
                       {hasChildren && (
                         <ChevronDown
@@ -368,7 +400,7 @@ export default function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.16, ease: "easeOut" }}
-              className="border-t border-border bg-background w-full overflow-hidden"
+              className="border-t border-border/70 bg-background/85 backdrop-blur-md w-full overflow-hidden"
             >
               <div className="container-editorial overflow-x-auto no-scrollbar">
                 <nav
@@ -479,7 +511,9 @@ export default function Header() {
                                 : "text-foreground hover:bg-surface",
                             )}
                           >
-                            {item.icon && <item.icon size={18} className="shrink-0" />}
+                            {item.icon && (
+                              <item.icon size={18} className="shrink-0" />
+                            )}
                             {t(item.label)}
                           </LocalizedLink>
                           {hasChildren && (

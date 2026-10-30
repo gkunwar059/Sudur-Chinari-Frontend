@@ -36,6 +36,8 @@ import EditorialCard from "@/components/common/EditorialCard";
 interface DistrictContentViewProps {
   district: District;
   articles: Article[];
+  totalStories?: number;
+  storiesHref?: string;
   nearbyDistricts: District[];
   initialTab?: string;
   lang: string;
@@ -92,6 +94,8 @@ const TABS = [
 export default function DistrictContentView({
   district,
   articles,
+  totalStories = articles.length,
+  storiesHref,
   initialTab = "all",
   lang,
 }: DistrictContentViewProps) {
@@ -571,6 +575,40 @@ export default function DistrictContentView({
               </div>
             </div>
           )}
+
+          <div className="mb-6 flex flex-col gap-3 border-b border-border pb-3 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <span
+                className="mb-1 block text-[11px] font-bold font-mono uppercase tracking-wider"
+                style={{ color: theme.primary }}
+              >
+                {isEn ? "Latest Reports" : "ताजा रिपोर्ट"}
+              </span>
+              <h2 className="text-xl font-bold font-headline text-foreground sm:text-2xl">
+                {isEn
+                  ? `Stories from ${t(district.name)}`
+                  : `${t(district.name)}का कथा`}
+              </h2>
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-xs font-mono font-bold text-muted-foreground">
+                {isEn
+                  ? `${totalStories} stories`
+                  : `${totalStories} कथा`}
+              </span>
+              {storiesHref && (
+                <Link
+                  href={storiesHref}
+                  className="inline-flex items-center gap-1.5 border border-border bg-background px-3 py-1.5 text-[11px] font-bold text-foreground transition-colors hover:border-foreground/30 hover:bg-surface"
+                >
+                  <span>
+                    {isEn ? "View all stories" : "सबै कथा हेर्नुहोस्"}
+                  </span>
+                  <ArrowRight size={12} />
+                </Link>
+              )}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {articles.map((art) => (

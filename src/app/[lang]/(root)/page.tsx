@@ -16,6 +16,7 @@ import { isLocale, ogLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localizedPath } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/config";
+import { getPartnersCached } from "@/lib/cached-data";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
@@ -60,9 +61,12 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
       .getArticlesServer({ lang })
       .then((res) => res?.results || [])
       .catch(() => []),
-    newsApi
-      .getPartnersServer({ district: "main" }, lang)
-      .then((res) => res?.results || [])
+    getPartnersCached(undefined, lang)
+      .then((res) =>
+        (res?.results || [])
+          .filter((p) => !p.district)
+          .map((p) => ({ ...p, url: p.url ?? undefined })),
+      )
       .catch(() => []),
     newsApi
       .getDistrictsServer(lang)

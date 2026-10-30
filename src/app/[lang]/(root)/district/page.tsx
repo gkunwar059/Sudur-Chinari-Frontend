@@ -9,6 +9,7 @@ import { normalizeImageUrl } from "@/lib/utils";
 import RegionDistrictsList from "@/components/district/RegionDistrictsList";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { buildMetadata } from "@/lib/seo";
+import { mergeDistrict } from "@/lib/districts";
 
 interface Props {
   params: Promise<{ lang: string }>;
@@ -46,22 +47,10 @@ export default async function DistrictDirectoryPage({ params }: Props) {
   if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
     districtsData = apiDistricts.results.map((apiD: any) => {
       const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
-      return {
-        ...fallback,
-        ...apiD,
-        theme: fallback?.theme || {
-          light: "var(--surface)",
-          border: "var(--border)",
-          badgeBg: "var(--surface-tint)",
-          badgeText: apiD.accentColor || "var(--brand)",
-        },
-        heroImage:
-          normalizeImageUrl(apiD.heroImage) ||
-          fallback?.heroImage ||
-          '/images/himalaya_banner.jpg',
-        accentColor: apiD.accentColor || fallback?.accentColor || "var(--brand)",
-        storyCount: fallback?.storyCount || 20,
-      };
+      const merged = mergeDistrict(apiD, fallback);
+      if (!merged) return [];
+      merged.storyCount = apiD.storyCount ?? fallback?.storyCount ?? 20;
+      return [merged];
     });
   }
 

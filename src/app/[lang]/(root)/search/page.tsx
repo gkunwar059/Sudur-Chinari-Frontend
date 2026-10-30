@@ -7,8 +7,15 @@ import { isLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { buildMetadata } from "@/lib/seo";
 import type { Locale } from "@/lib/i18n/config";
+import {
+  getArticlesCached,
+  getCategoriesCached,
+  getDistrictsCached,
+} from "@/lib/cached-data";
 
-export async function generateMetadata({ params }: PageProps<"/[lang]/search">): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: PageProps<"/[lang]/search">): Promise<Metadata> {
   const { lang } = await params;
   if (!isLocale(lang)) return {};
   const dict = await getDictionary(lang as Locale);
@@ -21,14 +28,16 @@ export async function generateMetadata({ params }: PageProps<"/[lang]/search">):
   });
 }
 
-export default async function SearchPage({ params }: PageProps<"/[lang]/search">) {
+export default async function SearchPage({
+  params,
+}: PageProps<"/[lang]/search">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   // Fetch initial data on the server
   const [articlesData, districtsData, categoriesData] = await Promise.all([
-    newsApi.getArticlesServer({ lang: lang as Locale }).catch(() => ({ results: [] })),
-    newsApi.getDistrictsServer(lang as Locale).catch(() => ({ results: [] })),
-    newsApi.getCategoriesServer(lang as Locale).catch(() => ({ results: [] })),
+    getArticlesCached({ lang: lang as Locale, limit: 100 }),
+    getDistrictsCached(lang as Locale),
+    getCategoriesCached(lang as Locale),
   ]);
 
   const initialArticles = articlesData?.results || [];
@@ -37,10 +46,10 @@ export default async function SearchPage({ params }: PageProps<"/[lang]/search">
 
   return (
     <Suspense>
-      <SearchClient 
-        initialArticles={initialArticles} 
-        districts={districts} 
-        categories={categories} 
+      <SearchClient
+        initialArticles={initialArticles}
+        districts={districts}
+        categories={categories}
       />
     </Suspense>
   );

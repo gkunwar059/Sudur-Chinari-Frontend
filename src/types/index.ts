@@ -25,6 +25,7 @@ export interface DistrictTheme {
 }
 
 export interface DistrictPlace {
+  id?: number | string;
   title: BilingualText;
   description: BilingualText;
   category: 'nature' | 'heritage' | 'spiritual' | 'culture';
@@ -94,6 +95,7 @@ export interface Category {
   layout_type?: 'base' | 'news' | 'sports' | 'stay' | 'tourism' | 'politics' | string;
   icon?: string;
   order?: number;
+  parent_id?: number | null;
   parent_slug?: string | null;
   /** Present on menu / detail responses */
   parent?: Pick<Category, "id" | "slug" | "name" | "image" | "layout_type"> | null;
@@ -137,6 +139,8 @@ export interface Article {
   tags: string[];
   status: ArticleStatus;
   publishedAt: string;
+  createdAt?: string;
+  created_at?: string;
   updatedAt: string;
   featured: boolean;
   breaking: boolean;

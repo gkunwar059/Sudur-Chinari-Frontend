@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Compass, MapPin } from "lucide-react";
@@ -12,6 +13,7 @@ import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { DISTRICT_GEO_DETAILS } from "@/data/districtMaps";
 import HotelSearch from "./HotelSearch";
 import HotelCard from "@/components/common/HotelCard";
+import PageSkeleton from "@/components/common/PageSkeleton";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -57,7 +59,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function StayDistrictPage({
+export default function StayDistrictPage({ params, searchParams }: Props) {
+  return (
+    <Suspense fallback={<PageSkeleton variant="grid" />}>
+      <StayDistrictPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function StayDistrictPageContent({
   params,
   searchParams,
 }: Props) {

@@ -12,33 +12,39 @@ import {
   MessageCircle,
   Video,
   Search,
+  Loader2,
 } from "lucide-react";
 import type { District, Article } from "@/types";
 
 import { newsApi } from "@/lib/api";
 
+const PAGE_SIZE = 12;
+
 const fetchArchives = async (
   districtSlug: string,
   category: string,
   locale: string,
-  search?: string,
+  search: string,
+  page: number,
 ) => {
   try {
     const params: Record<string, string> = {
       district: districtSlug,
       lang: locale,
+      limit: String(PAGE_SIZE),
+      page: String(page),
     };
     if (category !== "all") {
       params.category = category;
     }
-    if (search && search.trim() !== "") {
+    if (search.trim() !== "") {
       params.search = search.trim();
     }
     const res = await newsApi.getArticlesClient(params);
-    return res.results || [];
+    return { articles: res.results || [], count: res.count ?? 0 };
   } catch (error) {
     console.error("Failed to fetch archives", error);
-    return [];
+    return { articles: [], count: 0 };
   }
 };
 
@@ -94,30 +100,79 @@ export default function DistrictArchives({
     return () => clearTimeout(timer);
   }, [searchQuery]);
 
-  const [articles, setArticles] = useState<Article[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [result, setResult] = useState<{
+    key: string;
+    articles: Article[];
+    count: number;
+    page: number;
+  } | null>(null);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const fetchKey = `${district.slug}|${activeCategory}|${locale}|${debouncedSearch}`;
+  const categoryForApi =
+    activeCategory === "archives-all" ? "all" : activeCategory;
 
   // Fetch data when category or search changes
   useEffect(() => {
     let isMounted = true;
-    setLoading(true);
-
-    const categoryForApi =
-      activeCategory === "archives-all" ? "all" : activeCategory;
-
-    fetchArchives(district.slug, categoryForApi, locale, debouncedSearch).then(
-      (data) => {
-        if (isMounted) {
-          setArticles(data);
-          setLoading(false);
-        }
-      },
-    );
+    fetchArchives(
+      district.slug,
+      categoryForApi,
+      locale,
+      debouncedSearch,
+      1,
+    ).then((data) => {
+      if (isMounted) {
+        setResult({
+          key: fetchKey,
+          articles: data.articles,
+          count: data.count,
+          page: 1,
+        });
+      }
+    });
 
     return () => {
       isMounted = false;
     };
-  }, [district.slug, activeCategory, locale, debouncedSearch]);
+  }, [district.slug, categoryForApi, locale, debouncedSearch, fetchKey]);
+
+  const articles = result?.articles ?? [];
+  const count = result?.count ?? 0;
+  const loading = result?.key !== fetchKey;
+  const hasMore = articles.length < count;
+
+  const handleLoadMore = async () => {
+    if (loading || loadingMore || !hasMore) return;
+
+    const currentPage = result?.key === fetchKey ? result.page : 1;
+    const nextPage = currentPage + 1;
+    const requestKey = fetchKey;
+    setLoadingMore(true);
+
+    const data = await fetchArchives(
+      district.slug,
+      categoryForApi,
+      locale,
+      debouncedSearch,
+      nextPage,
+    );
+
+    setResult((prev) => {
+      if (!prev || prev.key !== requestKey) return prev;
+      const existingIds = new Set(prev.articles.map((article) => article.id));
+      return {
+        ...prev,
+        articles: [
+          ...prev.articles,
+          ...data.articles.filter((article) => !existingIds.has(article.id)),
+        ],
+        count: data.count,
+        page: nextPage,
+      };
+    });
+    setLoadingMore(false);
+  };
 
   const districtName =
     typeof district.name === "string" ? district.name : t(district.name);
@@ -199,6 +254,36 @@ export default function DistrictArchives({
             <p className="text-muted-foreground font-sans">
               {isEn ? "No records found." : "कुनै अभिलेख फेला परेन।"}
             </p>
+          </div>
+        )}
+
+        {!loading && articles.length > 0 && hasMore && (
+          <div className="mt-10 flex flex-col items-center gap-3">
+            <button
+              type="button"
+              onClick={handleLoadMore}
+              disabled={loadingMore}
+              className="inline-flex items-center gap-2 border border-border bg-background px-6 py-3 text-sm font-bold text-foreground transition-colors hover:border-foreground/30 hover:bg-surface disabled:cursor-not-allowed disabled:opacity-60"
+              style={{
+                borderTop: `3px solid ${district.accentColor || "var(--brand)"}`,
+              }}
+            >
+              {loadingMore && <Loader2 size={15} className="animate-spin" />}
+              <span>
+                {loadingMore
+                  ? isEn
+                    ? "Loading..."
+                    : "लोड हुँदैछ..."
+                  : isEn
+                    ? "Load more stories"
+                    : "थप कथा लोड गर्नुहोस्"}
+              </span>
+            </button>
+            <span className="text-xs font-mono text-muted-foreground">
+              {isEn
+                ? `${articles.length} of ${count} stories`
+                : `${articles.length} / ${count} कथा`}
+            </span>
           </div>
         )}
       </div>

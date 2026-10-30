@@ -1,7 +1,10 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { apiFetch } from "@/lib/api";
-import type { ApiLang, PaginatedResponse } from "@/lib/api";
-import type { Category } from "@/types";
+import type { ApiDistrictRecord, ApiLang, PaginatedResponse, PartnerRecord } from "@/lib/api";
+import type { Article, Category, Hotel } from "@/types";
+
+const ARTICLE_LIST_LIMIT = 24;
+const FULL_LIST_LIMIT = 100;
 
 export async function getArticlesCached(params?: {
   lang?: ApiLang;
@@ -12,7 +15,10 @@ export async function getArticlesCached(params?: {
   const { lang, ...rest } = params || {};
   cacheTag("articles");
   if (lang) cacheTag(`articles-${lang}`);
-  return apiFetch<PaginatedResponse<any>>("/articles/", { lang, params: rest });
+  return apiFetch<PaginatedResponse<Article>>("/articles/", {
+    lang,
+    params: { limit: ARTICLE_LIST_LIMIT, ...rest },
+  });
 }
 
 export async function getArticleBySlugCached(slug: string, lang?: ApiLang) {
@@ -29,7 +35,10 @@ export async function getDistrictsCached(lang?: ApiLang) {
   cacheLife("hours");
   cacheTag("districts");
   if (lang) cacheTag(`districts-${lang}`);
-  return apiFetch<PaginatedResponse<any>>("/districts/", { lang });
+  return apiFetch<PaginatedResponse<ApiDistrictRecord>>("/districts/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT },
+  });
 }
 
 export async function getCategoriesCached(lang?: ApiLang) {
@@ -37,7 +46,10 @@ export async function getCategoriesCached(lang?: ApiLang) {
   cacheLife("hours");
   cacheTag("categories");
   if (lang) cacheTag(`categories-${lang}`);
-  return apiFetch<PaginatedResponse<Category>>("/categories/", { lang });
+  return apiFetch<PaginatedResponse<Category>>("/categories/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT },
+  });
 }
 
 export async function getMenuCached(lang?: ApiLang) {
@@ -62,6 +74,30 @@ export async function getCategoryBySlugCached(slug: string, lang?: ApiLang) {
   }
 }
 
+export async function getDistrictBySlugCached(slug: string, lang?: ApiLang) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(`district-${slug}`);
+  if (lang) cacheTag(`district-${slug}-${lang}`);
+  return apiFetch<ApiDistrictRecord>(`/districts/${encodeURIComponent(slug)}/`, {
+    lang,
+  });
+}
+
+export async function getPartnersCached(
+  params?: Record<string, string | number>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("partners");
+  if (lang) cacheTag(`partners-${lang}`);
+  return apiFetch<PaginatedResponse<PartnerRecord>>("/partners/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT, ...params },
+  });
+}
+
 export async function getHotelsCached(
   params?: Record<string, string | number>,
   lang?: ApiLang,
@@ -70,7 +106,10 @@ export async function getHotelsCached(
   cacheLife("minutes");
   cacheTag("hotels");
   if (lang) cacheTag(`hotels-${lang}`);
-  return apiFetch<PaginatedResponse<any>>("/hotels/", { lang, params });
+  return apiFetch<PaginatedResponse<Hotel>>("/hotels/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT, ...params },
+  });
 }
 
 export async function getHotelBySlugCached(slug: string, lang?: ApiLang) {

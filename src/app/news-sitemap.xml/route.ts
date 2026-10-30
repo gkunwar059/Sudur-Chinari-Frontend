@@ -27,7 +27,9 @@ export async function GET() {
       const slug = getArticleSlug(art);
       const title =
         typeof art.title === "string" ? art.title : t(art.title, "ne");
-      const pubDate = new Date(art.publishedAt || art.createdAt || Date.now()).toISOString();
+      const pubDate = new Date(
+        art.publishedAt || art.created_at || art.createdAt || Date.now(),
+      ).toISOString();
       const escapedTitle = title
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")

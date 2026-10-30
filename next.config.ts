@@ -4,7 +4,30 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   skipTrailingSlashRedirect: true,
-  staticPageGenerationTimeout: 180,
+  allowedDevOrigins: ["127.0.0.1", "172.19.0.1"],
+  async headers() {
+    const securityHeaders: { key: string; value: string }[] = [
+      { key: "X-Content-Type-Options", value: "nosniff" },
+      { key: "X-Frame-Options", value: "SAMEORIGIN" },
+      { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+      {
+        key: "Permissions-Policy",
+        value: "camera=(), microphone=(), geolocation=()",
+      },
+    ];
+    if (process.env.NODE_ENV === "production") {
+      securityHeaders.push({
+        key: "Strict-Transport-Security",
+        value: "max-age=63072000; includeSubDomains",
+      });
+    }
+    return [
+      {
+        source: "/:path*",
+        headers: securityHeaders,
+      },
+    ];
+  },
   images: {
     dangerouslyAllowLocalIP: true,
     qualities: [70, 75],
