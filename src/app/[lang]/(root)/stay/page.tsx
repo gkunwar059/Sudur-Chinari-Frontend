@@ -35,8 +35,8 @@ export default async function HotelsAndStayPage({ params }: Props) {
 
   // Fetch districts for the Stay directory layout
   let districtsData: any[] = [];
-  const apiDistricts = await newsApi.getDistrictsServer(locale);
-  if (apiDistricts?.results?.length > 0) {
+  const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
+  if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
     districtsData = apiDistricts.results;
   }
 

@@ -83,7 +83,7 @@ export default async function DistrictPage({ params, searchParams }: Props) {
   const nearbyDistricts = DISTRICTS.filter((d) => d.slug !== slug).slice(0, 4);
 
   // Fetch partners specific to this district
-  const pRes = await newsApi.getPartnersServer({ district: slug }, lang as ApiLang);
+  const pRes = await newsApi.getPartnersServer({ district: slug }, lang as ApiLang).catch(() => null);
   const districtPartners = pRes?.results || [];
 
   const districtDisplayName =

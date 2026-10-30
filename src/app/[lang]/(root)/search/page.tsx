@@ -26,14 +26,14 @@ export default async function SearchPage({ params }: PageProps<"/[lang]/search">
   if (!isLocale(lang)) notFound();
   // Fetch initial data on the server
   const [articlesData, districtsData, categoriesData] = await Promise.all([
-    newsApi.getArticlesServer({ lang: lang as Locale }),
-    newsApi.getDistrictsServer(lang as Locale),
-    newsApi.getCategoriesServer(lang as Locale),
+    newsApi.getArticlesServer({ lang: lang as Locale }).catch(() => ({ results: [] })),
+    newsApi.getDistrictsServer(lang as Locale).catch(() => ({ results: [] })),
+    newsApi.getCategoriesServer(lang as Locale).catch(() => ({ results: [] })),
   ]);
 
-  const initialArticles = articlesData.results || [];
-  const districts = districtsData.results || districtsData || [];
-  const categories = categoriesData.results || categoriesData || [];
+  const initialArticles = articlesData?.results || [];
+  const districts = districtsData?.results || districtsData || [];
+  const categories = categoriesData?.results || categoriesData || [];
 
   return (
     <Suspense>

@@ -8,11 +8,11 @@ import { t } from "@/lib/utils";
 
 
 async function loadCategory(slug: string, lang: any): Promise<any> {
-  return await newsApi.getCategoryBySlugServer(slug, lang);
+  return await newsApi.getCategoryBySlugServer(slug, lang).catch(() => null);
 }
 
 async function loadMenu(lang: any): Promise<Category[]> {
-  return await newsApi.getMenuServer(lang);
+  return (await newsApi.getMenuServer(lang).catch(() => [])) || [];
 }
 
 export default async function StayCategoryLayout({
@@ -53,7 +53,7 @@ export default async function StayCategoryLayout({
     }
   }
 
-  const res = await newsApi.getHotelsServer({ category__slug: slug }, lang as Locale);
+  const res = await newsApi.getHotelsServer({ category__slug: slug }, lang as Locale).catch(() => null);
   let hotels: any[] = res?.results || [];
 
   return (

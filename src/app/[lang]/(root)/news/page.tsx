@@ -24,7 +24,7 @@ export async function generateMetadata({
 export default async function NewsPage({ params }: PageProps<"/[lang]/news">) {
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
-  const data = await newsApi.getArticlesServer({ lang });
+  const data = await newsApi.getArticlesServer({ lang }).catch(() => null);
   const initialArticles = data?.results || [];
 
   return (

@@ -39,11 +39,30 @@ function getBaseApiUrl(): string {
   return 'http://127.0.0.1:8001/api/v1';
 }
 
+function getBuildTimeFallback<T = any>(endpoint: string): T {
+  const clean = endpoint.split('?')[0].replace(/^\/+|\/+$/g, '');
+
+  // Specific array endpoints (menu, sitemap)
+  if (clean === 'categories/menu' || clean === 'sitemap') {
+    return [] as unknown as T;
+  }
+
+  // List/collection endpoints (articles, districts, categories, hotels, partners, comments)
+  const segments = clean.split('/');
+  if (segments.length === 1) {
+    return { count: 0, next: null, previous: null, results: [] } as unknown as T;
+  }
+
+  // Single detail endpoints (articles/slug, districts/slug, categories/slug, hotels/slug)
+  return null as unknown as T;
+}
+
 export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptions = {}): Promise<T> {
   // During Docker image build time (npm run build), the backend container is offline.
-  // Fail fast so SSG/prerendering immediately falls back to built-in data instead of hanging for 60s per page!
-  if (process.env.SKIP_BUILD_FETCH === 'true' || process.env.NEXT_PHASE === 'phase-production-build') {
-    throw new Error(`Build-time fetch skipped for ${endpoint} (backend is offline during docker build)`);
+  // Return safe fallbacks so SSG/prerendering immediately completes with fallback data
+  // instead of hanging for 60s per page or throwing build-breaking exceptions!
+  if (process.env.SKIP_BUILD_FETCH === 'true') {
+    return getBuildTimeFallback<T>(endpoint);
   }
 
   const isServer = typeof window === 'undefined';

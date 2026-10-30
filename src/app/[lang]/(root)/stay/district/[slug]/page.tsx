@@ -86,7 +86,7 @@ export default async function StayDistrictPage({
   const res = await newsApi.getHotelsServer(
     { district__slug: slug, ...(q ? { search: q } : {}) },
     locale
-  );
+  ).catch(() => null);
   const hotels = res?.results || [];
 
   return (

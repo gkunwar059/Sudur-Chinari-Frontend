@@ -42,8 +42,8 @@ export default async function DistrictDirectoryPage({ params }: Props) {
 
   // Fetch districts from backend API with fallback to hardcoded comprehensive dataset
   let districtsData: any[] = [];
-  const apiDistricts = await newsApi.getDistrictsServer(locale);
-  if (apiDistricts?.results?.length > 0) {
+  const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
+  if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
     districtsData = apiDistricts.results.map((apiD: any) => {
       const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
       return {
@@ -69,7 +69,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
     districtsData = FALLBACK_DISTRICTS;
   }
 
-  const allPartners = await newsApi.getPartnersServer(undefined, locale);
+  const allPartners = await newsApi.getPartnersServer(undefined, locale).catch(() => null);
   const districtPartners = (allPartners?.results || []).filter(
     (p: any) => p.district || p.district_slug,
   );
