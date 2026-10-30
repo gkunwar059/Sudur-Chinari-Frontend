@@ -25,9 +25,11 @@ ARG DJANGO_API_URL
 
 ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api/v1}
 ENV NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://sudurpashchim.com}
-ENV DJANGO_API_URL=${DJANGO_API_URL:-http://backend:8000}
+ENV DJANGO_API_URL=${DJANGO_API_URL:-http://sudur_backend:8000}
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# Skip hanging network calls to backend during offline image build
+ENV SKIP_BUILD_FETCH=true
 
 RUN npm run build
 

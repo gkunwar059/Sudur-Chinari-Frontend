@@ -2,8 +2,6 @@ import { cache } from 'react';
 import type { Locale } from '@/lib/i18n/config';
 import type { Category } from '@/types';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8001/api/v1';
-
 export type ApiLang = Locale | 'all';
 
 export interface PaginatedResponse<T> {
@@ -16,11 +14,40 @@ export interface PaginatedResponse<T> {
 export interface ApiFetchOptions extends RequestInit {
   lang?: ApiLang;
   params?: Record<string, string | number | boolean | undefined>;
+  timeout?: number;
+}
+
+function getBaseApiUrl(): string {
+  // In the browser, use relative /api/v1 (proxied via Next.js or Nginx)
+  if (typeof window !== 'undefined') {
+    return process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+  }
+
+  // On the server:
+  // 1. If DJANGO_API_URL is configured (e.g. http://sudur_backend:8000), use that:
+  if (process.env.DJANGO_API_URL) {
+    const base = process.env.DJANGO_API_URL.replace(/\/+$/, '');
+    return `${base}/api/v1`;
+  }
+
+  // 2. If NEXT_PUBLIC_API_URL is an absolute HTTP URL, use that:
+  if (process.env.NEXT_PUBLIC_API_URL && process.env.NEXT_PUBLIC_API_URL.startsWith('http')) {
+    return process.env.NEXT_PUBLIC_API_URL.replace(/\/+$/, '');
+  }
+
+  // 3. Fallback to default local Django port
+  return 'http://127.0.0.1:8001/api/v1';
 }
 
 export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptions = {}): Promise<T> {
+  // During Docker image build time (npm run build), the backend container is offline.
+  // Fail fast so SSG/prerendering immediately falls back to built-in data instead of hanging for 60s per page!
+  if (process.env.SKIP_BUILD_FETCH === 'true' || process.env.NEXT_PHASE === 'phase-production-build') {
+    throw new Error(`Build-time fetch skipped for ${endpoint} (backend is offline during docker build)`);
+  }
+
   const isServer = typeof window === 'undefined';
-  const { lang, params, ...fetchOptions } = options;
+  const { lang, params, timeout, ...fetchOptions } = options;
 
   // Build query string
   const urlObj = new URL(
@@ -39,36 +66,45 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
   }
 
   const queryPath = `${urlObj.pathname}${urlObj.search}`;
-  const url = isServer ? `${API_BASE_URL}${queryPath}` : `/api/v1${queryPath}`;
+  const base = getBaseApiUrl();
+  const url = endpoint.startsWith('http') ? endpoint : `${base}${queryPath}`;
 
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
     ...fetchOptions.headers,
   };
 
-  const res = await fetch(url, {
-    ...fetchOptions,
-    headers,
-  });
+  // Enforce a strict timeout (default 4s on server, 10s on client)
+  const timeoutMs = timeout ?? (isServer ? 4000 : 10000);
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
 
-  if (!res.ok) {
-    let errorData: any;
-    try {
-      errorData = await res.json();
-    } catch {
-      errorData = res.statusText;
+  try {
+    const res = await fetch(url, {
+      ...fetchOptions,
+      headers,
+      signal: fetchOptions.signal || controller.signal,
+    });
+
+    if (!res.ok) {
+      let errorData: any;
+      try {
+        errorData = await res.json();
+      } catch {
+        errorData = res.statusText;
+      }
+      const errorObj = new Error(`Failed to fetch from ${endpoint}: ${res.status}`);
+      (errorObj as any).response = { status: res.status, data: errorData };
+      throw errorObj;
     }
-    const errorObj = new Error(`Failed to fetch from ${endpoint}: ${res.status}`);
-    (errorObj as any).response = { status: res.status, data: errorData };
-    throw errorObj;
-  }
 
-  return res.json() as Promise<T>;
+    return res.json() as Promise<T>;
+  } finally {
+    clearTimeout(timeoutId);
+  }
 }
 
 export const serverFetch = apiFetch;
-
-
 
 export const newsApi = {
   // Client side fetch using native fetch + TanStack Query

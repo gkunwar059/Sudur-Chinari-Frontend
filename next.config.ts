@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   output: "standalone",
   cacheComponents: true,
   skipTrailingSlashRedirect: true,
+  staticPageGenerationTimeout: 180,
   images: {
     dangerouslyAllowLocalIP: true,
     qualities: [70, 75],
@@ -46,6 +47,15 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "backend",
+      },
+      {
+        protocol: "http",
+        hostname: "sudur_backend",
+        port: "8000",
+      },
+      {
+        protocol: "http",
+        hostname: "sudur_backend",
       },
       {
         protocol: "https",
