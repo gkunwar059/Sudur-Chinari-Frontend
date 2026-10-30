@@ -1,0 +1,29 @@
+services:
+  # ----------------------------------------------------------------------------
+  # Next.js Frontend Application (Standalone Node.js Server)
+  # ----------------------------------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-/api/v1}
+        NEXT_PUBLIC_SITE_URL: ${NEXT_PUBLIC_SITE_URL:-https://sudurpashchim.com}
+        DJANGO_API_URL: ${DJANGO_API_URL:-http://sudur_backend:8000}
+    container_name: sudur_frontend
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DJANGO_API_URL=${DJANGO_API_URL:-http://sudur_backend:8000}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-/api/v1}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-https://sudurpashchim.com}
+    networks:
+      - sudur_network
+
+networks:
+  sudur_network:
+    name: ${DOCKER_NETWORK:-sudur_network}
+    driver: bridge

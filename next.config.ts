@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   cacheComponents: true,
   skipTrailingSlashRedirect: true,
   images: {
@@ -36,6 +37,19 @@ const nextConfig: NextConfig = {
       {
         protocol: "http",
         hostname: "localhost",
+      },
+      {
+        protocol: "http",
+        hostname: "backend",
+        port: "8000",
+      },
+      {
+        protocol: "http",
+        hostname: "backend",
+      },
+      {
+        protocol: "https",
+        hostname: "**",
       },
     ],
   },
