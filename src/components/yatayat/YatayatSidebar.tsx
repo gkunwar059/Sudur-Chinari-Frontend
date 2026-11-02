@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import type { ComponentType } from "react";
 import type { Locale } from "@/lib/i18n/config";
+import AdBanner from "@/components/common/AdBanner";
 import {
   YatayatQuickActionTrigger,
   YatayatRegisterTrigger,
@@ -194,6 +195,9 @@ export default function YatayatSidebar({ locale }: YatayatSidebarProps) {
           </li>
         </ul>
       </div>
+
+      {/* Yatayat Sidebar Ad Slot */}
+      <AdBanner placement="sidebar" page="yatayat" className="!my-0" />
 
       <div className="relative h-44 rounded-none overflow-hidden border border-border border-t-[3px] border-t-brand shadow-xs group">
         <Image

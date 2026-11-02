@@ -2,6 +2,8 @@ import Image from "next/image";
 import { Building2, ExternalLink } from "lucide-react";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 
+import { normalizeImageUrl } from "@/lib/utils";
+
 export interface PartnerItem {
   id: string | number;
   name?: string;
@@ -11,7 +13,7 @@ export interface PartnerItem {
   roleNe?: string;
   roleEn?: string;
   image?: string | null;
-  url?: string;
+  url?: string | null;
 }
 
 export interface PartnersSectionProps {
@@ -108,7 +110,7 @@ export default function PartnersSection({
                   <div className="w-10 h-10 border border-border bg-surface group-hover/card:bg-background group-hover/card:border-brand-secondary flex items-center justify-center shrink-0 transition-colors overflow-hidden p-1 relative">
                     {isImageIcon ? (
                       <Image
-                        src={partner.image!}
+                        src={normalizeImageUrl(partner.image!)}
                         alt={partnerName}
                         width={36}
                         height={36}

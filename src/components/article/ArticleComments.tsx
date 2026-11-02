@@ -11,6 +11,8 @@ import {
   X,
   Loader2,
   ArrowRight,
+  UserCheck,
+  LogIn,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -28,7 +30,7 @@ import FTSectionDivider from "@/components/common/FTSectionDivider";
 import RelativeTime from "@/components/common/RelativeTime";
 
 interface ArticleCommentsProps {
-  articleId: string;
+  articleId: string | number;
 }
 
 interface PendingCommentData {
@@ -55,11 +57,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const [replyName, setReplyName] = useState("");
 
   // Reply collapse/expand states (by default replies are visible)
-  const [expandedThreads, setExpandedThreads] = useState<Record<string, boolean>>({});
+  const [expandedThreads, setExpandedThreads] = useState<
+    Record<string, boolean>
+  >({});
 
   // Auth modal & auto-submit states
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [pendingComment, setPendingComment] = useState<PendingCommentData | null>(null);
+  const [pendingComment, setPendingComment] =
+    useState<PendingCommentData | null>(null);
   const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
 
   // Session-level liked tracker
@@ -103,7 +108,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       toast.success(
         locale === "ne"
           ? "तपाईंको प्रतिक्रिया सफलतापूर्वक प्रकाशित भयो।"
-          : "Your comment has been successfully posted."
+          : "Your comment has been successfully posted.",
       );
 
       // Reset form states
@@ -194,7 +199,8 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     roots.forEach((root) => {
       if (root.replies && root.replies.length > 0) {
         root.replies.sort(
-          (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+          (a, b) =>
+            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime(),
         );
       }
     });
@@ -206,23 +212,24 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const handleSubmitMainComment = (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!user) {
-      setPendingComment({
-        authorName: name.trim(),
-        authorLocation: location.trim(),
-        content: commentText.trim(),
-        parentId: undefined,
-      });
-      setIsAuthModalOpen(true);
-      return;
-    }
-
     if (!commentText.trim()) {
       toast.error(
         locale === "ne"
           ? "कृपया आफ्नो प्रतिक्रिया लेख्नुहोस्।"
-          : "Please write your comment."
+          : "Please write your comment.",
       );
+      return;
+    }
+
+    if (!user) {
+      setPendingComment({
+        authorName: "",
+        authorLocation: location.trim(),
+        content: commentText.trim(),
+        parentId: undefined,
+      });
+      setPendingAutoSubmit(true);
+      setIsAuthModalOpen(true);
       return;
     }
 
@@ -239,23 +246,23 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const handleSubmitReply = (e: React.FormEvent, parentCommentId: string) => {
     e.preventDefault();
 
-    if (!user) {
-      setPendingComment({
-        authorName: replyName.trim(),
-        authorLocation: "",
-        content: replyText.trim(),
-        parentId: parentCommentId,
-      });
-      setIsAuthModalOpen(true);
-      return;
-    }
-
     if (!replyText.trim()) {
       toast.error(
         locale === "ne"
           ? "कृपया आफ्नो जवाफ लेख्नुहोस्।"
-          : "Please write your reply."
+          : "Please write your reply.",
       );
+      return;
+    }
+
+    if (!user) {
+      setPendingComment({
+        authorName: "",
+        content: replyText.trim(),
+        parentId: parentCommentId,
+      });
+      setPendingAutoSubmit(true);
+      setIsAuthModalOpen(true);
       return;
     }
 
@@ -268,6 +275,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   };
 
   const handleLike = (commentId: string) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setLikedIds((prev) => ({
       ...prev,
       [commentId]: !prev[commentId],
@@ -285,7 +296,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   const totalCommentsCount = rawComments.length;
 
   return (
-    <section id="comments-section" className="mt-12 pt-8 border-t border-border">
+    <section
+      id="comments-section"
+      className="mt-12 pt-8 border-t border-border"
+    >
       {/* ── Header with Comments Count & Sort ── */}
       <FTSectionDivider
         title={
@@ -298,7 +312,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         className="!my-0 mb-6"
         rightNode={
           <div className="flex items-center gap-1.5 text-xs text-muted-foreground font-sans">
-            <span className="text-muted-foreground">{locale === "ne" ? "क्रम:" : "Sort:"}</span>
+            <span className="text-muted-foreground">
+              {locale === "ne" ? "क्रम:" : "Sort:"}
+            </span>
             <button
               type="button"
               onClick={() => setSortBy("newest")}
@@ -306,7 +322,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                 "px-2.5 py-1 rounded-none font-semibold transition-colors cursor-pointer border",
                 sortBy === "newest"
                   ? "bg-brand text-white border-brand"
-                  : "bg-background text-muted-foreground border-border hover:bg-surface"
+                  : "bg-background text-muted-foreground border-border hover:bg-surface",
               )}
             >
               {locale === "ne" ? "ताजा" : "Latest"}
@@ -318,7 +334,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                 "px-2.5 py-1 rounded-none font-semibold transition-colors cursor-pointer border",
                 sortBy === "top"
                   ? "bg-brand text-white border-brand"
-                  : "bg-background text-muted-foreground border-border hover:bg-surface"
+                  : "bg-background text-muted-foreground border-border hover:bg-surface",
               )}
             >
               {locale === "ne" ? "धेरै मन पराइएको" : "Most Liked"}
@@ -328,20 +344,20 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       />
 
       {/* ── Main Comment Submission Form ── */}
-      <div className="bg-surface rounded-none border border-border p-5 sm:p-6 mb-8 shadow-xs">
+      <div className="bg-surface rounded-none border border-border border-t-2 border-t-brand p-5 sm:p-6 mb-8 shadow-xs">
         <h4 className="text-base sm:text-lg font-bold font-headline text-foreground mb-3">
           {locale === "ne" ? "आफ्नो प्रतिक्रिया लेख्नुहोस्" : "Leave a Comment"}
         </h4>
 
         {/* Guest Information Banner */}
         {!user && (
-          <div className="mb-4 p-3 bg-muted/40 border border-border text-xs sm:text-[13px] text-muted-foreground font-sans flex items-center justify-between gap-3 flex-wrap">
+          <div className="mb-4 p-3.5 bg-brand/5 border border-brand/20 text-xs sm:text-[13px] text-foreground font-sans flex items-center justify-between gap-3 flex-wrap rounded-sm">
             <span className="flex items-center gap-2">
               <span className="text-brand font-bold text-sm">ℹ️</span>
               <span>
                 {locale === "ne"
-                  ? "प्रतिक्रिया पोस्ट गर्नका लागि खाता आवश्यक पर्दछ। नाम भरेर सिधै पठाउन सक्नुहुन्छ वा लगइन गर्नुहोस्।"
-                  : "An account is required to post a comment. Enter your name or sign in directly."}
+                  ? "प्रतिक्रिया लेख्नका लागि लगइन हुन अनिवार्य छ।"
+                  : "Please sign in to your account to leave a comment."}
               </span>
             </span>
             <button
@@ -352,20 +368,33 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
               }}
               className="text-brand font-bold hover:underline cursor-pointer ml-auto inline-flex items-center gap-1 group"
             >
-              <span>{locale === "ne" ? "अहिले लगइन / दर्ता गर्नुहोस्" : "Sign in / Register"}</span>
-              <ArrowRight size={13} className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
+              <span>
+                {locale === "ne"
+                  ? "अहिले लगइन / दर्ता गर्नुहोस्"
+                  : "Sign in / Register"}
+              </span>
+              <ArrowRight
+                size={13}
+                className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+              />
             </button>
           </div>
         )}
 
-        <form onSubmit={handleSubmitMainComment} noValidate className="space-y-3.5">
-          {user ? (
+        <form
+          onSubmit={handleSubmitMainComment}
+          noValidate
+          className="space-y-3.5"
+        >
+          {user && (
             /* ── LOGGED IN USER: Show User Badge and Location section only ── */
             <>
               <div className="flex items-center justify-between pb-3 mb-3.5 border-b border-border/70 flex-wrap gap-2">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-full bg-brand text-white flex items-center justify-center text-xs font-bold shrink-0">
-                    {(user.first_name || user.username || "U").charAt(0).toUpperCase()}
+                    {(user.first_name || user.username || "U")
+                      .charAt(0)
+                      .toUpperCase()}
                   </div>
                   <div>
                     <div className="text-xs sm:text-[13px] font-bold text-foreground flex items-center gap-2">
@@ -380,45 +409,23 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
               <div>
                 <label className="block text-xs sm:text-[13px] font-bold text-foreground tracking-normal mb-1.5 font-sans">
-                  {locale === "ne" ? "ठेगाना / जिल्ला (ऐच्छिक)" : "Location (Optional)"}
+                  {locale === "ne"
+                    ? "ठेगाना / जिल्ला (ऐच्छिक)"
+                    : "Location (Optional)"}
                 </label>
                 <input
                   type="text"
                   value={location}
                   onChange={(e) => setLocation(e.target.value)}
-                  placeholder={locale === "ne" ? "जस्तै: धनगढी, कैलाली" : "e.g. Dhangadhi, Kailali"}
+                  placeholder={
+                    locale === "ne"
+                      ? "जस्तै: धनगढी, कैलाली"
+                      : "e.g. Dhangadhi, Kailali"
+                  }
                   className="w-full px-3.5 py-2.5 text-sm sm:text-[15px] bg-background border border-border rounded-none focus:outline-none focus:border-brand transition-colors font-sans"
                 />
               </div>
             </>
-          ) : (
-            /* ── GUEST USER: Show Full Name and Location fields ── */
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-foreground tracking-normal mb-1.5 font-sans">
-                  {locale === "ne" ? "तपाईंको पूरा नाम *" : "Full Name *"}
-                </label>
-                <input
-                  type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder={locale === "ne" ? "जस्तै: रमेश साउद" : "e.g. Ramesh Saud"}
-                  className="w-full px-3.5 py-2.5 text-sm sm:text-[15px] bg-background border border-border rounded-none focus:outline-none focus:border-brand transition-colors font-sans"
-                />
-              </div>
-              <div>
-                <label className="block text-xs sm:text-[13px] font-bold text-foreground tracking-normal mb-1.5 font-sans">
-                  {locale === "ne" ? "ठेगाना / जिल्ला (ऐच्छिक)" : "Location (Optional)"}
-                </label>
-                <input
-                  type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
-                  placeholder={locale === "ne" ? "जस्तै: धनगढी, कैलाली" : "e.g. Dhangadhi, Kailali"}
-                  className="w-full px-3.5 py-2.5 text-sm sm:text-[15px] bg-background border border-border rounded-none focus:outline-none focus:border-brand transition-colors font-sans"
-                />
-              </div>
-            </div>
           )}
 
           {/* Comment textarea */}
@@ -430,12 +437,20 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
               rows={4}
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
+              onClick={!user ? () => setIsAuthModalOpen(true) : undefined}
+              onFocus={!user ? () => setIsAuthModalOpen(true) : undefined}
               placeholder={
-                locale === "ne"
+                !user
+                  ? locale === "ne"
+                    ? "प्रतिक्रिया लेख्न कृपया पहिले लगइन गर्नुहोस् (यहाँ थिच्नुहोस्)..."
+                    : "Please sign in to leave a comment (click here to log in)..."
+                  : locale === "ne"
                   ? "यस समाचारबारे आफ्नो विचार वा सुझाव यहाँ लेख्नुहोस्..."
                   : "Share your thoughts or feedback on this article..."
               }
-              className="w-full px-3.5 py-2.5 text-sm sm:text-[15px] bg-background border border-border rounded-none focus:outline-none focus:border-brand transition-colors resize-y leading-relaxed font-sans"
+              className={`w-full px-3.5 py-2.5 text-sm sm:text-[15px] bg-background border border-border rounded-none focus:outline-none focus:border-brand transition-colors resize-y leading-relaxed font-sans ${
+                !user ? "cursor-pointer hover:border-brand/60" : ""
+              }`}
             />
           </div>
 
@@ -446,17 +461,28 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                 : "Civil and respectful comments are encouraged."}
             </p>
             <button
-              type="submit"
-              disabled={postCommentMutation.isPending}
+              type={user ? "submit" : "button"}
+              onClick={!user ? () => setIsAuthModalOpen(true) : undefined}
+              disabled={user ? postCommentMutation.isPending : false}
               className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-none bg-brand hover:bg-brand-dark text-white text-sm font-bold transition-all cursor-pointer disabled:opacity-50 shadow-2xs font-sans"
             >
-              {postCommentMutation.isPending && (
+              {postCommentMutation.isPending ? (
                 <Loader2 size={16} className="animate-spin" />
-              )}
+              ) : !user ? (
+                <LogIn size={15} />
+              ) : null}
               <span>
                 {postCommentMutation.isPending
-                  ? locale === "ne" ? "पठाउँदै..." : "Posting..."
-                  : locale === "ne" ? "प्रतिक्रिया पठाउनुहोस्" : "Post Comment"}
+                  ? locale === "ne"
+                    ? "पठाउँदै..."
+                    : "Posting..."
+                  : !user
+                    ? locale === "ne"
+                      ? "लगइन गरेर प्रतिक्रिया दिनुहोस्"
+                      : "Sign In to Comment"
+                    : locale === "ne"
+                      ? "प्रतिक्रिया पठाउनुहोस्"
+                      : "Post Comment"}
               </span>
             </button>
           </div>
@@ -490,7 +516,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       {/* ── Empty State ── */}
       {!isLoading && commentTree.length === 0 && (
         <div className="text-center py-12 px-4 border border-dashed border-border bg-surface/30">
-          <MessageSquare size={32} className="mx-auto text-muted-foreground mb-3 opacity-60" />
+          <MessageSquare
+            size={32}
+            className="mx-auto text-muted-foreground mb-3 opacity-60"
+          />
           <h4 className="text-base font-bold text-foreground font-headline mb-1">
             {locale === "ne" ? "कुनै प्रतिक्रिया छैन" : "No comments yet"}
           </h4>
@@ -507,7 +536,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         <div className="space-y-4">
           {commentTree.map((comment) => {
             const isLiked = !!likedIds[comment.id];
-            const initialLetter = comment.authorName ? comment.authorName.charAt(0) : "U";
+            const initialLetter = comment.authorName
+              ? comment.authorName.charAt(0)
+              : "U";
             const replies = comment.replies || [];
             const hasReplies = replies.length > 0;
             const isExpanded = expandedThreads[comment.id] !== false; // Default expanded
@@ -537,7 +568,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                         )}
                       </div>
                       <span className="text-xs text-gray-400 font-sans">
-                        <RelativeTime date={comment.createdAt} locale={locale} />
+                        <RelativeTime
+                          date={comment.createdAt}
+                          locale={locale}
+                        />
                       </span>
                     </div>
 
@@ -552,12 +586,17 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                         onClick={() => handleLike(comment.id)}
                         className={cn(
                           "inline-flex items-center gap-1 font-semibold transition-colors cursor-pointer",
-                          isLiked ? "text-brand" : "text-muted-foreground hover:text-brand"
+                          isLiked
+                            ? "text-brand"
+                            : "text-muted-foreground hover:text-brand",
                         )}
                       >
                         <ThumbsUp
                           size={13}
-                          className={cn("transition-transform active:scale-125", isLiked && "fill-brand")}
+                          className={cn(
+                            "transition-transform active:scale-125",
+                            isLiked && "fill-brand",
+                          )}
                         />
                         <span>{comment.likes || 0}</span>
                       </button>
@@ -575,7 +614,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                         className="inline-flex items-center gap-1 text-gray-500 hover:text-foreground font-semibold transition-colors cursor-pointer"
                       >
                         <CornerDownRight size={13} />
-                        <span>{locale === "ne" ? "जवाफ दिनुहोस्" : "Reply"}</span>
+                        <span>
+                          {locale === "ne" ? "जवाफ दिनुहोस्" : "Reply"}
+                        </span>
                       </button>
                     </div>
 
@@ -612,7 +653,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                                 value={replyName}
                                 onChange={(e) => setReplyName(e.target.value)}
                                 placeholder={
-                                  locale === "ne" ? "तपाईंको पूरा नाम *" : "Your Full Name *"
+                                  locale === "ne"
+                                    ? "तपाईंको पूरा नाम *"
+                                    : "Your Full Name *"
                                 }
                                 className="w-full px-3 py-1.5 text-xs sm:text-sm bg-background border border-border rounded-none focus:outline-none focus:border-brand font-sans"
                               />
@@ -652,8 +695,12 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                               )}
                               <span>
                                 {postCommentMutation.isPending
-                                  ? locale === "ne" ? "पठाउँदै..." : "Sending..."
-                                  : locale === "ne" ? "जवाफ पठाउनुहोस्" : "Reply"}
+                                  ? locale === "ne"
+                                    ? "पठाउँदै..."
+                                    : "Sending..."
+                                  : locale === "ne"
+                                    ? "जवाफ पठाउनुहोस्"
+                                    : "Reply"}
                               </span>
                             </button>
                           </div>
@@ -700,7 +747,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                   <div className="mt-3 pt-2 pl-4 sm:pl-7 ml-4 sm:ml-5 border-l-2 border-brand/20 dark:border-brand/30 space-y-3.5">
                     {replies.map((reply) => {
                       const isReplyLiked = !!likedIds[reply.id];
-                      const replyInitial = reply.authorName ? reply.authorName.charAt(0) : "U";
+                      const replyInitial = reply.authorName
+                        ? reply.authorName.charAt(0)
+                        : "U";
 
                       return (
                         <div
@@ -725,7 +774,10 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                                 )}
                               </div>
                               <span className="text-[11px] text-gray-400 font-sans">
-                                <RelativeTime date={reply.createdAt} locale={locale} />
+                                <RelativeTime
+                                  date={reply.createdAt}
+                                  locale={locale}
+                                />
                               </span>
                             </div>
 
@@ -742,12 +794,15 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                                   "inline-flex items-center gap-1 font-semibold transition-colors cursor-pointer",
                                   isReplyLiked
                                     ? "text-brand"
-                                    : "text-muted-foreground hover:text-brand"
+                                    : "text-muted-foreground hover:text-brand",
                                 )}
                               >
                                 <ThumbsUp
                                   size={11}
-                                  className={cn("transition-transform active:scale-125", isReplyLiked && "fill-brand")}
+                                  className={cn(
+                                    "transition-transform active:scale-125",
+                                    isReplyLiked && "fill-brand",
+                                  )}
                                 />
                                 <span>{reply.likes || 0}</span>
                               </button>
@@ -761,7 +816,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
                                 className="inline-flex items-center gap-1 text-gray-500 hover:text-foreground font-semibold transition-colors cursor-pointer"
                               >
                                 <CornerDownRight size={11} />
-                                <span>{locale === "ne" ? "जवाफ दिनुहोस्" : "Reply"}</span>
+                                <span>
+                                  {locale === "ne" ? "जवाफ दिनुहोस्" : "Reply"}
+                                </span>
                               </button>
                             </div>
                           </div>
@@ -781,7 +838,9 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         defaultName={pendingComment?.authorName || name.trim()}
-        initialMode={(pendingComment?.authorName || name.trim()) ? "register" : "login"}
+        initialMode={
+          pendingComment?.authorName || name.trim() ? "register" : "login"
+        }
         onSuccess={() => {
           setIsAuthModalOpen(false);
           setPendingAutoSubmit(true);

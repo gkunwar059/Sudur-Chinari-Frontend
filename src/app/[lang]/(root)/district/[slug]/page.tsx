@@ -5,7 +5,6 @@ import JsonLd from "@/components/common/JsonLd";
 import PageSkeleton from "@/components/common/PageSkeleton";
 import DistrictContentView from "@/components/district/DistrictContentView";
 import { DISTRICTS, getDistrictBySlug, mergeDistrict } from "@/lib/districts";
-import { getArticlesByDistrict } from "@/data/articles";
 import { isLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
@@ -99,19 +98,14 @@ async function DistrictPageContent({ params, searchParams }: Props) {
     district: slug,
     limit: 9,
   }).catch(() => null);
-  const localArticles = getArticlesByDistrict(slug, 9);
-  const articles =
-    articleData?.results && articleData.results.length > 0
-      ? articleData.results
-      : localArticles;
+  const articles = articleData?.results || [];
   const totalStories = articleData?.count ?? articles.length;
   const nearbyDistricts = DISTRICTS.filter((d) => d.slug !== slug).slice(0, 4);
 
   // Fetch partners specific to this district
-  const pRes = await newsApi.getPartnersServer(
-    { district: slug },
-    lang as ApiLang,
-  );
+  const pRes = await newsApi
+    .getPartnersServer({ district: slug }, lang as ApiLang)
+    .catch(() => null);
   const districtPartners = pRes?.results || [];
 
   const districtDisplayName =
@@ -183,7 +177,7 @@ async function DistrictPageContent({ params, searchParams }: Props) {
         />
 
         {districtPartners && districtPartners.length > 0 && (
-          <div className="container-editorial pb-10">
+          <div className="container-editorial pb-10 scroll-reveal">
             <PartnersSection
               partners={districtPartners}
               locale={lang}

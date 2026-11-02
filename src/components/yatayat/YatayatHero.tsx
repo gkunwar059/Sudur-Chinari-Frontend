@@ -1,4 +1,4 @@
-import { Clock, MapPin, ShieldCheck } from "lucide-react";
+import { Clock, MapPin, ShieldCheck, Bus, ArrowRight } from "lucide-react";
 import { formatNumber } from "@/lib/i18n/format";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import type { Locale } from "@/lib/i18n/config";
@@ -6,6 +6,7 @@ import { SUDURPASHCHIM_DISTRICTS_LIST } from "@/data/yatayatData";
 import YatayatHeroCarousel, {
   type YatayatHeroSlide,
 } from "./YatayatHeroCarousel";
+import { YatayatRegisterTrigger } from "./YatayatClientActions";
 
 interface YatayatHeroProps {
   locale: Locale;
@@ -71,38 +72,59 @@ export default function YatayatHero({ locale }: YatayatHeroProps) {
       <div className="border-b border-border bg-background">
         <div className="container-editorial py-8 sm:py-10 pt-4 sm:pt-6">
           <div className="flex flex-col lg:flex-row justify-between gap-8">
-            <div className="lg:w-7/12">
-              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-headline text-foreground tracking-tight leading-tight">
-                {isNe ? "सुदूर यातायात" : "Sudur Yatayat"}
-              </h1>
-              <p className="text-sm sm:text-base text-muted-foreground font-sans mt-2 max-w-2xl leading-relaxed">
-                {isNe
-                  ? "सुदूरपश्चिम प्रदेशका बस, हाइस तथा जीप सेवाहरूको रूट, प्रस्थान समय, सम्पर्क नम्बर, भाडादर र यातायातसम्बन्धी आवश्यक जानकारी एउटै स्थानमा खोज्नुहोस्।"
-                  : "Find routes, departure timings, contact numbers, fares, and essential transit information for buses, hiace vans, and jeeps across Sudurpashchim Province."}
-              </p>
+            <div className="lg:w-7/12 flex flex-col justify-between">
+              <div>
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black font-headline text-foreground tracking-tight leading-tight">
+                  {isNe ? "सुदूर यातायात" : "Sudur Yatayat"}
+                </h1>
+                <p className="text-sm sm:text-base text-muted-foreground font-sans mt-2 max-w-2xl leading-relaxed">
+                  {isNe
+                    ? "सुदूरपश्चिम प्रदेशका बस, हाइस तथा जीप सेवाहरूको रूट, प्रस्थान समय, सम्पर्क नम्बर, भाडादर र यातायातसम्बन्धी आवश्यक जानकारी एउटै स्थानमा खोज्नुहोस्।"
+                    : "Find routes, departure timings, contact numbers, fares, and essential transit information for buses, hiace vans, and jeeps across Sudurpashchim Province."}
+                </p>
 
-              <div className="mt-7 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-4 lg:gap-x-8">
-                {features.map((feature) => {
-                  const Icon = feature.icon;
+                <div className="mt-6 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-6 sm:gap-y-4 lg:gap-x-8">
+                  {features.map((feature) => {
+                    const Icon = feature.icon;
 
-                  return (
-                    <div key={feature.title} className="flex items-center gap-3">
-                      <span
-                        className={`w-10 h-10 shrink-0 flex items-center justify-center text-white shadow-md ${feature.tileClass}`}
-                      >
-                        <Icon size={18} aria-hidden="true" />
-                      </span>
-                      <span className="min-w-0">
-                        <span className="block text-sm font-bold text-foreground font-sans">
-                          {feature.title}
+                    return (
+                      <div key={feature.title} className="flex items-center gap-3">
+                        <span
+                          className={`w-10 h-10 shrink-0 flex items-center justify-center text-white shadow-md ${feature.tileClass}`}
+                        >
+                          <Icon size={18} aria-hidden="true" />
                         </span>
-                        <span className="block text-xs text-muted-foreground font-sans">
-                          {feature.subtitle}
+                        <span className="min-w-0">
+                          <span className="block text-sm font-bold text-foreground font-sans">
+                            {feature.title}
+                          </span>
+                          <span className="block text-xs text-muted-foreground font-sans">
+                            {feature.subtitle}
+                          </span>
                         </span>
-                      </span>
-                    </div>
-                  );
-                })}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="mt-7 flex flex-wrap items-center gap-3">
+                <YatayatRegisterTrigger
+                  locale={locale}
+                  className="bg-brand hover:brightness-110 text-white font-bold px-5 py-2.5 text-sm rounded-none transition-all shadow-xs border border-brand inline-flex items-center gap-2 cursor-pointer group"
+                >
+                  <Bus size={16} aria-hidden="true" className="shrink-0" />
+                  <span>
+                    {isNe
+                      ? "यातायात सेवा दर्ता वा अद्यावधिक गर्नुहोस्"
+                      : "Register or Update Transport Service"}
+                  </span>
+                  <ArrowRight
+                    size={14}
+                    aria-hidden="true"
+                    className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                  />
+                </YatayatRegisterTrigger>
               </div>
             </div>
 

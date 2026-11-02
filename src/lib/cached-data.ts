@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { apiFetch } from "@/lib/api";
 import type { ApiDistrictRecord, ApiLang, PaginatedResponse, PartnerRecord } from "@/lib/api";
-import type { Article, Category, Hotel } from "@/types";
+import type { Article, Category, Hotel, VideoItem, PhotoStory, Author } from "@/types";
 
 const ARTICLE_LIST_LIMIT = 24;
 const FULL_LIST_LIMIT = 100;
@@ -119,3 +119,54 @@ export async function getHotelBySlugCached(slug: string, lang?: ApiLang) {
   if (lang) cacheTag(`hotel-${slug}-${lang}`);
   return apiFetch<any>(`/hotels/${encodeURIComponent(slug)}/`, { lang });
 }
+
+export async function getVideosCached(
+  params?: Record<string, string | number>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("videos");
+  if (lang) cacheTag(`videos-${lang}`);
+  return apiFetch<PaginatedResponse<VideoItem>>("/videos/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT, ...params },
+  });
+}
+
+export async function getPhotoStoriesCached(
+  params?: Record<string, string | number>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("photo-stories");
+  if (lang) cacheTag(`photo-stories-${lang}`);
+  return apiFetch<PaginatedResponse<PhotoStory>>("/photo-stories/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT, ...params },
+  });
+}
+
+export async function getAuthorsCached(
+  params?: Record<string, string | number>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("authors");
+  if (lang) cacheTag(`authors-${lang}`);
+  return apiFetch<PaginatedResponse<Author>>("/authors/", {
+    lang,
+    params: { limit: FULL_LIST_LIMIT, ...params },
+  });
+}
+
+export async function getBreakingNewsCached(lang?: ApiLang) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("breaking-news");
+  if (lang) cacheTag(`breaking-news-${lang}`);
+  return apiFetch<PaginatedResponse<any>>("/breaking-news/", { lang });
+}
+

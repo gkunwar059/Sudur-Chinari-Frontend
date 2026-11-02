@@ -28,9 +28,7 @@ export const BACKEND_URL = process.env.NEXT_PUBLIC_API_URL
 
 export function getProxiedImageUrl(url: string | null | undefined): string {
   if (!url) return '';
-  if (url.startsWith('http')) return url;
-  if (url.startsWith('/')) return `${BACKEND_URL}${url}`;
-  return `${BACKEND_URL}/${url}`;
+  return normalizeImageUrl(url);
 }
 
 export function formatDate(dateStr: string, locale: Locale = 'ne'): string {
@@ -104,17 +102,29 @@ export function getCurrentNepaliDateString() {
 }
 
 export function normalizeImageUrl(url?: string | null): string {
-  if (!url) return '';
-  // If backend host was prepended to a frontend /images/... or /media/... path, extract relative path
-  if (url.includes('/images/')) {
-    const idx = url.indexOf('/images/');
-    return url.slice(idx);
+  const fallback = '/images/places/khaptad_national_park.jpg';
+  if (!url) return fallback;
+  const trimmed = url.trim();
+  if (!trimmed) return fallback;
+
+  // If backend or localhost prepended to /images/
+  if (trimmed.includes('/images/')) {
+    const idx = trimmed.indexOf('/images/');
+    return trimmed.slice(idx);
   }
-  if (url.includes('/media/')) {
-    const idx = url.indexOf('/media/');
-    return url.slice(idx);
+
+  // If backend or localhost prepended to /media/
+  if (trimmed.includes('/media/')) {
+    const idx = trimmed.indexOf('/media/');
+    return trimmed.slice(idx);
   }
-  return url;
+
+  // Ensure leading slash for relative asset paths
+  if (trimmed.startsWith('images/') || trimmed.startsWith('media/')) {
+    return `/${trimmed}`;
+  }
+
+  return trimmed;
 }
 
 

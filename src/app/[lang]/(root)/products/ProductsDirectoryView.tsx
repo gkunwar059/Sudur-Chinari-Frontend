@@ -7,6 +7,7 @@ import { mergeDistrictList } from "@/lib/districts";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import ProductContributionModal from "@/components/products/ProductContributionModal";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
+import AdBanner from "@/components/common/AdBanner";
 
 interface ProductsDirectoryViewProps {
   districts: any[];
@@ -64,7 +65,7 @@ export default function ProductsDirectoryView({
         </div>
       </div>
 
-      <div className="container-editorial py-10 sm:py-12">
+      <div className="container-editorial py-10 sm:py-12 scroll-reveal">
         <FTSectionDivider
           title={locale === "ne" ? "जिल्लागत स्थानीय उत्पादनहरू" : "District Local Products"}
           enTitle={locale === "ne" ? "Local Products by District" : undefined}
@@ -135,6 +136,9 @@ export default function ProductsDirectoryView({
             );
           })}
         </div>
+
+        {/* Local Products Page Billboard Banner */}
+        <AdBanner placement="billboard-mid" page="products" className="mt-10" />
       </div>
     </main>
   );

@@ -81,6 +81,22 @@ const nextConfig: NextConfig = {
         hostname: "sudur_backend",
       },
       {
+        protocol: "http",
+        hostname: "api.sudurchinari.com",
+      },
+      {
+        protocol: "https",
+        hostname: "api.sudurchinari.com",
+      },
+      {
+        protocol: "http",
+        hostname: "*.sudurchinari.com",
+      },
+      {
+        protocol: "https",
+        hostname: "*.sudurchinari.com",
+      },
+      {
         protocol: "https",
         hostname: "**",
       },

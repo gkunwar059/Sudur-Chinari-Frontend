@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, ArrowRight, Search, MapPin } from "lucide-react";
@@ -35,29 +36,37 @@ export default function DistrictAtlasModal({
 }: DistrictAtlasModalProps) {
   const router = useRouter();
   const { locale, tr } = useLanguage();
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<
     "all" | "terai" | "pahad" | "himal"
   >("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   // Close on Escape key and prevent background scroll
   useEffect(() => {
+    if (!isOpen) return;
+
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
 
-      // Focus search input on desktop
-      if (typeof window !== "undefined" && window.innerWidth >= 768) {
-        setTimeout(() => searchInputRef.current?.focus(), 120);
-      }
+    window.addEventListener("keydown", handleKeyDown);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    // Focus search input on desktop without scrolling the window
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setTimeout(() => searchInputRef.current?.focus({ preventScroll: true }), 120);
     }
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
+      document.body.style.overflow = prevOverflow || "";
     };
   }, [isOpen, onClose]);
 
@@ -111,9 +120,9 @@ export default function DistrictAtlasModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -387,6 +396,7 @@ export default function DistrictAtlasModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

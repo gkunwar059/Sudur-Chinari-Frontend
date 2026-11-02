@@ -424,8 +424,49 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
       ? resolvedSearchParams.q.trim()
       : "";
   const searchQuery = rawSearchQuery.toLowerCase();
+  // Fetch live products from backend for this district
+  let allProducts = PRODUCTS;
+  try {
+    const apiProductsResponse = await newsApi
+      .getProductsServer({ district__slug: slug }, locale)
+      .catch(() => null);
+    if (apiProductsResponse?.results && apiProductsResponse.results.length > 0) {
+      const apiProductList = apiProductsResponse.results.map((item: any) => ({
+        slug: item.slug,
+        name:
+          typeof item.name === "object"
+            ? item.name
+            : { ne: item.name, en: item.name_en || item.name },
+        category:
+          typeof item.category_name === "object"
+            ? item.category_name
+            : {
+                ne: item.category_name || "अन्य",
+                en: item.category_slug || "Other",
+              },
+        categoryId: item.category_slug || "dairy",
+        farmerCount: item.producer_count ?? 1,
+        desc:
+          typeof item.description === "object"
+            ? item.description
+            : {
+                ne: item.description || "",
+                en: item.description_en || item.description || "",
+              },
+        image: item.image || "",
+      }));
+      // Put live database products first, followed by deduplicated fallbacks
+      const seenSlugs = new Set(apiProductList.map((p: any) => p.slug));
+      allProducts = [
+        ...apiProductList,
+        ...PRODUCTS.filter((p) => !seenSlugs.has(p.slug)),
+      ];
+    }
+  } catch (e) {
+    allProducts = PRODUCTS;
+  }
 
-  const categoryCounts = PRODUCTS.reduce<Record<string, number>>(
+  const categoryCounts = allProducts.reduce<Record<string, number>>(
     (counts, product) => {
       counts[product.categoryId] = (counts[product.categoryId] ?? 0) + 1;
       return counts;
@@ -435,16 +476,16 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
 
   let filteredProducts =
     currentCategory === "all"
-      ? PRODUCTS
-      : PRODUCTS.filter((product) => product.categoryId === currentCategory);
+      ? allProducts
+      : allProducts.filter((product) => product.categoryId === currentCategory);
 
   if (searchQuery) {
     filteredProducts = filteredProducts.filter(
       (product) =>
-        product.name.en.toLowerCase().includes(searchQuery) ||
-        product.name.ne.toLowerCase().includes(searchQuery) ||
-        product.desc.en.toLowerCase().includes(searchQuery) ||
-        product.desc.ne.toLowerCase().includes(searchQuery),
+        product.name.en?.toLowerCase().includes(searchQuery) ||
+        product.name.ne?.toLowerCase().includes(searchQuery) ||
+        product.desc.en?.toLowerCase().includes(searchQuery) ||
+        product.desc.ne?.toLowerCase().includes(searchQuery),
     );
   }
 
@@ -622,7 +663,10 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
                 </div>
 
                 <div className="mt-5 border-t border-border pt-4">
-                  <ProductContributionModal buttonClassName="flex w-full items-center justify-center gap-2 border border-brand bg-transparent px-4 py-2.5 text-sm font-bold text-brand transition-all hover:bg-brand hover:text-white" />
+                  <ProductContributionModal
+                    defaultDistrict={district.slug}
+                    buttonClassName="flex w-full items-center justify-center gap-2 border border-brand bg-transparent px-4 py-2.5 text-sm font-bold text-brand transition-all hover:bg-brand hover:text-white cursor-pointer"
+                  />
                 </div>
               </div>
 

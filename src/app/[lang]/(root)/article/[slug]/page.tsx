@@ -10,7 +10,6 @@ import type { Locale } from "@/lib/i18n/config";
 import type { ApiLang } from "@/lib/api";
 import { localizedPath } from "@/lib/i18n/paths";
 import { getArticleSlug, t } from "@/lib/utils";
-import { ARTICLES } from "@/data/articles";
 
 interface PageProps {
   params: Promise<{ lang: string; slug: string }>;
@@ -25,22 +24,9 @@ export async function generateMetadata({
   const { lang, slug } = await params;
   if (!isLocale(lang)) return {};
 
-  let article = await getArticleBySlugCached(slug, lang as ApiLang).catch(
+  const article = await getArticleBySlugCached(slug, lang as ApiLang).catch(
     () => null,
   );
-
-  if (!article) {
-    article = ARTICLES.find((a) => {
-      const s = a.slug;
-      if (typeof s === "string") return s.toLowerCase() === slug.toLowerCase();
-      if (typeof s === "object")
-        return (
-          s.en?.toLowerCase() === slug.toLowerCase() ||
-          s.ne?.toLowerCase() === slug.toLowerCase()
-        );
-      return false;
-    });
-  }
 
   if (!article) return {};
 
@@ -112,24 +98,12 @@ async function ArticlePageContent({ params }: PageProps) {
   const { lang, slug } = await params;
   if (!isLocale(lang)) notFound();
 
-  const [articleData, listData] = await Promise.all([
+  const [article, listData] = await Promise.all([
     getArticleBySlugCached(slug, lang as ApiLang).catch(() => null),
     getArticlesCached({ lang: lang as ApiLang }).catch(() => null),
   ]);
-  let article = articleData;
-  if (!article) {
-    article = ARTICLES.find((a) => {
-      const s = a.slug;
-      if (typeof s === "string") return s.toLowerCase() === slug.toLowerCase();
-      if (typeof s === "object")
-        return (
-          s.en?.toLowerCase() === slug.toLowerCase() ||
-          s.ne?.toLowerCase() === slug.toLowerCase()
-        );
-      return false;
-    });
-  }
-  let articles = listData?.results || [];
+
+  const articles = listData?.results || [];
 
   if (!article) notFound();
 

@@ -8,6 +8,7 @@ import {
   InstagramIcon,
 } from "@/components/common/SocialIcons";
 import BackToTopButton from "@/components/layout/BackToTopButton";
+import NewsletterSubscription from "@/components/common/NewsletterSubscription";
 import type { Locale } from "@/lib/i18n/config";
 
 export default function Footer({ locale }: { locale: Locale }) {
@@ -54,27 +55,33 @@ export default function Footer({ locale }: { locale: Locale }) {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2.5 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2.5">
-                  <MapPin size={16} className="text-brand-secondary shrink-0" />
-                  <span>
-                    {locale === "ne"
-                      ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश"
-                      : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province"}
-                  </span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
+                <div className="flex flex-col gap-2.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2.5">
+                    <MapPin size={16} className="text-brand-secondary shrink-0" />
+                    <span>
+                      {locale === "ne"
+                        ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश"
+                        : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Phone size={16} className="text-brand-secondary shrink-0" />
+                    <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={16} className="text-brand-secondary shrink-0" />
+                    <a
+                      href="mailto:info@sudurchinari.com"
+                      className="hover:text-brand-secondary transition-colors"
+                    >
+                      info@sudurchinari.com
+                    </a>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Phone size={16} className="text-brand-secondary shrink-0" />
-                  <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <Mail size={16} className="text-brand-secondary shrink-0" />
-                  <a
-                    href="mailto:info@sudurchinari.com"
-                    className="hover:text-brand-secondary transition-colors"
-                  >
-                    info@sudurchinari.com
-                  </a>
+
+                <div className="border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-8">
+                  <NewsletterSubscription locale={locale} />
                 </div>
               </div>
             </div>

@@ -199,7 +199,7 @@ export default function DistrictArchives({
           </div>
 
           <div className="w-full lg:w-96 shrink-0 flex flex-col">
-            <AdBanner placement="sidebar" className="!mb-4" />
+            <AdBanner placement="sidebar" page="district" className="!mb-4" />
             <div className="relative">
               <Search
                 size={18}

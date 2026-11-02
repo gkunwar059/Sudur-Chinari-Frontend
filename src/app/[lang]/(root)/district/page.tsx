@@ -45,13 +45,15 @@ export default async function DistrictDirectoryPage({ params }: Props) {
   let districtsData: any[] = [];
   const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
   if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
-    districtsData = apiDistricts.results.map((apiD: any) => {
-      const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
-      const merged = mergeDistrict(apiD, fallback);
-      if (!merged) return [];
-      merged.storyCount = apiD.storyCount ?? fallback?.storyCount ?? 20;
-      return [merged];
-    });
+    districtsData = apiDistricts.results
+      .map((apiD: any) => {
+        const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
+        const merged = mergeDistrict(apiD, fallback);
+        if (!merged) return null;
+        merged.storyCount = apiD.storyCount ?? fallback?.storyCount ?? 20;
+        return merged;
+      })
+      .filter(Boolean);
   }
 
   if (districtsData.length === 0) {
@@ -153,7 +155,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
 
         {/* ── District Partners Network ── */}
         {districtPartners && districtPartners.length > 0 && (
-          <div className="container-editorial py-8">
+          <div className="container-editorial py-8 scroll-reveal">
             <PartnersSection
               partners={districtPartners}
               locale={locale}

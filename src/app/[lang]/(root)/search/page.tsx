@@ -34,15 +34,19 @@ export default async function SearchPage({
   const { lang } = await params;
   if (!isLocale(lang)) notFound();
   // Fetch initial data on the server
-  const [articlesData, districtsData, categoriesData] = await Promise.all([
+  const [articlesData, districtsData, categoriesData, trendingData] = await Promise.all([
     getArticlesCached({ lang: lang as Locale, limit: 100 }),
     getDistrictsCached(lang as Locale),
     getCategoriesCached(lang as Locale),
+    newsApi.getTrendingTopicsServer(lang as Locale).catch(() => null),
   ]);
 
   const initialArticles = articlesData?.results || [];
   const districts = districtsData?.results || districtsData || [];
   const categories = categoriesData?.results || categoriesData || [];
+  const trendingTopics = (trendingData?.results && trendingData.results.length > 0)
+    ? trendingData.results.map((item: any) => typeof item.name === "object" ? (item.name[lang] || item.name.ne || item.name.en) : item.name)
+    : undefined;
 
   return (
     <Suspense>
@@ -50,6 +54,7 @@ export default async function SearchPage({
         initialArticles={initialArticles}
         districts={districts}
         categories={categories}
+        trendingTopics={trendingTopics}
       />
     </Suspense>
   );

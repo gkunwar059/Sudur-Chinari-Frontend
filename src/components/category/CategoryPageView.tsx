@@ -2,6 +2,7 @@ import Link from "@/components/i18n/LocalizedLink";
 import { ChevronRight, MapPin, Newspaper, TrendingUp, Layers } from "lucide-react";
 import AdBanner from "@/components/common/AdBanner";
 import EditorialCard from "@/components/common/EditorialCard";
+import FTEmptyState from "@/components/common/FTEmptyState";
 import { t, getArticleSlug } from "@/lib/utils";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import CategoryThumb from "@/components/common/CategoryThumb";
@@ -219,7 +220,7 @@ export default function CategoryPageView({
         {/* ── Main Editorial Content Grid ── */}
         <div className="container-editorial py-6 sm:py-10">
           {/* Top Leaderboard Ad */}
-          <AdBanner placement="top-leaderboard" className="mb-8" />
+          <AdBanner placement="top-leaderboard" page="category" className="mb-8" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             {/* ── Left Articles Column (8 cols) ── */}
@@ -244,7 +245,7 @@ export default function CategoryPageView({
 
                   {/* 2. Grid of Secondary Stories */}
                   {gridArticles.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 scroll-reveal">
                       {gridArticles.map((article: any) => (
                         <EditorialCard
                           key={article.id}
@@ -259,18 +260,29 @@ export default function CategoryPageView({
                   )}
                 </>
               ) : (
-                <div className="bg-background border border-border p-8 sm:p-12 text-center">
-                  <p className="text-muted-foreground text-base">
-                    {isEn ? "No news found in this category." : "यस श्रेणीको कुनै समाचार फेला परेन।"}
-                  </p>
-                </div>
+                <FTEmptyState
+                  title={
+                    isEn
+                      ? `No articles found in ${t(category?.name, lang) || slug}`
+                      : `${t(category?.name, lang) || slug} श्रेणीमा हाल कुनै समाचार प्रकाशित छैन`
+                  }
+                  description={
+                    isEn
+                      ? "Our editorial team is preparing fresh reports for this category. Please check back shortly or explore other sections."
+                      : "हाम्रो डेस्कले यस श्रेणीका ताजा समाचारहरू तयार गर्दैछ। कृपया केही समयपछि पुन: हेर्नुहोस् वा अन्य खण्डहरू अवलोकन गर्नुहोस्।"
+                  }
+                  kicker={isEn ? "CATEGORY ARCHIVE" : "श्रेणी अभिलेख"}
+                  icon={<Newspaper size={24} className="text-brand" />}
+                  actionText={isEn ? "View All News" : "सबै समाचार हेर्नुहोस्"}
+                  actionHref="/"
+                />
               )}
             </div>
 
             {/* ── Right Editorial Sidebar (4 cols) ── */}
             <aside className="lg:col-span-4 min-w-0 space-y-6 sm:space-y-8">
               {/* 1. Popular / Trending Stories */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
                 <FTSectionDivider
                   title={isEn ? "Popular Stories" : "लोकप्रिय समाचार"}
                   icon={<TrendingUp size={18} className="text-brand" />}
@@ -302,10 +314,12 @@ export default function CategoryPageView({
               </div>
 
               {/* Sidebar MREC Ad Slot */}
-              <AdBanner placement="sidebar" />
+              <div className="scroll-reveal scroll-delay-100">
+                <AdBanner placement="sidebar" page="category" />
+              </div>
 
               {/* 2. Other Categories */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
                 <FTSectionDivider
                   title={isEn ? "Other Topics" : "अन्य विषयहरू"}
                   icon={<Layers size={18} className="text-brand" />}
@@ -340,7 +354,7 @@ export default function CategoryPageView({
               </div>
 
               {/* 3. District News Quick Links */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
                 <FTSectionDivider
                   title={isEn ? "News by District" : "जिल्ला अनुसार समाचार"}
                   icon={<MapPin size={18} className="text-brand" />}

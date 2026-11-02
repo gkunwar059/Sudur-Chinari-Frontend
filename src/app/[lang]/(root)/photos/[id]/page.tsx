@@ -4,27 +4,33 @@ import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { Camera } from "lucide-react";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { PHOTO_STORIES } from "@/data/articles";
 import { notFound } from "next/navigation";
-import { t } from "@/lib/utils";
+import { t, normalizeImageUrl } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import PhotoLightboxGallery from "@/components/photos/PhotoLightboxGallery";
+import { newsApi } from "@/lib/api";
 
 interface Props {
   params: Promise<{ lang: string; id: string }>;
 }
 
 export async function generateStaticParams() {
-  return PHOTO_STORIES.flatMap((s) => [
-    { lang: "en", id: s.id },
-    { lang: "ne", id: s.id },
-  ]);
+  try {
+    const res = await newsApi.getPhotoStoriesServer().catch(() => null);
+    const photos = res?.results || [];
+    return photos.flatMap((s) => [
+      { lang: "en", id: String(s.id) },
+      { lang: "ne", id: String(s.id) },
+    ]);
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
-  const story = PHOTO_STORIES.find((s) => s.id === id);
+  const story = await newsApi.getPhotoStoryByIdServer(id, locale).catch(() => null);
   if (!story) return {};
 
   const title = `${t(story.title, locale)} | ${locale === "ne" ? "फोटो फिचर" : "Photo Feature"}`;
@@ -35,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     path: `/photos/${id}`,
     title,
     description,
-    image: story.coverImage,
+    image: normalizeImageUrl(story.coverImage),
     type: "article",
   });
 }
@@ -47,17 +53,22 @@ export default async function PhotoStoryDetailsPage({ params }: Props) {
     : defaultLocale;
   const id = resolvedParams.id;
 
-  const story = PHOTO_STORIES.find((s) => s.id === id);
+  const story = await newsApi.getPhotoStoryByIdServer(id, lang as Locale).catch(() => null);
 
   if (!story) {
     notFound();
   }
 
-  // Generate mock images for the gallery since we only have one cover image in data
-  const galleryImages = Array.from({ length: story.imageCount }).map((_, i) => {
-    // Using picsum.photos instead of unsplash since source.unsplash is deprecated
-    return `https://picsum.photos/seed/${id}-${i}/800/${600 + (i % 3) * 100}`;
-  });
+  const count = Math.max(1, Math.min(story.imageCount || 1, 12));
+  const galleryImages =
+    story.images && story.images.length > 0
+      ? story.images.map((img: any) => normalizeImageUrl(img.image))
+      : [
+          normalizeImageUrl(story.coverImage),
+          ...Array.from({ length: Math.max(0, count - 1) }).map((_, i) => {
+            return `https://picsum.photos/seed/${id}-${i}/800/${600 + (i % 3) * 100}`;
+          }),
+        ];
 
   return (
     <div className="min-h-screen bg-background selection:bg-brand/20">
@@ -100,7 +111,7 @@ export default async function PhotoStoryDetailsPage({ params }: Props) {
           style={{ borderTop: "4px solid var(--color-brand)" }}
         >
           <Image
-            src={story.coverImage}
+            src={normalizeImageUrl(story.coverImage)}
             alt={t(story.title, lang as Locale)}
             fill
             sizes="100vw"

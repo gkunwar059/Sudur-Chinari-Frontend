@@ -5,6 +5,8 @@ import { Heart, MessageSquare, Bookmark, Share2, Check } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { cn } from "@/lib/utils";
 
+import { newsApi } from "@/lib/api";
+
 interface ArticleReactionsProps {
   articleId: string;
   articleTitle: string;
@@ -16,7 +18,7 @@ export default function ArticleReactions({
   articleId,
   articleTitle,
   initialLikes = 142,
-  commentsCount = 3,
+  commentsCount = 0,
 }: ArticleReactionsProps) {
   const { locale } = useLanguage();
   const [likes, setLikes] = useState(initialLikes);
@@ -38,14 +40,18 @@ export default function ArticleReactions({
     } catch {
       // localStorage may fail
     }
+
+    // Record view in backend
+    newsApi.viewArticleClient(articleId).catch(() => null);
   }, [articleId]);
 
-  const toggleLike = () => {
+  const toggleLike = async () => {
     setLikeAnimating(true);
     setTimeout(() => setLikeAnimating(false), 400);
 
-    if (hasLiked) {
-      setLikes((prev) => prev - 1);
+    const willLike = !hasLiked;
+    if (!willLike) {
+      setLikes((prev) => Math.max(0, prev - 1));
       setHasLiked(false);
       try {
         localStorage.removeItem(`article_like_${articleId}`);
@@ -56,6 +62,15 @@ export default function ArticleReactions({
       try {
         localStorage.setItem(`article_like_${articleId}`, "true");
       } catch {}
+    }
+
+    try {
+      const res: any = await newsApi.likeArticleClient(articleId);
+      if (res && typeof res.likes === "number") {
+        setLikes(res.likes);
+      }
+    } catch (e) {
+      // fallback already updated optimistically
     }
   };
 

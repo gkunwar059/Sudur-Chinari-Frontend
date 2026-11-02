@@ -67,19 +67,46 @@ export function YatayatQuickActionTrigger({
   );
 }
 
+import { useAuth } from "@/context/AuthContext";
+import AuthModal from "@/components/auth/AuthModal";
+
 export function YatayatRegisterTrigger({ locale, className, children }: TriggerProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user } = useAuth();
+
+  const handleOpen = () => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
+    setIsOpen(true);
+  };
 
   return (
     <>
-      <button type="button" onClick={() => setIsOpen(true)} className={className}>
+      <button type="button" onClick={handleOpen} className={className}>
         {children}
       </button>
-      <OperatorRegistrationModal
-        isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
-        locale={locale}
-      />
+
+      {isAuthModalOpen && (
+        <AuthModal
+          isOpen={isAuthModalOpen}
+          onClose={() => setIsAuthModalOpen(false)}
+          onSuccess={() => {
+            setIsAuthModalOpen(false);
+            setIsOpen(true);
+          }}
+        />
+      )}
+
+      {isOpen && (
+        <OperatorRegistrationModal
+          isOpen={isOpen}
+          onClose={() => setIsOpen(false)}
+          locale={locale}
+        />
+      )}
     </>
   );
 }

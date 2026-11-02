@@ -3,7 +3,7 @@ import Link from "@/components/i18n/LocalizedLink";
 import { Quote, Play, Star } from "lucide-react";
 import type { Article } from "@/types";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
-import { getArticleSlug, t } from "@/lib/utils";
+import { getArticleSlug, t, normalizeImageUrl } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n/config";
 
 interface FTOpinionSectionProps {
@@ -66,7 +66,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
                 >
                   <div className="relative aspect-[4/3] sm:aspect-square md:aspect-[4/3] bg-surface border border-border overflow-hidden rounded-xl">
                     <Image
-                      src={op1.featuredImage}
+                      src={normalizeImageUrl(op1.featuredImage)}
                       alt={tr(op1.title)}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-700"
