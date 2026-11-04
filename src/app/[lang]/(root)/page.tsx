@@ -230,18 +230,18 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           />
 
           {/* ── 2. 9 Districts Explorer (खण्ड ०१) ── */}
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <DistrictMapCards initialDistricts={apiDistricts} />
           </div>
-          <div className="scroll-reveal scroll-delay-100">
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="billboard-mid" page="home" />
           </div>
 
           {/* ── 2.5 Archives & Voices ── */}
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <FTArchivesAndVoices stories={topStories} />
           </div>
-          <div className="scroll-reveal scroll-delay-100">
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="bottom-strip" page="home" />
           </div>
 
@@ -252,27 +252,27 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           /> */}
 
           {/* ── 6. Opinion Section (खण्ड ०५) ── */}
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <FTOpinionSection opinions={opinionList} locale={lang as Locale} />
           </div>
-          <div className="scroll-reveal scroll-delay-100">
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="billboard-mid" page="home" />
           </div>
 
           {/* ── 8. Recent Video Reports (खण्ड ०७) & Photo Stories (खण्ड ०८) ── */}
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <VideoShorts videos={apiVideos} />
           </div>
 
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <PhotoGallerySection photoStories={apiPhotos} />
           </div>
-          <div className="scroll-reveal scroll-delay-100">
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="bottom-strip" page="home" />
           </div>
 
           {/* ── 9. Institutional Affiliations Network (खण्ड ०९) ── */}
-          <div className="scroll-reveal">
+          <div suppressHydrationWarning className="scroll-reveal">
             <PartnersSection partners={apiPartners} locale={lang} />
           </div>
         </main>

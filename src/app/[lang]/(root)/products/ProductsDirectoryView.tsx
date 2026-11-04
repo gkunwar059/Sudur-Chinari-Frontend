@@ -11,11 +11,13 @@ import AdBanner from "@/components/common/AdBanner";
 
 interface ProductsDirectoryViewProps {
   districts: any[];
+  districtCounts?: Record<string, { farmers: number; products: number }>;
   locale: Locale;
 }
 
 export default function ProductsDirectoryView({
   districts,
+  districtCounts = {},
   locale,
 }: ProductsDirectoryViewProps) {
   const districtsData = mergeDistrictList(districts);
@@ -112,7 +114,7 @@ export default function ProductsDirectoryView({
                   <div className="flex gap-5 sm:gap-6">
                     <div className="flex flex-col">
                       <span className="text-foreground text-sm sm:text-base font-black">
-                        {district.slug.length * 15 + 120}
+                        {districtCounts[district.slug]?.farmers ?? 0}
                       </span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         {locale === "ne" ? "किसान" : "Farmers"}
@@ -121,7 +123,7 @@ export default function ProductsDirectoryView({
                     <div className="w-px h-8 bg-border"></div>
                     <div className="flex flex-col">
                       <span className="text-foreground text-sm sm:text-base font-black">
-                        {district.slug.length * 3 + 15}
+                        {districtCounts[district.slug]?.products ?? 0}
                       </span>
                       <span className="text-[10px] text-muted-foreground uppercase tracking-wider">
                         {locale === "ne" ? "उत्पादन" : "Products"}

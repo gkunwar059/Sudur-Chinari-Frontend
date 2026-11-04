@@ -30,7 +30,7 @@ const nextConfig: NextConfig = {
   },
   images: {
     dangerouslyAllowLocalIP: true,
-    qualities: [70, 75],
+    qualities: [70, 75, 80],
     remotePatterns: [
       {
         protocol: "https",

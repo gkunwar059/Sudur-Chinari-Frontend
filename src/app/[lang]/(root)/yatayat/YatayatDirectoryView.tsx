@@ -121,13 +121,13 @@ async function loadYatayatServices(locale: Locale): Promise<YatayatService[]> {
       return liveServices;
     }
   } catch (err) {}
-  return YATAYAT_SERVICES;
+  return [];
 }
 
 function resolveDirectoryState(
   locale: Locale,
   searchParams: SearchParams,
-  availableServices: YatayatService[] = YATAYAT_SERVICES
+  availableServices: YatayatService[] = []
 ): YatayatDirectoryState {
   const originSlug = firstParam(searchParams.origin);
   const destinationSlug = firstParam(searchParams.destination);
@@ -301,7 +301,7 @@ async function YatayatDirectoryResults({
             </div>
           )}
 
-          {activeTab === "all" && (
+          {activeTab === "all" && counts.bus > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-surface border border-border border-t-[2px] border-t-brand rounded-none text-sm font-semibold">
               <div className="flex items-center gap-2.5 text-foreground font-sans">
                 <Bus size={17} aria-hidden="true" className="text-brand" />

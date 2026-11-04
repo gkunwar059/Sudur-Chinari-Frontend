@@ -425,13 +425,13 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
       : "";
   const searchQuery = rawSearchQuery.toLowerCase();
   // Fetch live products from backend for this district
-  let allProducts = PRODUCTS;
+  let allProducts: any[] = [];
   try {
     const apiProductsResponse = await newsApi
       .getProductsServer({ district__slug: slug }, locale)
       .catch(() => null);
     if (apiProductsResponse?.results && apiProductsResponse.results.length > 0) {
-      const apiProductList = apiProductsResponse.results.map((item: any) => ({
+      allProducts = apiProductsResponse.results.map((item: any) => ({
         slug: item.slug,
         name:
           typeof item.name === "object"
@@ -455,15 +455,9 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
               },
         image: item.image || "",
       }));
-      // Put live database products first, followed by deduplicated fallbacks
-      const seenSlugs = new Set(apiProductList.map((p: any) => p.slug));
-      allProducts = [
-        ...apiProductList,
-        ...PRODUCTS.filter((p) => !seenSlugs.has(p.slug)),
-      ];
     }
   } catch (e) {
-    allProducts = PRODUCTS;
+    allProducts = [];
   }
 
   const categoryCounts = allProducts.reduce<Record<string, number>>(
@@ -688,7 +682,7 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
                 const isActive = currentCategory === category.id;
                 const count =
                   category.id === "all"
-                    ? PRODUCTS.length
+                    ? allProducts.length
                     : (categoryCounts[category.id] ?? 0);
 
                 return (

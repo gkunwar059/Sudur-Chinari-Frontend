@@ -23,6 +23,7 @@ import { formatViews, normalizeImageUrl } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import RelativeTime from "@/components/common/RelativeTime";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 interface VideoShortsProps {
   filterDistrict?: string;
@@ -133,20 +134,20 @@ export default function VideoShorts({
     } catch {}
   };
 
-  // Handle ESC key for modal
+  // Safely lock background scroll with global reference-counted lock
+  useBodyScrollLock(!!activeModalVideo);
+
+  // Handle ESC key and arrow keys for modal
   useEffect(() => {
+    if (!activeModalVideo) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeModal();
       if (e.key === "ArrowRight") navigateModal("next");
       if (e.key === "ArrowLeft") navigateModal("prev");
     };
-    if (activeModalVideo) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [activeModalVideo]);
 

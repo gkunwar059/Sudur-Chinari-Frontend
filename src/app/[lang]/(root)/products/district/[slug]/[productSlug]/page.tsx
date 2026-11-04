@@ -135,7 +135,7 @@ async function ProductDetailsPageContent({ params }: Props) {
           : { ne: "बजार भाउ अनुसार", en: "Market rate" },
         image: p.avatar || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop",
       }))
-    : FARMERS;
+    : [];
 
   return (
     <main className="flex-1 mobile-safe-bottom bg-background">
@@ -171,12 +171,19 @@ async function ProductDetailsPageContent({ params }: Props) {
               className="!my-6"
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {dynamicFarmers.map((farmer: any) => (
-                <div
-                  key={farmer.id}
-                  className="editorial-card-bordered border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
-                >
+            {dynamicFarmers.length === 0 ? (
+              <div className="border border-dashed border-border bg-surface/60 p-8 text-center text-sm text-muted-foreground">
+                {locale === "ne"
+                  ? "यस उत्पादनका लागि हाल कुनै किसान वा उत्पादक सूचीकृत छैनन्।"
+                  : "No registered farmers or producers found for this product yet."}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {dynamicFarmers.map((farmer: any) => (
+                  <div
+                    key={farmer.id}
+                    className="editorial-card-bordered border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
+                  >
                   <div className="flex items-center gap-3 mb-6">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border shrink-0">
                       <Image
@@ -224,6 +231,7 @@ async function ProductDetailsPageContent({ params }: Props) {
                 </div>
               ))}
             </div>
+            )}
           </div>
         </div>
       </div>

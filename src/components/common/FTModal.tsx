@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
+import { lockBodyScroll } from "@/lib/scroll-lock";
 
 /**
  * Shared modal behavior: Escape-to-close + body scroll lock.
@@ -8,19 +9,21 @@ import { useEffect, type ReactNode } from "react";
  * pass `enabled` to only attach the behavior while the modal is open.
  */
 export function useModalDismiss(onClose: () => void, enabled = true) {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+
   useEffect(() => {
     if (!enabled) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
     document.addEventListener("keydown", onKey);
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+    const unlock = lockBodyScroll();
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = previous;
+      unlock();
     };
-  }, [onClose, enabled]);
+  }, [enabled]);
 }
 
 interface FTModalProps {

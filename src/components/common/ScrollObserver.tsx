@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { forceUnlockBodyScroll } from "@/lib/scroll-lock";
 
 /**
  * ScrollObserver:
@@ -12,6 +13,11 @@ import { usePathname } from "next/navigation";
  */
 export default function ScrollObserver() {
   const pathname = usePathname();
+
+  useEffect(() => {
+    // Ensure body scroll is free whenever user transitions routes
+    forceUnlockBodyScroll();
+  }, [pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
@@ -26,8 +32,10 @@ export default function ScrollObserver() {
       (entries, obs) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            entry.target.classList.add("is-revealed");
-            obs.unobserve(entry.target);
+            const target = entry.target as HTMLElement;
+            target.setAttribute("data-revealed", "true");
+            target.classList.add("is-revealed");
+            obs.unobserve(target);
           }
         });
       },
@@ -40,13 +48,15 @@ export default function ScrollObserver() {
 
     const observeElements = () => {
       const targets = document.querySelectorAll(
-        ".scroll-reveal:not(.is-revealed), .scroll-reveal-fade:not(.is-revealed), .scroll-reveal-scale:not(.is-revealed)"
+        ".scroll-reveal:not([data-revealed='true']), .scroll-reveal-fade:not([data-revealed='true']), .scroll-reveal-scale:not([data-revealed='true'])"
       );
       targets.forEach((target) => observer.observe(target));
     };
 
-    // Initial scan
-    observeElements();
+    // Initial scan after frame to avoid race with hydration
+    const rafId = requestAnimationFrame(() => {
+      observeElements();
+    });
 
     // Observe dynamically mounted elements or route transitions
     const mutationObserver = new MutationObserver(() => {
@@ -59,6 +69,7 @@ export default function ScrollObserver() {
     });
 
     return () => {
+      cancelAnimationFrame(rafId);
       observer.disconnect();
       mutationObserver.disconnect();
     };

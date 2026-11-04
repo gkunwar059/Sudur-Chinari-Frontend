@@ -33,6 +33,7 @@ export default function ScrollReveal({
 
   return (
     <Component
+      suppressHydrationWarning
       className={`${animClass} ${delayClass} ${className}`.trim()}
       {...props}
     >

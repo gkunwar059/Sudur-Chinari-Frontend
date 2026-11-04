@@ -603,7 +603,8 @@ button, [role="button"] {
   will-change: opacity, transform;
 }
 
-.scroll-reveal.is-revealed {
+.scroll-reveal.is-revealed,
+.scroll-reveal[data-revealed="true"] {
   opacity: 1;
   transform: translateY(0);
 }
@@ -614,7 +615,8 @@ button, [role="button"] {
   will-change: opacity;
 }
 
-.scroll-reveal-fade.is-revealed {
+.scroll-reveal-fade.is-revealed,
+.scroll-reveal-fade[data-revealed="true"] {
   opacity: 1;
 }
 
@@ -626,7 +628,8 @@ button, [role="button"] {
   will-change: opacity, transform;
 }
 
-.scroll-reveal-scale.is-revealed {
+.scroll-reveal-scale.is-revealed,
+.scroll-reveal-scale[data-revealed="true"] {
   opacity: 1;
   transform: scale(1) translateY(0);
 }

@@ -115,7 +115,7 @@ export default async function VideosPage({ params }: Props) {
           <>
             {/* Shorts */}
             {shorts.length > 0 && (
-              <div className="container-editorial py-10 scroll-reveal">
+              <div suppressHydrationWarning className="container-editorial py-10 scroll-reveal">
                 <FTSectionDivider
                   title="Shorts / Reels"
                   icon={
@@ -159,12 +159,12 @@ export default async function VideosPage({ params }: Props) {
             )}
 
             {/* Regular videos */}
-            <div className="container-editorial my-6 scroll-reveal scroll-delay-100">
+            <div suppressHydrationWarning className="container-editorial my-6 scroll-reveal scroll-delay-100">
               <AdBanner placement="billboard-mid" page="video" />
             </div>
 
             {regular.length > 0 && (
-              <div className="container-editorial pb-14 scroll-reveal">
+              <div suppressHydrationWarning className="container-editorial pb-14 scroll-reveal">
                 <FTSectionDivider
                   title={lang === "en" ? "Full Video Reports" : "विस्तृत भिडियो रिपोर्टहरू"}
                   enTitle={lang === "en" ? undefined : "Full Video Reports"}

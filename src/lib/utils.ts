@@ -124,6 +124,28 @@ export function normalizeImageUrl(url?: string | null): string {
     return `/${trimmed}`;
   }
 
+  // Known media folders stored as relative paths in Django
+  if (
+    trimmed.startsWith('districts/') ||
+    trimmed.startsWith('places/') ||
+    trimmed.startsWith('articles/') ||
+    trimmed.startsWith('products/') ||
+    trimmed.startsWith('hotels/') ||
+    trimmed.startsWith('authors/') ||
+    trimmed.startsWith('banner_ads/') ||
+    trimmed.startsWith('categories/') ||
+    trimmed.startsWith('contributions/') ||
+    trimmed.startsWith('seed/') ||
+    trimmed.startsWith('partners/')
+  ) {
+    return `/media/${trimmed}`;
+  }
+
+  // Ensure leading slash if it's a relative path
+  if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://') && !trimmed.startsWith('/')) {
+    return `/${trimmed}`;
+  }
+
   return trimmed;
 }
 

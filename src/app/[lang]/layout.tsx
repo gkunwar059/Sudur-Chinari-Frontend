@@ -53,7 +53,7 @@ const devanagari = Noto_Sans_Devanagari({
 
 const notoSerif = Noto_Serif_Devanagari({
   subsets: ["devanagari", "latin"],
-  weight: ["400", "600", "700", "800", "900"],
+  weight: ["400", "700"],
   variable: "--font-noto-serif",
   display: "swap",
 });

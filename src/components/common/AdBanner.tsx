@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { Megaphone, Plus, Sparkles, ExternalLink } from "lucide-react";
+import { Megaphone, Plus } from "lucide-react";
 import { newsApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
 import AdUploadModal from "@/components/ads/AdUploadModal";
 import AuthModal from "@/components/auth/AuthModal";
+import { normalizeImageUrl } from "@/lib/utils";
 
 export type AdPlacement =
   | "top-leaderboard"
@@ -134,7 +135,7 @@ export default function AdBanner({
         if (res && res.active && res.data && (res.data.image || res.data.image_url)) {
           const item: AdItem = {
             id: res.data.id,
-            image: res.data.image || res.data.image_url,
+            image: normalizeImageUrl(res.data.image || res.data.image_url),
             alt: res.data.alt_text || res.data.title || "Advertisement",
             href: res.data.target_url || "#",
             advertiser: res.data.advertiser || "",
@@ -184,52 +185,54 @@ export default function AdBanner({
   return (
     <>
       <div className={`w-full my-3 sm:my-4 ${className}`}>
-        {/* Subtle broadsheet ad label bar */}
-        <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground tracking-normal px-1 mb-1">
-          <span className="flex items-center gap-1">
-            <Megaphone size={11} className="text-brand opacity-80" />
-            <span>विज्ञापन • Advertisement</span>
-          </span>
-
-          <button
-            type="button"
-            onClick={handleEmptyClick}
-            className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-brand font-medium transition-colors cursor-pointer group"
-          >
-            <Plus size={11} className="text-brand group-hover:scale-110 transition-transform" />
-            <span>{isNe ? "यहाँ विज्ञापन राख्नुहोस्" : "Advertise Here"}</span>
-          </button>
-        </div>
-
         {/* ── Active Ad Present ── */}
         {image ? (
-          <a
-            href={href}
-            target={href.startsWith("http") ? "_blank" : "_self"}
-            rel="noopener noreferrer"
-            aria-label={alt}
-            onClick={handleAdClick}
-            className="block relative w-full overflow-hidden rounded-none border border-border shadow-2xs hover:shadow-xs transition-all duration-300 group"
-          >
-            <div
-              className={`relative w-full ${config.containerClass} overflow-hidden bg-surface`}
-            >
-              <Image
-                src={image}
-                alt={alt}
-                fill
-                className="object-cover object-center opacity-95 group-hover:opacity-100 transition-opacity duration-300"
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
-              />
+          <>
+            {/* Subtle broadsheet ad label bar */}
+            <div className="flex items-center justify-between text-[10px] font-semibold text-muted-foreground tracking-normal px-1 mb-1">
+              <span className="flex items-center gap-1">
+                <Megaphone size={11} className="text-brand opacity-80" />
+                <span>{isNe ? "विज्ञापन" : "Advertisement"}</span>
+              </span>
+
+              <button
+                type="button"
+                onClick={handleEmptyClick}
+                className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-brand font-medium transition-colors cursor-pointer group"
+              >
+                <Plus size={11} className="text-brand group-hover:scale-110 transition-transform" />
+                <span>{isNe ? "यहाँ विज्ञापन राख्नुहोस्" : "Advertise Here"}</span>
+              </button>
             </div>
-            {activeAd?.advertiser && (
-              <div className="absolute bottom-1 right-1.5 px-1.5 py-0.5 bg-black/70 text-white text-[9px] font-mono tracking-wider opacity-0 group-hover:opacity-90 transition-opacity">
-                {activeAd.advertiser}
+
+            <a
+              href={href}
+              target={href.startsWith("http") ? "_blank" : "_self"}
+              rel="noopener noreferrer"
+              aria-label={alt}
+              onClick={handleAdClick}
+              className="block relative w-full overflow-hidden rounded-none border border-border shadow-2xs hover:shadow-xs transition-all duration-300 group"
+            >
+              <div
+                className={`relative w-full ${config.containerClass} overflow-hidden bg-surface`}
+              >
+                <Image
+                  src={image}
+                  alt={alt}
+                  fill
+                  className="object-cover object-center opacity-95 group-hover:opacity-100 transition-opacity duration-300"
+                  sizes="(max-width: 768px) 100vw, (max-width: 1200px) 90vw, 1200px"
+                />
               </div>
-            )}
-          </a>
+              {activeAd?.advertiser && (
+                <div className="absolute bottom-1 right-1.5 px-1.5 py-0.5 bg-black/70 text-white text-[9px] font-mono tracking-wider opacity-0 group-hover:opacity-90 transition-opacity">
+                  {activeAd.advertiser}
+                </div>
+              )}
+            </a>
+          </>
         ) : (
-          /* ── Empty Ad Slot: Authenticated Click-to-Upload BroadSheet Placeholder ── */
+          /* ── Empty Ad Slot: Button Only ── */
           allowEmptyUpload && (
             <div
               onClick={handleEmptyClick}
@@ -241,47 +244,19 @@ export default function AdBanner({
                   handleEmptyClick();
                 }
               }}
-              className={`relative w-full ${config.containerClass} overflow-hidden rounded-none border-2 border-dashed border-border hover:border-brand bg-surface/60 hover:bg-surface transition-all duration-200 cursor-pointer p-3 sm:p-4 flex flex-col items-center justify-center text-center group shadow-2xs hover:shadow-xs`}
+              className={`relative w-full ${config.containerClass} overflow-hidden rounded-none border border-dashed border-border/80 hover:border-brand/70 bg-surface/40 hover:bg-surface/70 transition-all duration-200 cursor-pointer flex items-center justify-center p-3 sm:p-4 group`}
             >
-              {/* Corner decorative tag */}
-              <div className="absolute top-2 left-2 flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase tracking-wider text-muted-foreground bg-background px-1.5 py-0.5 border border-border">
-                <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-                <span>{isNe ? "खाली स्थान" : "SLOT OPEN"}</span>
-              </div>
-
-              <div className="absolute top-2 right-2 text-[9px] font-mono text-muted-foreground hidden sm:block">
-                {config.dims}
-              </div>
-
-              {/* Main invitation content */}
-              <div className="max-w-xl mx-auto flex flex-col items-center justify-center">
-                <div className="flex items-center gap-1.5 text-brand mb-1">
-                  <Sparkles size={14} className="text-brand animate-pulse" />
-                  <span className="font-sans font-bold text-[11px] sm:text-xs uppercase tracking-wider">
-                    {isNe
-                      ? "विज्ञापन स्थान उपलब्ध छ • ADVERTISE HERE"
-                      : "PRIME EDITORIAL PLACEMENT AVAILABLE"}
-                  </span>
-                </div>
-
-                <p className="font-headline font-semibold text-xs sm:text-sm text-foreground mb-2 line-clamp-1">
-                  {isNe
-                    ? "यस स्थानमा तपाईंको व्यवसाय, संस्था वा उत्पादनको विज्ञापन गर्नुहोस्"
-                    : "Promote your brand, institution or product in this section"}
-                </p>
-
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand text-white text-[11px] font-bold uppercase tracking-wider transition-transform group-hover:scale-105 shadow-xs">
-                  <Plus size={13} strokeWidth={2.5} />
-                  <span>
-                    {user
-                      ? isNe
-                        ? "विज्ञापन अपलोड / अनुरोध गर्नुहोस्"
-                        : "Upload / Request Ad"
-                      : isNe
-                        ? "लगइन गरी विज्ञापन अनुरोध गर्नुहोस्"
-                        : "Login to Place Ad"}
-                  </span>
-                </div>
+              <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-brand text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 group-hover:bg-brand/90 group-hover:scale-105 shadow-xs">
+                <Plus size={14} strokeWidth={2.5} />
+                <span>
+                  {user
+                    ? isNe
+                      ? "विज्ञापन अनुरोध गर्नुहोस्"
+                      : "Upload / Request Ad"
+                    : isNe
+                      ? "यहाँ विज्ञापन राख्नुहोस्"
+                      : "Advertise Here"}
+                </span>
               </div>
             </div>
           )
@@ -303,7 +278,7 @@ export default function AdBanner({
             if (res?.active && res?.data) {
               setActiveAd({
                 id: res.data.id,
-                image: res.data.image || res.data.image_url,
+                image: normalizeImageUrl(res.data.image || res.data.image_url),
                 alt: res.data.alt_text || res.data.title,
                 href: res.data.target_url || "#",
                 advertiser: res.data.advertiser || "",

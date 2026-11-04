@@ -13,6 +13,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { getCurrentNepaliDateString, t } from "@/lib/utils";
 import { District } from "@/types";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 interface DistrictAtlasModalProps {
   isOpen: boolean;
@@ -42,22 +43,25 @@ export default function DistrictAtlasModal({
     "all" | "terai" | "pahad" | "himal"
   >("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Close on Escape key and prevent background scroll
+  // Prevent background scroll safely with global reference-counted lock
+  useBodyScrollLock(isOpen);
+
+  // Close on Escape key
   useEffect(() => {
     if (!isOpen) return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") onCloseRef.current();
     };
 
     window.addEventListener("keydown", handleKeyDown);
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
 
     // Focus search input on desktop without scrolling the window
     if (typeof window !== "undefined" && window.innerWidth >= 768) {
@@ -66,9 +70,8 @@ export default function DistrictAtlasModal({
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = prevOverflow || "";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Reset filters when opened
   useEffect(() => {
