@@ -1,11 +1,11 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { VIDEOS } from "@/data/articles";
 import VideoPlayerView from "@/components/video/VideoPlayerView";
 import { isLocale, ogLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
-import { t } from "@/lib/utils";
+import { t, normalizeImageUrl } from "@/lib/utils";
+import { newsApi } from "@/lib/api";
 
 interface Props {
   params: Promise<{ lang: string; id: string }>;
@@ -14,16 +14,23 @@ interface Props {
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
 
 export async function generateStaticParams() {
-  return VIDEOS.flatMap((v) => [
-    { lang: "en", id: v.id },
-    { lang: "ne", id: v.id },
-  ]);
+  try {
+    const res = await newsApi.getVideosServer().catch(() => null);
+    const videos = res?.results || [];
+    return videos.flatMap((v) => [
+      { lang: "en", id: String(v.id) },
+      { lang: "ne", id: String(v.id) },
+    ]);
+  } catch {
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   if (!isLocale(lang)) return {};
-  const video = VIDEOS.find((v) => v.id === id);
+
+  const video = await newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null);
   if (!video) return {};
 
   const title = lang === "en" ? `${t(video.title, 'en')} — Video` : `${t(video.title, 'ne')} — भिडियो`;
@@ -47,7 +54,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url: `${SITE_URL}${localizedPath(lang as Locale, `/videos/${id}`)}`,
       title,
       description,
-      images: [video.thumbnail],
+      images: [normalizeImageUrl(video.thumbnail)],
     },
   };
 }
@@ -56,18 +63,23 @@ export default async function VideoDetailPage({ params }: Props) {
   const { lang, id } = await params;
   if (!isLocale(lang)) notFound();
 
-  const video = VIDEOS.find((v) => v.id === id);
+  const [video, apiVideosRes] = await Promise.all([
+    newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null),
+    newsApi.getVideosServer(undefined, lang as Locale).catch(() => null),
+  ]);
+
   if (!video) notFound();
 
-  const otherVideos = VIDEOS.filter((v) => v.id !== id);
+  const allVideos = apiVideosRes?.results || [];
+  const otherVideos = allVideos.filter((v) => String(v.id) !== String(id));
 
   return (
     <>
-            <main className="flex-1 mobile-safe-bottom bg-surface/50 py-8">
+      <main className="flex-1 mobile-safe-bottom bg-surface/50 py-8">
         <div className="container-editorial">
           <VideoPlayerView video={video} otherVideos={otherVideos} />
         </div>
       </main>
-                </>
+    </>
   );
 }

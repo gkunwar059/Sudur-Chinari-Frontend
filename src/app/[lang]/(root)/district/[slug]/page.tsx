@@ -1,14 +1,20 @@
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import JsonLd from "@/components/common/JsonLd";
+import PageSkeleton from "@/components/common/PageSkeleton";
 import DistrictContentView from "@/components/district/DistrictContentView";
 import { DISTRICTS, getDistrictBySlug, mergeDistrict } from "@/lib/districts";
-import { getArticlesByDistrict } from "@/data/articles";
 import { isLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
 import { SITE_URL, buildMetadata } from "@/lib/seo";
-import { newsApi } from "@/lib/api";
-import type { ApiLang } from "@/lib/api";
+import {
+  getArticlesCached,
+  getDistrictBySlugCached,
+  getPartnersCached,
+} from "@/lib/cached-data";
+import { newsApi, type ApiLang } from "@/lib/api";
 import type { District } from "@/types";
 import PartnersSection from "@/components/home/PartnersSection";
 
@@ -56,7 +62,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function DistrictPage({ params, searchParams }: Props) {
+export default function DistrictPage({ params, searchParams }: Props) {
+  return (
+    <Suspense fallback={<PageSkeleton variant="detail" />}>
+      <DistrictPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function DistrictPageContent({ params, searchParams }: Props) {
   const { lang, slug } = await params;
   if (!isLocale(lang)) notFound();
 
@@ -79,11 +93,19 @@ export default async function DistrictPage({ params, searchParams }: Props) {
         : fallbackDistrict.slider_images || [];
   }
 
-  const articles = getArticlesByDistrict(slug, 9);
+  const articleData = await getArticlesCached({
+    lang: lang as ApiLang,
+    district: slug,
+    limit: 9,
+  }).catch(() => null);
+  const articles = articleData?.results || [];
+  const totalStories = articleData?.count ?? articles.length;
   const nearbyDistricts = DISTRICTS.filter((d) => d.slug !== slug).slice(0, 4);
 
   // Fetch partners specific to this district
-  const pRes = await newsApi.getPartnersServer({ district: slug }, lang as ApiLang).catch(() => null);
+  const pRes = await newsApi
+    .getPartnersServer({ district: slug }, lang as ApiLang)
+    .catch(() => null);
   const districtPartners = pRes?.results || [];
 
   const districtDisplayName =
@@ -147,13 +169,15 @@ export default async function DistrictPage({ params, searchParams }: Props) {
         <DistrictContentView
           district={district}
           articles={articles}
+          totalStories={totalStories}
+          storiesHref={`/district/${slug}/stories`}
           nearbyDistricts={nearbyDistricts}
           initialTab={initialTab}
           lang={lang}
         />
 
         {districtPartners && districtPartners.length > 0 && (
-          <div className="container-editorial pb-10">
+          <div className="container-editorial pb-10 scroll-reveal">
             <PartnersSection
               partners={districtPartners}
               locale={lang}

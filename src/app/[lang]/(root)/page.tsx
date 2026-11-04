@@ -9,13 +9,16 @@ import AdBanner from "@/components/common/AdBanner";
 import PartnersSection, {
   type PartnerItem,
 } from "@/components/home/PartnersSection";
-import type { Article } from "@/types";
+import type { Article, VideoItem, PhotoStory, HeroSlide } from "@/types";
+import FTEmptyState from "@/components/common/FTEmptyState";
+import { Newspaper } from "lucide-react";
 import { newsApi } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { isLocale, ogLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localizedPath } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/config";
+import { getPartnersCached } from "@/lib/cached-data";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
@@ -51,21 +54,39 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   if (!isLocale(lang)) notFound();
   const dict = await getDictionary(lang as Locale);
 
-  const [apiArticles, apiPartners, apiDistricts]: [
+  const [apiArticles, apiPartners, apiDistricts, apiVideos, apiPhotos, apiHeroSlides]: [
     Article[],
     PartnerItem[],
     any[],
+    VideoItem[],
+    PhotoStory[],
+    HeroSlide[],
   ] = await Promise.all([
     newsApi
       .getArticlesServer({ lang })
       .then((res) => res?.results || [])
       .catch(() => []),
-    newsApi
-      .getPartnersServer({ district: "main" }, lang)
-      .then((res) => res?.results || [])
+    getPartnersCached(undefined, lang)
+      .then((res) =>
+        (res?.results || [])
+          .filter((p) => !p.district)
+          .map((p) => ({ ...p, url: p.url ?? undefined })),
+      )
       .catch(() => []),
     newsApi
       .getDistrictsServer(lang)
+      .then((res) => res?.results || [])
+      .catch(() => []),
+    newsApi
+      .getVideosServer(undefined, lang)
+      .then((res) => res?.results || [])
+      .catch(() => []),
+    newsApi
+      .getPhotoStoriesServer(undefined, lang)
+      .then((res) => res?.results || [])
+      .catch(() => []),
+    newsApi
+      .getHeroSlidesServer({ lang })
       .then((res) => res?.results || [])
       .catch(() => []),
   ]);
@@ -101,13 +122,25 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   if (!ARTICLES || ARTICLES.length === 0) {
     return (
       <div className="min-h-screen flex flex-col bg-background text-foreground w-full">
-        <main className="flex-1 flex items-center justify-center min-h-[50vh]">
-          <div className="text-center p-8">
-            <h2 className="text-2xl font-bold mb-4">No Content Available</h2>
-            <p className="text-muted-foreground">
-              Please add articles from the backend admin panel.
-            </p>
-          </div>
+        <main className="flex-1 flex items-center justify-center min-h-[60vh] container-editorial py-12">
+          <FTEmptyState
+            variant="page"
+            title={
+              lang === "ne"
+                ? "हाल कुनै समाचार वा लेखहरू प्रकाशित भएका छैनन्"
+                : "No Published Articles Available"
+            }
+            description={
+              lang === "ne"
+                ? "हाम्रो सम्पादकीय टोलीले सुदूरपश्चिम तथा राष्ट्रिय राजनीतिका ताजा समाचारहरू तयार गर्दैछ। कृपया केही समयपछि पुन: हेर्नुहोस्।"
+                : "Our editorial desk is curating the latest news and broadsheet dispatches. Please check back shortly."
+            }
+            kicker={lang === "ne" ? "डिजिटल संस्करण" : "DIGITAL EDITION"}
+            icon={<Newspaper size={28} className="text-brand" />}
+            accentColor="var(--color-brand)"
+            actionText={lang === "ne" ? "गृहपृष्ठ ताजा गर्नुहोस्" : "Refresh Editions"}
+            actionHref={`/${lang}`}
+          />
         </main>
       </div>
     );
@@ -129,20 +162,10 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
   ];
 
   // ── 3. Spotlight (Left + Center Widescreen + Right) ──
-  const spotlightCenter =
-    ARTICLES.find((a) => a.id === "art_darchula_utsav") ||
-    ARTICLES[8] ||
-    ARTICLES[0];
-  const spotlightLeft =
-    ARTICLES.find((a) => a.id === "art_kanchanpur_shukla") ||
-    ARTICLES[7] ||
-    ARTICLES[1] ||
-    ARTICLES[0];
-  const spotlightRight =
-    ARTICLES.find((a) => a.id === "art_bajhang_khaptad") ||
-    ARTICLES[6] ||
-    ARTICLES[2] ||
-    ARTICLES[0];
+  const districtArticles = ARTICLES.filter((a) => Boolean(a.district));
+  const spotlightCenter = districtArticles[0] || ARTICLES[8] || ARTICLES[0];
+  const spotlightLeft = districtArticles[1] || ARTICLES[7] || ARTICLES[1] || ARTICLES[0];
+  const spotlightRight = districtArticles[2] || ARTICLES[6] || ARTICLES[2] || ARTICLES[0];
 
   // ── 4. News & Most Read (3 News + Most Read 1-5) ──
   const newsStories = [
@@ -160,7 +183,9 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
 
   // ── 5. Opinion Stories (Warm Tinted Block + Sub Columns) ──
   const opinionArticles = ARTICLES.filter(
-    (a) => a.category.slug === "opinion" || a.author.role.includes("स्तम्भकार"),
+    (a) =>
+      a.category?.slug === "opinion" ||
+      (typeof a.author?.role === "string" && a.author.role.includes("स्तम्भकार")),
   );
   const opinionList =
     opinionArticles.length >= 5
@@ -195,6 +220,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
         <main className="w-full max-w-full overflow-x-hidden min-w-0 flex-1 mobile-safe-bottom container-editorial py-4 sm:py-6">
           {/* ── 1. Hero Lead Section ── */}
           <FTLeadHero
+            heroSlides={apiHeroSlides}
             leadStory={leadStory}
             exclusiveStory={exclusiveStory}
             quickStory={quickStory}
@@ -204,12 +230,20 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           />
 
           {/* ── 2. 9 Districts Explorer (खण्ड ०१) ── */}
-          <DistrictMapCards initialDistricts={apiDistricts} />
-          <AdBanner placement="billboard-mid" />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <DistrictMapCards initialDistricts={apiDistricts} />
+          </div>
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
+            <AdBanner placement="billboard-mid" page="home" />
+          </div>
 
           {/* ── 2.5 Archives & Voices ── */}
-          <FTArchivesAndVoices stories={topStories} />
-          <AdBanner placement="bottom-strip" />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <FTArchivesAndVoices stories={topStories} />
+          </div>
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
+            <AdBanner placement="bottom-strip" page="home" />
+          </div>
 
           {/* ── 5. News & Most Read 1-5 (खण्ड ०४) ── */}
           {/* <FTNewsMostRead
@@ -218,17 +252,29 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           /> */}
 
           {/* ── 6. Opinion Section (खण्ड ०५) ── */}
-          <FTOpinionSection opinions={opinionList} locale={lang as Locale} />
-          <AdBanner placement="billboard-mid" />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <FTOpinionSection opinions={opinionList} locale={lang as Locale} />
+          </div>
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
+            <AdBanner placement="billboard-mid" page="home" />
+          </div>
 
           {/* ── 8. Recent Video Reports (खण्ड ०७) & Photo Stories (खण्ड ०८) ── */}
-          <VideoShorts />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <VideoShorts videos={apiVideos} />
+          </div>
 
-          <PhotoGallerySection />
-          <AdBanner placement="bottom-strip" />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <PhotoGallerySection photoStories={apiPhotos} />
+          </div>
+          <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
+            <AdBanner placement="bottom-strip" page="home" />
+          </div>
 
           {/* ── 9. Institutional Affiliations Network (खण्ड ०९) ── */}
-          <PartnersSection partners={apiPartners} locale={lang} />
+          <div suppressHydrationWarning className="scroll-reveal">
+            <PartnersSection partners={apiPartners} locale={lang} />
+          </div>
         </main>
       </div>
     </>

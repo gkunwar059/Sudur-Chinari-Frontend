@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { X, ArrowRight, Search, MapPin } from "lucide-react";
@@ -12,6 +13,7 @@ import {
 import { useLanguage } from "@/context/LanguageContext";
 import { getCurrentNepaliDateString, t } from "@/lib/utils";
 import { District } from "@/types";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 interface DistrictAtlasModalProps {
   isOpen: boolean;
@@ -35,31 +37,41 @@ export default function DistrictAtlasModal({
 }: DistrictAtlasModalProps) {
   const router = useRouter();
   const { locale, tr } = useLanguage();
+  const [mounted, setMounted] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<
     "all" | "terai" | "pahad" | "himal"
   >("all");
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
-  // Close on Escape key and prevent background scroll
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    if (isOpen) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+    setMounted(true);
+  }, []);
 
-      // Focus search input on desktop
-      if (typeof window !== "undefined" && window.innerWidth >= 768) {
-        setTimeout(() => searchInputRef.current?.focus(), 120);
-      }
+  // Prevent background scroll safely with global reference-counted lock
+  useBodyScrollLock(isOpen);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCloseRef.current();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+
+    // Focus search input on desktop without scrolling the window
+    if (typeof window !== "undefined" && window.innerWidth >= 768) {
+      setTimeout(() => searchInputRef.current?.focus({ preventScroll: true }), 120);
     }
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "unset";
     };
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
   // Reset filters when opened
   useEffect(() => {
@@ -111,9 +123,9 @@ export default function DistrictAtlasModal({
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
-  return (
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -387,6 +399,7 @@ export default function DistrictAtlasModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

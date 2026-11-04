@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
 import { Search, Menu, X, Sun, Moon, User, ChevronDown } from "lucide-react";
@@ -25,39 +26,60 @@ interface NavItem {
   children: Category[];
 }
 
-/** Always-present links; everything else comes from the Category menu API. */
-const FIXED_NAV_ITEMS: NavItem[] = [
+/** Primary navigation links displayed in the header */
+const HEADER_NAV_CONFIG: {
+  key: string;
+  label: BilingualText;
+  href: string;
+  categorySlug?: string;
+}[] = [
   {
     key: "home",
-    label: { ne: "मुख्यपृष्ठ", en: "Home" },
+    label: { ne: "गृहपृष्ठ", en: "Home" },
     href: "/",
-    children: [],
   },
   {
     key: "district",
     label: { ne: "जिल्ला", en: "Districts" },
     href: "/district",
-    children: [],
   },
   {
     key: "products",
     label: { ne: "सुदूर उत्पादन", en: "Local Products" },
     href: "/products",
-    children: [],
   },
   {
     key: "yatayat",
     label: { ne: "सुदूर यातायात", en: "Sudur Yatayat" },
     href: "/yatayat",
-    children: [],
+  },
+  {
+    key: "stay",
+    label: { ne: "होटल तथा बासस्थान", en: "Hotel and Stay" },
+    href: "/stay",
+    categorySlug: "stay",
+  },
+  {
+    key: "news",
+    label: { ne: "समाचार", en: "News" },
+    href: "/news",
+    categorySlug: "news",
   },
 ];
 
-const categoryHref = (cat: any) => {
+const LAYOUT_ROUTES = new Set([
+  "news",
+  "politics",
+  "sports",
+  "tourism",
+  "stay",
+]);
+
+const categoryHref = (cat: Category) => {
   const isTopLevel = !cat.parent && !cat.parent_slug;
   const layout = cat.layout_type === "stayor_hotel" ? "stay" : cat.layout_type;
 
-  if (layout && layout !== "base") {
+  if (layout && LAYOUT_ROUTES.has(layout)) {
     return isTopLevel ? `/${layout}` : `/${layout}/category/${cat.slug}`;
   }
 
@@ -87,19 +109,35 @@ export default function Header() {
   const [expandedMobileKey, setExpandedMobileKey] = useState<string | null>(
     null,
   );
+  const [isScrolled, setIsScrolled] = useState(false);
 
-  const navItems = useMemo<NavItem[]>(
-    () => [
-      ...FIXED_NAV_ITEMS,
-      ...menu.map((cat) => ({
-        key: `cat-${cat.slug}`,
-        label: cat.name,
-        href: categoryHref(cat),
-        children: cat.children ?? [],
-      })),
-    ],
-    [menu],
-  );
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 25);
+    };
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const navItems = useMemo<NavItem[]>(() => {
+    return HEADER_NAV_CONFIG.map((cfg) => {
+      const cat = cfg.categorySlug
+        ? menu.find(
+            (c) =>
+              c.slug === cfg.categorySlug ||
+              c.layout_type === cfg.categorySlug,
+          )
+        : undefined;
+
+      return {
+        key: cfg.key,
+        label: cfg.label,
+        href: cfg.href,
+        children: cat?.children ?? [],
+      };
+    });
+  }, [menu]);
 
   // Sub-menu strip: hovered item wins (desktop); otherwise the active section's children stay visible
   const activeItem = navItems.find((item) =>
@@ -147,15 +185,45 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 bg-background border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
+        "sticky top-0 isolate border-b border-border transition-all duration-300",
+        isScrolled
+          ? "shadow-md bg-background/95 backdrop-blur-sm"
+          : "shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
         menuOpen ? "z-[200]" : "z-50",
       )}
     >
+      {/* ── Shared background for header + menu bar ── */}
+      <div
+        aria-hidden="true"
+        className="absolute inset-0 -z-20 bg-background"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      >
+        <Image
+          src="/images/header_banner.jpg"
+          alt="Sudurpashchim Mountain & River Landscape"
+          fill
+          sizes="100vw"
+          quality={80}
+          priority
+          className="object-cover object-[center_35%] opacity-40 dark:opacity-25"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/95 via-background/70 to-background/95" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand/10 via-transparent to-brand-secondary/10" />
+      </div>
+
       {/* ── Top Bar: Logo & Utility Row ── */}
-      <div className="container-editorial py-3.5">
+      <div
+        className={cn(
+          "container-editorial transition-all duration-300 ease-in-out",
+          isScrolled ? "py-1.5 sm:py-2" : "py-3 sm:py-3.5",
+        )}
+      >
         <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
           {/* Logo with Mountain Emblem */}
-          <Logo />
+          <Logo isScrolled={isScrolled} />
 
           {/* Right controls */}
           <div className="flex items-center gap-1.5 sm:gap-4 text-sm shrink-0">
@@ -215,12 +283,12 @@ export default function Header() {
               </button>
             )}
 
-            {/* Theme Toggle (Mobile & Tablet) */}
+            {/* Theme Toggle */}
             <button
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
-              className="lg:hidden text-foreground hover:text-brand transition-colors p-2 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer rounded-full hover:bg-surface"
+              className="text-foreground hover:text-brand transition-colors p-2 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer rounded-full hover:bg-surface"
             >
               {mounted && theme === "dark" ? (
                 <Moon size={18} className="text-brand" />
@@ -279,83 +347,52 @@ export default function Header() {
         )}
       </div>
 
-      {/* ── Bottom Row: Navigation Bar with Horizontal Swipe on Mobile & Tablet ── */}
-      <div onMouseLeave={() => setHoveredKey(null)}>
-        <div className="border-t border-border bg-surface/90 w-full overflow-hidden">
-          <div className="container-editorial flex items-center justify-between">
-            {/* Main Nav Items - Swipeable on mobile/tablet, full on desktop */}
-            <div className="w-full min-w-0 overflow-x-auto no-scrollbar">
-              <nav
-                className="flex items-center space-x-1 py-1 -ml-3"
-                aria-label="Main"
-              >
-                {navItems.map((item) => {
-                  const isActive = isNavItemActive(item, unprefixedPath);
-                  const hasChildren = item.children.length > 0;
+      {/* ── Bottom Row: Centered Editorial Category Navigation Bar (The Art Newspaper style) ── */}
+      <div
+        onMouseLeave={() => setHoveredKey(null)}
+        className="border-t border-border bg-background/95 backdrop-blur-xs relative z-10"
+      >
+        <div className="container-editorial">
+          <div className="w-full overflow-x-auto no-scrollbar">
+            <nav
+              className={cn(
+                "flex items-center justify-start sm:justify-center flex-nowrap sm:flex-wrap gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 transition-all duration-300 ease-in-out",
+                isScrolled ? "py-1.5 sm:py-2 min-h-[38px]" : "py-2.5 sm:py-3 min-h-[42px]",
+              )}
+              aria-label="Main"
+            >
+              {navItems.map((item) => {
+                const isActive = isNavItemActive(item, unprefixedPath);
+                const hasChildren = item.children.length > 0;
 
-                  return (
-                    <LocalizedLink
-                      key={item.key}
-                      href={item.href}
-                      onMouseEnter={() => setHoveredKey(item.key)}
-                      onFocus={() => setHoveredKey(item.key)}
-                      aria-haspopup={hasChildren ? "true" : undefined}
+                return (
+                  <LocalizedLink
+                    key={item.key}
+                    href={item.href}
+                    onMouseEnter={() => setHoveredKey(item.key)}
+                    onFocus={() => setHoveredKey(item.key)}
+                    aria-haspopup={hasChildren ? "true" : undefined}
+                    className={cn(
+                      "text-[13.5px] sm:text-[14.5px] tracking-normal transition-colors py-1 whitespace-nowrap shrink-0 relative group",
+                      isActive
+                        ? "text-brand font-bold"
+                        : "text-foreground/80 hover:text-brand font-normal sm:font-medium",
+                    )}
+                  >
+                    <span>{t(item.label)}</span>
+                    {/* Thicker broadsheet active / hover border bottom in nav */}
+                    <span
                       className={cn(
-                        "px-3.5 py-2.5 text-sm sm:text-base font-semibold transition-all relative whitespace-nowrap min-h-[42px] flex items-center gap-1.5 shrink-0",
+                        "absolute -bottom-1.5 left-0 right-0 h-[3.5px] bg-brand rounded-none transition-all duration-200",
                         isActive
-                          ? "text-brand font-bold"
-                          : "text-muted-foreground hover:text-brand",
+                          ? "opacity-100 scale-x-100"
+                          : "opacity-0 scale-x-0 group-hover:opacity-60 group-hover:scale-x-100",
                       )}
-                    >
-                      {item.icon && <item.icon size={16} className="shrink-0" />}
-                      {t(item.label)}
-                      {hasChildren && (
-                        <ChevronDown
-                          size={15}
-                          className={cn(
-                            "transition-transform duration-200 opacity-60",
-                            stripItem?.key === item.key &&
-                              "rotate-180 opacity-100",
-                          )}
-                        />
-                      )}
-                      {/* Active Green Underline Bar matching reference image */}
-                      {isActive && (
-                        <span className="absolute bottom-0 left-2 right-2 h-[3px] bg-brand rounded-none" />
-                      )}
-                    </LocalizedLink>
-                  );
-                })}
-              </nav>
-            </div>
-
-            {/* Right: Theme Toggle Switch */}
-            <div className="hidden lg:flex items-center py-1 pl-4 shrink-0 border-l border-border ml-2">
-              <button
-                type="button"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-                aria-label="Toggle theme"
-                className={cn(
-                  "relative inline-flex h-[26px] w-[50px] items-center rounded-full transition-colors cursor-pointer shrink-0 border border-transparent shadow-inner",
-                  theme === "dark" ? "bg-brand" : "bg-gray-300",
-                )}
-              >
-                <span
-                  className={cn(
-                    "inline-flex flex-shrink-0 items-center justify-center h-[20px] w-[20px] transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm",
-                    theme === "dark"
-                      ? "translate-x-[26px]"
-                      : "translate-x-[4px]",
-                  )}
-                >
-                  {mounted && theme === "dark" ? (
-                    <Moon size={12} className="text-brand" />
-                  ) : (
-                    <Sun size={12} className="text-warning" />
-                  )}
-                </span>
-              </button>
-            </div>
+                    />
+                  </LocalizedLink>
+                );
+              })}
+            </nav>
           </div>
         </div>
 
@@ -368,11 +405,11 @@ export default function Header() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.16, ease: "easeOut" }}
-              className="border-t border-border bg-background w-full overflow-hidden"
+              className="border-t border-border/70 bg-background/95 backdrop-blur-md w-full overflow-hidden"
             >
               <div className="container-editorial overflow-x-auto no-scrollbar">
                 <nav
-                  className="flex items-center gap-1 sm:gap-2 py-2 -ml-1.5"
+                  className="flex items-center justify-center gap-2 sm:gap-4 py-2"
                   aria-label={t(stripItem.label)}
                 >
                   {stripItem.children.map((child) => {
@@ -384,21 +421,21 @@ export default function Header() {
                         key={child.slug}
                         href={childHref}
                         className={cn(
-                          "group flex items-center gap-2.5 pl-1.5 pr-3.5 py-1.5 rounded-full shrink-0 whitespace-nowrap transition-colors",
+                          "group flex items-center gap-2 px-3 py-1 rounded-none text-xs sm:text-sm font-medium transition-colors shrink-0 whitespace-nowrap",
                           isChildActive
-                            ? "bg-brand/10 text-brand"
-                            : "text-foreground hover:bg-surface hover:text-brand",
+                            ? "text-brand font-semibold"
+                            : "text-muted-foreground hover:text-brand",
                         )}
                       >
-                        <CategoryThumb
-                          image={child.image}
-                          label={childLabel}
-                          size={34}
-                          className="transition-transform duration-200 group-hover:scale-105"
-                        />
-                        <span className="text-sm font-semibold">
-                          {childLabel}
-                        </span>
+                        {child.image && (
+                          <CategoryThumb
+                            image={child.image}
+                            label={childLabel}
+                            size={24}
+                            className="transition-transform duration-200 group-hover:scale-105"
+                          />
+                        )}
+                        <span>{childLabel}</span>
                       </LocalizedLink>
                     );
                   })}
@@ -479,7 +516,9 @@ export default function Header() {
                                 : "text-foreground hover:bg-surface",
                             )}
                           >
-                            {item.icon && <item.icon size={18} className="shrink-0" />}
+                            {item.icon && (
+                              <item.icon size={18} className="shrink-0" />
+                            )}
                             {t(item.label)}
                           </LocalizedLink>
                           {hasChildren && (

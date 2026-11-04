@@ -25,6 +25,7 @@ export interface DistrictTheme {
 }
 
 export interface DistrictPlace {
+  id?: number | string;
   title: BilingualText;
   description: BilingualText;
   category: 'nature' | 'heritage' | 'spiritual' | 'culture';
@@ -94,6 +95,7 @@ export interface Category {
   layout_type?: 'base' | 'news' | 'sports' | 'stay' | 'tourism' | 'politics' | string;
   icon?: string;
   order?: number;
+  parent_id?: number | null;
   parent_slug?: string | null;
   /** Present on menu / detail responses */
   parent?: Pick<Category, "id" | "slug" | "name" | "image" | "layout_type"> | null;
@@ -137,6 +139,8 @@ export interface Article {
   tags: string[];
   status: ArticleStatus;
   publishedAt: string;
+  createdAt?: string;
+  created_at?: string;
   updatedAt: string;
   featured: boolean;
   breaking: boolean;
@@ -167,13 +171,15 @@ export interface ArticleComment {
 // Video / Shorts
 // -------------------------------------------------------
 export interface VideoItem {
-  id: string;
+  id: string | number;
   title: BilingualText;
   thumbnail: string;
   duration: string;
   views: number;
+  likes?: number;
+  has_liked?: boolean;
   publishedAt: string;
-  district?: string;
+  district?: string | District;
   isShort: boolean;
 }
 
@@ -181,21 +187,22 @@ export interface VideoItem {
 // Photo Story
 // -------------------------------------------------------
 export interface PhotoStory {
-  id: string;
+  id: string | number;
   title: BilingualText;
   description: BilingualText;
   coverImage: string;
   imageCount: number;
   photographer: string;
   publishedAt: string;
-  district?: string;
+  district?: string | District;
+  images?: Array<{ id: number; image: string; caption?: string; order?: number }>;
 }
 
 // -------------------------------------------------------
 // Breaking News
 // -------------------------------------------------------
 export interface BreakingNews {
-  id: string;
+  id: string | number;
   text: BilingualText;
   href: string;
   publishedAt: string;
@@ -273,4 +280,85 @@ export interface Hotel {
   rooms: HotelRoom[];
   gallery: HotelGallery[];
   nearby_places: HotelNearbyPlace[];
+}
+
+// -------------------------------------------------------
+// Partner
+// -------------------------------------------------------
+export interface Partner {
+  id: number | string;
+  name: BilingualText;
+  role?: BilingualText;
+  image?: string | null;
+  url?: string | null;
+  district?: number | string | District | null;
+  district_slug?: string | null;
+  district_name?: string | null;
+}
+
+// -------------------------------------------------------
+// Popup Ad
+// -------------------------------------------------------
+export interface PopupAd {
+  id: number | string;
+  title: BilingualText;
+  image: string;
+  target_url: string;
+  advertiser?: string;
+  duration_seconds: number;
+  is_active: boolean;
+}
+
+// -------------------------------------------------------
+// User Account
+// -------------------------------------------------------
+export interface User {
+  id: number | string;
+  email: string;
+  username: string;
+  phone?: string;
+  first_name?: string;
+  last_name?: string;
+}
+
+// -------------------------------------------------------
+// Homepage Placements
+// -------------------------------------------------------
+export interface HomePagePlacement {
+  id: number | string;
+  section_name: string;
+  articles: Article[];
+}
+
+// -------------------------------------------------------
+// Sitemap Item
+// -------------------------------------------------------
+export interface SitemapItem {
+  type: 'article' | 'district' | 'category' | string;
+  slug: string;
+  updated_at: string;
+  has_ne: boolean;
+}
+
+// -------------------------------------------------------
+// Hero Slide
+// -------------------------------------------------------
+export interface HeroSlide {
+  id: number | string;
+  title: string;
+  subtitle?: string;
+  excerpt?: string;
+  image?: string | null;
+  image_url?: string | null;
+  article?: number | null;
+  article_slug?: string | null;
+  article_title?: string | null;
+  primary_button_text?: string;
+  primary_button_url?: string;
+  secondary_button_text?: string;
+  secondary_button_url?: string;
+  order: number;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }

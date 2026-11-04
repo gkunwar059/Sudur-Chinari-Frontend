@@ -8,13 +8,15 @@ import {
   ChevronRight,
   ArrowRight,
 } from "lucide-react";
-import type { Article } from "@/types";
+import type { Article, HeroSlide } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import FTCategoryBadge from "@/components/common/FTCategoryBadge";
-import { getArticleSlug, cn } from "@/lib/utils";
+import { getArticleSlug, cn, normalizeImageUrl } from "@/lib/utils";
 import UserContributionModal from "@/components/district/UserContributionModal";
+import AdBanner from "@/components/common/AdBanner";
 
 interface FTLeadHeroProps {
+  heroSlides?: HeroSlide[];
   leadStory: Article;
   exclusiveStory: Article;
   quickStory: Article;
@@ -24,6 +26,7 @@ interface FTLeadHeroProps {
 }
 
 export default function FTLeadHero({
+  heroSlides,
   leadStory,
   exclusiveStory,
   quickStory,
@@ -34,7 +37,7 @@ export default function FTLeadHero({
   const { t, locale } = useLanguage();
   const [isContributionModalOpen, setIsContributionModalOpen] = useState(false);
 
-  const provinceFeatures = [
+  const defaultFallbackFeatures = [
     {
       id: "province-1",
       title:
@@ -144,6 +147,86 @@ export default function FTLeadHero({
     },
   ];
 
+  const provinceFeatures =
+    heroSlides && heroSlides.length > 0
+      ? heroSlides.map((slide, index) => {
+          const link = slide.article_slug
+            ? `/${locale}/article/${slide.article_slug}`
+            : slide.primary_button_url || "/district";
+
+          const featuredImage =
+            slide.image || slide.image_url || leadStory.featuredImage;
+
+          const categoryName =
+            slide.subtitle || (locale === "ne" ? "विशेष" : "Featured");
+          const categorySlug = slide.subtitle
+            ? slide.subtitle.toLowerCase().replace(/\s+/g, "-")
+            : "featured";
+
+          const colors = ["var(--brand)", "var(--brand-secondary)", "var(--accent)"];
+          const badgeColor = colors[index % colors.length];
+
+          const buttons: Array<{
+            label: string;
+            href?: string;
+            onClick?: () => void;
+            primary: boolean;
+            icon?: boolean;
+          }> = [
+            {
+              label:
+                slide.primary_button_text ||
+                (locale === "ne" ? "कथा खोज्नुहोस्" : "Find Stories"),
+              href: slide.primary_button_url || link,
+              primary: true,
+              icon: true,
+            },
+          ];
+
+          if (slide.secondary_button_text) {
+            buttons.push({
+              label: slide.secondary_button_text,
+              href: slide.secondary_button_url || undefined,
+              onClick: !slide.secondary_button_url
+                ? () => setIsContributionModalOpen(true)
+                : undefined,
+              primary: false,
+            });
+          }
+
+          const stats =
+            index === 0
+              ? [
+                  {
+                    value: locale === "ne" ? "१०" : "10",
+                    label: locale === "ne" ? "मुख्य विधा" : "Main Categories",
+                  },
+                  {
+                    value: locale === "ne" ? "४५+" : "45+",
+                    label: locale === "ne" ? "साझा कथा" : "Shared Stories",
+                  },
+                  { value: "∞", label: locale === "ne" ? "सम्झनाहरू" : "Memories" },
+                ]
+              : undefined;
+
+          return {
+            id: `hero-slide-${slide.id}`,
+            title: slide.title,
+            excerpt: slide.excerpt || "",
+            featuredImage,
+            link,
+            category: {
+              id: Number(slide.id) || index + 1,
+              name: categoryName,
+              slug: categorySlug,
+              color: badgeColor,
+            },
+            buttons,
+            stats,
+          };
+        })
+      : defaultFallbackFeatures;
+
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
 
@@ -214,7 +297,7 @@ export default function FTLeadHero({
               >
                 <Link href={feature.link} className="absolute inset-0 z-0">
                   <Image
-                    src={feature.featuredImage}
+                    src={normalizeImageUrl(feature.featuredImage)}
                     alt={feature.title}
                     fill
                     className="object-cover"
@@ -355,17 +438,8 @@ export default function FTLeadHero({
         </div>
 
         {/* ── 2. RIGHT COLUMN: Advertisement (3 cols) ── */}
-        <aside className="lg:col-span-3 min-w-0 flex flex-col h-full">
-          <div className="w-full h-[300px] lg:h-full bg-surface/40 border border-dashed border-border flex flex-col items-center justify-center text-muted-foreground p-4">
-            <span className="text-[10px] sm:text-xs uppercase tracking-widest font-bold mb-2">
-              Advertisement
-            </span>
-            <span className="text-sm font-sans text-center">
-              Ad Space
-              <br />
-              (e.g., 300x600)
-            </span>
-          </div>
+        <aside className="lg:col-span-3 min-w-0 flex flex-col h-full justify-center">
+          <AdBanner placement="sidebar" page="home" />
         </aside>
       </div>
       {/* ── Bottom Auto-Scrolling Horizontal Articles ── */}
@@ -385,7 +459,7 @@ export default function FTLeadHero({
               >
                 <div className="relative w-12 h-12 shrink-0 mr-4 overflow-hidden border border-border">
                   <Image
-                    src={story.featuredImage}
+                    src={normalizeImageUrl(story.featuredImage)}
                     alt={t(story.title)}
                     fill
                     sizes="48px"

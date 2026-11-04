@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import LocalizedLink from "@/components/i18n/LocalizedLink";
 import { useRoadblockAd } from "@/hooks/useRoadblockAd";
+import { normalizeImageUrl } from "@/lib/utils";
 
 function RoadblockAdModalContent() {
   const { locale } = useLanguage();
@@ -110,7 +111,7 @@ function RoadblockAdModalContent() {
             title={title}
           >
             <Image
-              src={adData.image}
+              src={normalizeImageUrl(adData.image)}
               alt={title}
               fill
               preload

@@ -1,17 +1,23 @@
 import Image from "next/image";
 import { Building2, ExternalLink } from "lucide-react";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
+import type { BilingualText, Locale } from "@/types";
+import { t, normalizeImageUrl } from "@/lib/utils";
 
 export interface PartnerItem {
   id: string | number;
-  name?: string;
-  role?: string;
+  name?: string | BilingualText;
+  role?: string | BilingualText;
   nameNe?: string;
   nameEn?: string;
+  name_ne?: string;
+  name_en?: string;
   roleNe?: string;
   roleEn?: string;
+  role_ne?: string;
+  role_en?: string;
   image?: string | null;
-  url?: string;
+  url?: string | null;
 }
 
 export interface PartnersSectionProps {
@@ -83,16 +89,28 @@ export default function PartnersSection({
           <div className="animate-partners-marquee flex items-center gap-3 sm:gap-4 py-1">
             {displayList.map((partner, index) => {
               const partnerName =
-                partner.name ||
-                (locale === "ne" ? partner.nameNe : partner.nameEn) ||
+                (typeof partner.name === "object" && partner.name !== null
+                  ? t(partner.name, locale as Locale)
+                  : partner.name) ||
+                (locale === "ne"
+                  ? partner.nameNe || partner.name_ne
+                  : partner.nameEn || partner.name_en) ||
                 partner.nameEn ||
+                partner.name_en ||
                 partner.nameNe ||
+                partner.name_ne ||
                 "";
               const partnerRole =
-                partner.role ||
-                (locale === "ne" ? partner.roleNe : partner.roleEn) ||
-                partner.roleNe ||
+                (typeof partner.role === "object" && partner.role !== null
+                  ? t(partner.role, locale as Locale)
+                  : partner.role) ||
+                (locale === "ne"
+                  ? partner.roleNe || partner.role_ne
+                  : partner.roleEn || partner.role_en) ||
                 partner.roleEn ||
+                partner.role_en ||
+                partner.roleNe ||
+                partner.role_ne ||
                 "";
 
               const isImageIcon =
@@ -108,7 +126,7 @@ export default function PartnersSection({
                   <div className="w-10 h-10 border border-border bg-surface group-hover/card:bg-background group-hover/card:border-brand-secondary flex items-center justify-center shrink-0 transition-colors overflow-hidden p-1 relative">
                     {isImageIcon ? (
                       <Image
-                        src={partner.image!}
+                        src={normalizeImageUrl(partner.image!)}
                         alt={partnerName}
                         width={36}
                         height={36}

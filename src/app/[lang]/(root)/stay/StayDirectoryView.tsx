@@ -90,7 +90,7 @@ export default function StayDirectoryView({
 
       {/* ── Broadsheet Directory Sections Grouped by Geographical Belts ── */}
       {/* District Cards Grid - Modern Horizontal Banners */}
-      <div className="container-editorial py-10 sm:py-12">
+      <div className="container-editorial py-10 sm:py-12 scroll-reveal">
         <FTSectionDivider
           title={locale === "ne" ? "जिल्लागत होटल तथा बासस्थान" : "Hotels & Stay by District"}
           enTitle={locale === "ne" ? "Accommodations by District" : undefined}

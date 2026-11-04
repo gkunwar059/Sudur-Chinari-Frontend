@@ -14,6 +14,8 @@ import FTSectionDivider from "@/components/common/FTSectionDivider";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import PageSkeleton from "@/components/common/PageSkeleton";
 
+import { newsApi } from "@/lib/api";
+
 interface Props {
   params: Promise<{ lang: string; slug: string; productSlug: string }>;
 }
@@ -29,16 +31,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (found) district = found;
   } catch (error) {}
 
+  const apiProduct = await newsApi.getProductBySlugServer(productSlug, locale).catch(() => null);
   const districtName = t(district.name, locale);
-  const productName =
-    productSlug === "ghee" ? (locale === "ne" ? "घ्यू" : "Ghee") : productSlug;
+  const productName = apiProduct
+    ? typeof apiProduct.name === "object" ? t(apiProduct.name, locale) : apiProduct.name
+    : productSlug === "ghee"
+      ? (locale === "ne" ? "घ्यू" : "Ghee")
+      : productSlug;
 
   const title =
     locale === "ne"
       ? `${districtName}को ${productName} — स्थानीय उत्पादन`
       : `${productName} from ${districtName} — Local Produce`;
-  const description =
-    locale === "ne"
+  const description = apiProduct?.description
+    ? (typeof apiProduct.description === "object" ? t(apiProduct.description, locale) : apiProduct.description)
+    : locale === "ne"
       ? `${districtName} जिल्लाको अर्गानिक ${productName} उत्पादन, स्थानीय किसानहरू र सम्पर्क विवरण।`
       : `Organic ${productName} produce from ${districtName} district, local farmers, and contact details.`;
 
@@ -93,14 +100,42 @@ async function ProductDetailsPageContent({ params }: Props) {
   } catch (error) {}
 
   const districtName = t(district.name, locale);
-  const productName =
-    productSlug === "ghee"
+
+  const apiProduct = await newsApi.getProductBySlugServer(productSlug, locale).catch(() => null);
+
+  const productName = apiProduct
+    ? typeof apiProduct.name === "object" ? t(apiProduct.name, locale) : apiProduct.name
+    : productSlug === "ghee"
       ? locale === "ne"
         ? "घ्यू"
         : "Ghee"
       : locale === "ne"
         ? "उत्पादन"
         : "Product";
+
+  const productDescription = apiProduct?.description
+    ? (typeof apiProduct.description === "object" ? t(apiProduct.description, locale) : apiProduct.description)
+    : locale === "ne"
+      ? "स्थानीय गाई/भैंसीको परम्परागत तरिकाले उत्पादन गरिएको शुद्ध र स्वादिष्ट घ्यू।"
+      : "Pure and delicious product traditionally produced by local farmers.";
+
+  const dynamicFarmers = (apiProduct?.producers && apiProduct.producers.length > 0)
+    ? apiProduct.producers.map((p: any) => ({
+        id: `producer-${p.id}`,
+        name: typeof p.name === "object" ? p.name : { ne: p.name, en: p.name_en || p.name },
+        address: typeof p.municipality_address === "object"
+          ? p.municipality_address
+          : { ne: p.municipality_address || `${districtName}`, en: p.municipality_address || `${districtName}` },
+        phone: p.phone || "सम्पर्क उपलब्ध छैन",
+        experience: p.experience_years
+          ? { ne: `${p.experience_years} वर्ष`, en: `${p.experience_years} Years` }
+          : { ne: "अनुभवी", en: "Experienced" },
+        price: apiProduct.estimated_price_range
+          ? { ne: apiProduct.estimated_price_range, en: apiProduct.estimated_price_range }
+          : { ne: "बजार भाउ अनुसार", en: "Market rate" },
+        image: p.avatar || "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop",
+      }))
+    : [];
 
   return (
     <main className="flex-1 mobile-safe-bottom bg-background">
@@ -124,9 +159,7 @@ async function ProductDetailsPageContent({ params }: Props) {
               {productName}
             </h1>
             <p className="text-base text-muted-foreground mb-4 sm:md-6">
-              {locale === "ne"
-                ? "स्थानीय गाई/भैंसीको परम्परागत तरिकाले उत्पादन गरिएको शुद्ध र स्वादिष्ट घ्यू।"
-                : "Pure and delicious product traditionally produced by local farmers."}
+              {productDescription}
             </p>
 
             <FTSectionDivider
@@ -138,12 +171,19 @@ async function ProductDetailsPageContent({ params }: Props) {
               className="!my-6"
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {FARMERS.map((farmer) => (
-                <div
-                  key={farmer.id}
-                  className="editorial-card-bordered border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
-                >
+            {dynamicFarmers.length === 0 ? (
+              <div className="border border-dashed border-border bg-surface/60 p-8 text-center text-sm text-muted-foreground">
+                {locale === "ne"
+                  ? "यस उत्पादनका लागि हाल कुनै किसान वा उत्पादक सूचीकृत छैनन्।"
+                  : "No registered farmers or producers found for this product yet."}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                {dynamicFarmers.map((farmer: any) => (
+                  <div
+                    key={farmer.id}
+                    className="editorial-card-bordered border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
+                  >
                   <div className="flex items-center gap-3 mb-6">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border shrink-0">
                       <Image
@@ -191,6 +231,7 @@ async function ProductDetailsPageContent({ params }: Props) {
                 </div>
               ))}
             </div>
+            )}
           </div>
         </div>
       </div>

@@ -1,16 +1,30 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "@/components/i18n/LocalizedLink";
-import { ChevronRight, Search } from "lucide-react";
+import {
+  ArrowRight,
+  Layers,
+  Leaf,
+  MapPin,
+  Search,
+  SearchX,
+  Sprout,
+  X,
+} from "lucide-react";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { newsApi } from "@/lib/api";
+import type { BilingualText } from "@/types";
+import { getDistrictsCached } from "@/lib/cached-data";
+import { localizedPath } from "@/lib/i18n/paths";
 import { t } from "@/lib/utils";
 import { DISTRICTS as FALLBACK_DISTRICTS } from "@/data/districts";
 import { getDistrictBySlug, mergeDistrict } from "@/lib/districts";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { buildMetadata } from "@/lib/seo";
 import ProductContributionModal from "@/components/products/ProductContributionModal";
+import ProductImage from "@/components/products/ProductImage";
+import PageSkeleton from "@/components/common/PageSkeleton";
+import { newsApi } from "@/lib/api";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -102,8 +116,7 @@ const PRODUCTS = [
       ne: "परम्परागत तरिकाले बनाएको छुर्पी",
       en: "Traditionally made hard cheese",
     },
-    image:
-      "https://images.unsplash.com/photo-1620603706059-4d6a63200dc8?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "butter",
@@ -122,8 +135,7 @@ const PRODUCTS = [
     categoryId: "dairy",
     farmerCount: 34,
     desc: { ne: "बाक्लो परम्परागत दही", en: "Thick traditional yogurt" },
-    image:
-      "https://images.unsplash.com/photo-1571212515416-fec0eb9941a3?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "paneer",
@@ -132,8 +144,7 @@ const PRODUCTS = [
     categoryId: "dairy",
     farmerCount: 18,
     desc: { ne: "ताजा पनिर", en: "Fresh cottage cheese" },
-    image:
-      "https://images.unsplash.com/photo-1631452180519-c014fe946bc0?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "mohi",
@@ -142,8 +153,7 @@ const PRODUCTS = [
     categoryId: "dairy",
     farmerCount: 28,
     desc: { ne: "परम्परागत मोही", en: "Traditional buttermilk" },
-    image:
-      "https://images.unsplash.com/photo-1625937712144-ec859eb56811?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "cheese",
@@ -167,8 +177,7 @@ const PRODUCTS = [
       ne: "उच्च पहाडी भेगमा फलेको कोदो",
       en: "High altitude grown millet",
     },
-    image:
-      "https://images.unsplash.com/photo-1582845876007-88544a49ed5d?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "corn",
@@ -190,8 +199,7 @@ const PRODUCTS = [
     categoryId: "grains",
     farmerCount: 89,
     desc: { ne: "बास्नादार स्थानीय चामल", en: "Aromatic local rice" },
-    image:
-      "https://images.unsplash.com/photo-1586201375761-83865001e8ac?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "wheat",
@@ -210,8 +218,7 @@ const PRODUCTS = [
     categoryId: "grains",
     farmerCount: 41,
     desc: { ne: "पौष्टिक फापर", en: "Nutritious buckwheat" },
-    image:
-      "https://images.unsplash.com/photo-1621245892523-a5c7beff77b4?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "barley",
@@ -220,8 +227,7 @@ const PRODUCTS = [
     categoryId: "grains",
     farmerCount: 25,
     desc: { ne: "हिमाली जौ", en: "Mountain grown barley" },
-    image:
-      "https://images.unsplash.com/photo-1542010589005-d1eabd394997?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "beans",
@@ -240,8 +246,7 @@ const PRODUCTS = [
     categoryId: "grains",
     farmerCount: 48,
     desc: { ne: "अग्र्यानिक भटमास", en: "Organic soybean" },
-    image:
-      "https://images.unsplash.com/photo-1599818819266-03704efc73df?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
 
   // Fruits
@@ -272,8 +277,7 @@ const PRODUCTS = [
     categoryId: "fruits",
     farmerCount: 54,
     desc: { ne: "ताजा स्थानीय कागती", en: "Fresh local lemons" },
-    image:
-      "https://images.unsplash.com/photo-1590502593747-422e17eb79f4?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "pear",
@@ -282,8 +286,7 @@ const PRODUCTS = [
     categoryId: "fruits",
     farmerCount: 37,
     desc: { ne: "रसिलो स्थानीय नासपाती", en: "Juicy local pears" },
-    image:
-      "https://images.unsplash.com/photo-1614707663200-a2468307dbab?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "peach",
@@ -312,8 +315,7 @@ const PRODUCTS = [
     categoryId: "fruits",
     farmerCount: 15,
     desc: { ne: "पहाडी ओखर", en: "Mountain walnuts" },
-    image:
-      "https://images.unsplash.com/photo-1597463098670-658b5e6792dc?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
 
   // Spices
@@ -324,8 +326,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 8,
     desc: { ne: "प्राकृतिक र शुद्ध भिर मह", en: "Natural cliff honey" },
-    image:
-      "https://images.unsplash.com/photo-1587049352847-4d4b12736173?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "ginger",
@@ -334,8 +335,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 67,
     desc: { ne: "अग्र्यानिक ताजा अदुवा", en: "Organic fresh ginger" },
-    image:
-      "https://images.unsplash.com/photo-1596472714264-577bf6957723?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "turmeric",
@@ -344,8 +344,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 82,
     desc: { ne: "शुद्ध स्थानीय बेसार", en: "Pure local turmeric" },
-    image:
-      "https://images.unsplash.com/photo-1615486171448-4fb62c668ba0?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "garlic",
@@ -354,8 +353,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 59,
     desc: { ne: "स्थानीय लसुन", en: "Strong local garlic" },
-    image:
-      "https://images.unsplash.com/photo-1588696680456-11f8e1378f8d?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "chili",
@@ -364,8 +362,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 43,
     desc: { ne: "पिरो हिमाली खुर्सानी", en: "Spicy mountain chili" },
-    image:
-      "https://images.unsplash.com/photo-1574345431698-f2b1d6837eb5?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "cardamom",
@@ -374,8 +371,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 26,
     desc: { ne: "उच्च स्तरको अलैंची", en: "Premium black cardamom" },
-    image:
-      "https://images.unsplash.com/photo-1604085444697-7e9b04877dc1?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "timur",
@@ -384,8 +380,7 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 14,
     desc: { ne: "बास्नादार हिमाली टिमुर", en: "Aromatic mountain pepper" },
-    image:
-      "https://images.unsplash.com/photo-1596706439247-5a18a66fbc4b?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
   {
     slug: "mustard",
@@ -394,55 +389,142 @@ const PRODUCTS = [
     categoryId: "spices",
     farmerCount: 31,
     desc: { ne: "स्थानीय तोरी", en: "Local mustard seeds" },
-    image:
-      "https://images.unsplash.com/photo-1581076939768-4a7b539c941e?q=80&w=600&auto=format&fit=crop",
+    image: "",
   },
 ];
 
-export default async function DistrictProductsPage({
-  params,
-  searchParams,
-}: Props) {
+export default function DistrictProductsPage({ params, searchParams }: Props) {
+  return (
+    <Suspense fallback={<PageSkeleton variant="grid" />}>
+      <DistrictProductsPageContent
+        params={params}
+        searchParams={searchParams}
+      />
+    </Suspense>
+  );
+}
+
+async function DistrictProductsPageContent({ params, searchParams }: Props) {
   const { lang, slug } = await params;
   const resolvedSearchParams = await searchParams;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
-  const currentCategory =
+
+  const requestedCategory =
     typeof resolvedSearchParams?.category === "string"
       ? resolvedSearchParams.category
       : "all";
+  const currentCategory = CATEGORIES.some(
+    (category) => category.id === requestedCategory,
+  )
+    ? requestedCategory
+    : "all";
 
-  const searchQuery =
+  const rawSearchQuery =
     typeof resolvedSearchParams?.q === "string"
-      ? resolvedSearchParams.q.toLowerCase()
+      ? resolvedSearchParams.q.trim()
       : "";
+  const searchQuery = rawSearchQuery.toLowerCase();
+  // Fetch live products from backend for this district
+  let allProducts: any[] = [];
+  try {
+    const apiProductsResponse = await newsApi
+      .getProductsServer({ district__slug: slug }, locale)
+      .catch(() => null);
+    if (apiProductsResponse?.results && apiProductsResponse.results.length > 0) {
+      allProducts = apiProductsResponse.results.map((item: any) => ({
+        slug: item.slug,
+        name:
+          typeof item.name === "object"
+            ? item.name
+            : { ne: item.name, en: item.name_en || item.name },
+        category:
+          typeof item.category_name === "object"
+            ? item.category_name
+            : {
+                ne: item.category_name || "अन्य",
+                en: item.category_slug || "Other",
+              },
+        categoryId: item.category_slug || "dairy",
+        farmerCount: item.producer_count ?? 1,
+        desc:
+          typeof item.description === "object"
+            ? item.description
+            : {
+                ne: item.description || "",
+                en: item.description_en || item.description || "",
+              },
+        image: item.image || "",
+      }));
+    }
+  } catch (e) {
+    allProducts = [];
+  }
+
+  const categoryCounts = allProducts.reduce<Record<string, number>>(
+    (counts, product) => {
+      counts[product.categoryId] = (counts[product.categoryId] ?? 0) + 1;
+      return counts;
+    },
+    {},
+  );
 
   let filteredProducts =
     currentCategory === "all"
-      ? PRODUCTS
-      : PRODUCTS.filter((p) => p.categoryId === currentCategory);
+      ? allProducts
+      : allProducts.filter((product) => product.categoryId === currentCategory);
 
   if (searchQuery) {
     filteredProducts = filteredProducts.filter(
-      (p) =>
-        p.name.en.toLowerCase().includes(searchQuery) ||
-        p.name.ne.toLowerCase().includes(searchQuery) ||
-        p.desc.en.toLowerCase().includes(searchQuery) ||
-        p.desc.ne.toLowerCase().includes(searchQuery),
+      (product) =>
+        product.name.en?.toLowerCase().includes(searchQuery) ||
+        product.name.ne?.toLowerCase().includes(searchQuery) ||
+        product.desc.en?.toLowerCase().includes(searchQuery) ||
+        product.desc.ne?.toLowerCase().includes(searchQuery),
     );
   }
 
   let district: any = { name: { ne: "अछाम", en: "Achham" }, slug: slug };
   try {
-    const apiDistricts = await newsApi.getDistrictsServer(locale);
-    const found = apiDistricts?.results?.find((d: any) => d.slug === slug);
+    const apiDistricts = await getDistrictsCached(locale);
+    const found = apiDistricts?.results?.find((item) => item.slug === slug);
     if (found) district = found;
   } catch (error) {}
 
   const districtName = t(district.name, locale);
+  const activeCategory =
+    CATEGORIES.find((category) => category.id === currentCategory) ??
+    CATEGORIES[0];
+  const activeCategoryLabel = t(activeCategory.label, locale);
+  const directoryPath = `/products/district/${slug}`;
+
+  const buildHref = (categoryId: string) => {
+    const params = new URLSearchParams();
+    if (categoryId !== "all") params.set("category", categoryId);
+    if (rawSearchQuery) params.set("q", rawSearchQuery);
+    const query = params.toString();
+    return query ? `${directoryPath}?${query}` : directoryPath;
+  };
+
+  const searchAction = `${localizedPath(locale, directoryPath)}${
+    currentCategory !== "all" ? `?category=${currentCategory}` : ""
+  }`;
+
+  const resultsHeading = rawSearchQuery
+    ? locale === "ne"
+      ? `“${rawSearchQuery}” का नतिजा`
+      : `Results for “${rawSearchQuery}”`
+    : currentCategory === "all"
+      ? locale === "ne"
+        ? "सबै स्थानीय उत्पादनहरू"
+        : "All local products"
+      : activeCategoryLabel;
+
+  const emptyStateHref = rawSearchQuery
+    ? buildHref(currentCategory)
+    : buildHref("all");
 
   return (
     <main className="flex-1 mobile-safe-bottom bg-background">
-      {/* Breadcrumb */}
       <FTBreadcrumb
         locale={locale}
         items={[
@@ -454,187 +536,336 @@ export default async function DistrictProductsPage({
         ]}
       />
 
-      {/* Editorial Header & Categories */}
-      <div className="border-b border-border relative overflow-hidden">
-        <div className="container-editorial pt-4 pb-6 sm:pt-6 sm:pb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="max-w-2xl">
-              <div className="flex items-center gap-2 text-xs font-mono font-bold text-brand-secondary mb-2 uppercase tracking-wider">
-                {locale === "ne"
-                  ? "कृषि तथा स्थानीय उत्पादन"
-                  : "Agriculture & Local Products"}
+      <section className="relative overflow-hidden border-b border-border bg-surface/60">
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -right-24 -top-28 h-80 w-80 rounded-full bg-brand/10 blur-3xl"
+        />
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-brand-secondary/5 blur-3xl"
+        />
+
+        <div className="container-editorial relative py-8 sm:py-10 lg:py-12">
+          <div className="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-[minmax(0,1fr)_340px] lg:gap-12">
+            <div className="flex flex-col justify-center">
+              <div className="flex items-center gap-2 text-[11px] font-mono font-bold uppercase tracking-[0.18em] text-brand">
+                <Leaf size={14} aria-hidden="true" />
+                <span>
+                  {locale === "ne"
+                    ? "कृषि तथा स्थानीय उत्पादन"
+                    : "Agriculture & Local Products"}
+                </span>
               </div>
-              <h1 className="text-4xl sm:text-5xl font-black font-headline text-foreground tracking-tight leading-tight">
-                {districtName} {locale === "ne" ? "उत्पादनहरू" : "Products"}
+
+              <h1 className="mt-4 text-4xl font-black leading-[1.08] tracking-tight text-foreground sm:text-5xl lg:text-6xl font-headline">
+                {locale === "ne" ? `${districtName}का ` : `${districtName} `}
+                <span className="text-brand">
+                  {locale === "ne" ? "उत्पादनहरू" : "Products"}
+                </span>
               </h1>
-              <p className="text-base text-muted-foreground font-sans mt-2 leading-relaxed">
+
+              <p className="mt-4 max-w-2xl text-sm font-sans leading-relaxed text-muted-foreground sm:text-base">
                 {locale === "ne"
                   ? `${districtName} जिल्लाका किसान र उत्पादकहरूद्वारा उत्पादित अर्गानिक तथा स्थानीय उत्पादनहरूको डिजिटल सूची।`
                   : `A digital directory of organic and local products cultivated by farmers and producers in ${districtName} district.`}
               </p>
 
-              {/* Search Field */}
-              <div className="mt-8">
-                <form
-                  method="GET"
-                  action={`/products/district/${slug}`}
-                  className="relative w-full max-w-md"
-                >
-                  {currentCategory !== "all" && (
-                    <input
-                      type="hidden"
-                      name="category"
-                      value={currentCategory}
-                    />
-                  )}
+              <form
+                method="GET"
+                action={searchAction}
+                className="mt-7 max-w-xl"
+              >
+                {currentCategory !== "all" && (
+                  <input
+                    type="hidden"
+                    name="category"
+                    value={currentCategory}
+                  />
+                )}
+                <div className="flex h-12 overflow-hidden border border-border bg-background shadow-sm transition-all focus-within:border-brand focus-within:ring-2 focus-within:ring-brand/15">
                   <Search
-                    className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
                     size={18}
+                    aria-hidden="true"
+                    className="ml-4 shrink-0 self-center text-muted-foreground"
                   />
                   <input
                     type="text"
                     name="q"
-                    defaultValue={
-                      typeof resolvedSearchParams?.q === "string"
-                        ? resolvedSearchParams.q
-                        : ""
-                    }
+                    defaultValue={rawSearchQuery}
                     placeholder={
                       locale === "ne"
                         ? "उत्पादन खोज्नुहोस्..."
                         : "Search products..."
                     }
-                    className="w-full bg-surface border border-border pl-11 pr-4 py-3 text-base font-sans focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand rounded-none shadow-sm text-foreground placeholder:text-muted-foreground/60"
+                    className="min-w-0 flex-1 bg-transparent px-3 text-sm font-medium text-foreground outline-none placeholder:text-muted-foreground/70"
                   />
+                  {rawSearchQuery && (
+                    <Link
+                      href={buildHref(currentCategory)}
+                      aria-label={
+                        locale === "ne" ? "खोजी हटाउनुहोस्" : "Clear search"
+                      }
+                      className="flex shrink-0 items-center px-2 text-muted-foreground transition-colors hover:text-foreground"
+                    >
+                      <X size={16} />
+                    </Link>
+                  )}
                   <button
                     type="submit"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-surface hover:bg-surface-hover text-foreground px-3 py-1.5 text-xs font-bold border border-border transition-colors"
+                    className="m-1 inline-flex shrink-0 items-center justify-center gap-2 bg-brand px-4 text-sm font-bold text-white transition-colors hover:bg-brand-dark"
                   >
-                    {locale === "ne" ? "खोज्नुहोस्" : "Search"}
+                    <Search
+                      size={14}
+                      className="sm:hidden"
+                      aria-hidden="true"
+                    />
+                    <span className="hidden sm:inline">
+                      {locale === "ne" ? "खोज्नुहोस्" : "Search"}
+                    </span>
                   </button>
-                </form>
-              </div>
+                </div>
+              </form>
             </div>
 
-            {/* Right Side: Stats & Ad */}
-            <div className="flex flex-col sm:flex-row lg:flex-col gap-6 shrink-0 w-full lg:w-auto lg:self-end">
-              {/* Advertisement Placeholder */}
-              <div className="flex items-center justify-center w-full sm:w-1/2 lg:w-[320px] min-h-[100px] bg-surface border border-dashed border-border select-none">
-                <span className="text-[10px] text-muted-foreground font-sans tracking-widest uppercase font-bold">
+            <aside className="flex flex-col gap-4">
+              <div className="flex flex-1 flex-col border border-border border-t-4 border-t-brand bg-background p-5 shadow-sm sm:p-6">
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                    {locale === "ne" ? "जिल्ला प्रोफाइल" : "District snapshot"}
+                  </span>
+                  <MapPin size={16} className="text-brand" aria-hidden="true" />
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="block text-3xl font-black leading-none text-foreground">
+                      {PRODUCTS.length}
+                    </span>
+                    <span className="mt-2 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {locale === "ne" ? "स्थानीय उत्पादन" : "Local products"}
+                    </span>
+                  </div>
+                  <div className="border-l border-border pl-4">
+                    <span className="block text-3xl font-black leading-none text-foreground">
+                      {CATEGORIES.length - 1}
+                    </span>
+                    <span className="mt-2 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                      {locale === "ne" ? "विधाहरू" : "Categories"}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-5 border-t border-border pt-4">
+                  <ProductContributionModal
+                    defaultDistrict={district.slug}
+                    buttonClassName="flex w-full items-center justify-center gap-2 border border-brand bg-transparent px-4 py-2.5 text-sm font-bold text-brand transition-all hover:bg-brand hover:text-white cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="flex min-h-[88px] items-center justify-center border border-dashed border-border bg-background/70 px-4">
+                <span className="text-[10px] font-sans uppercase tracking-[0.24em] text-muted-foreground">
                   {locale === "ne" ? "विज्ञापन" : "Advertisement"}
                 </span>
               </div>
-
-              {/* Stats Box */}
-              <div className="flex flex-col w-full sm:w-1/2 lg:w-auto bg-surface border border-border border-t-4 border-t-brand shadow-sm shrink-0">
-                <div className="flex items-center gap-5 p-4 sm:px-6 sm:py-5 justify-center w-full">
-                  <div className="flex flex-col items-center text-center">
-                    <span className="text-3xl font-black text-foreground leading-snug">
-                      {slug.length * 15 + 120}+
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">
-                      {locale === "ne" ? "स्थानीय किसान" : "Local Farmers"}
-                    </span>
-                  </div>
-                  <div className="w-px h-10 bg-border"></div>
-                  <div className="flex flex-col items-center text-center">
-                    <span className="text-3xl font-black text-foreground leading-snug">
-                      {slug.length * 3 + 15}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider mt-0.5">
-                      {locale === "ne" ? "मुख्य उत्पादन" : "Core Products"}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="px-4 pb-4 sm:px-6 sm:pb-5">
-                  <ProductContributionModal buttonClassName="w-full bg-transparent border border-brand text-brand font-bold py-2.5 px-4 text-sm hover:bg-brand hover:text-white transition-all flex items-center justify-center gap-2" />
-                </div>
-              </div>
-            </div>
+            </aside>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Filter Categories & Search */}
-      <div className="bg-surface border-b border-border py-2 sm:py-3">
-        <div className="container-editorial flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="overflow-x-auto no-scrollbar flex-1">
-            <div className="flex gap-4">
-              {CATEGORIES.map((cat, i) => {
-                const isActive = currentCategory === cat.id;
+      <section className="border-b border-border bg-background">
+        <div className="container-editorial py-3.5">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 py-0.5">
+              {CATEGORIES.map((category) => {
+                const isActive = currentCategory === category.id;
+                const count =
+                  category.id === "all"
+                    ? allProducts.length
+                    : (categoryCounts[category.id] ?? 0);
+
                 return (
                   <Link
-                    key={cat.id}
-                    href={`/products/district/${slug}?category=${cat.id}`}
-                    className={`flex flex-col items-center min-w-[80px] p-2 rounded-md transition-colors ${
+                    key={category.id}
+                    href={buildHref(category.id)}
+                    aria-current={isActive ? "page" : undefined}
+                    className={`inline-flex shrink-0 items-center gap-2 border px-3.5 py-2 text-sm font-bold transition-colors ${
                       isActive
-                        ? "bg-brand/10 text-brand font-bold"
-                        : "text-muted-foreground hover:bg-surface hover:text-brand"
+                        ? "border-brand bg-brand text-white"
+                        : "border-border bg-background text-muted-foreground hover:border-brand/40 hover:bg-surface hover:text-foreground"
                     }`}
                   >
-                    <span className="text-2xl mb-1">{cat.icon}</span>
-                    <span className="text-xs">{t(cat.label, locale)}</span>
+                    <span aria-hidden="true" className="text-base">
+                      {category.icon}
+                    </span>
+                    <span>{t(category.label, locale)}</span>
+                    <span
+                      className={`min-w-5 px-1.5 py-0.5 text-[10px] font-mono font-bold ${
+                        isActive
+                          ? "bg-white/20 text-white"
+                          : "bg-surface text-muted-foreground"
+                      }`}
+                    >
+                      {count}
+                    </span>
                   </Link>
                 );
               })}
             </div>
+
+            <p className="shrink-0 text-xs text-muted-foreground font-sans sm:text-right">
+              <span className="font-mono font-bold text-foreground">
+                {filteredProducts.length}
+              </span>{" "}
+              {locale === "ne"
+                ? "उत्पादन भेटियो"
+                : filteredProducts.length === 1
+                  ? "product found"
+                  : "products found"}
+            </p>
           </div>
         </div>
-      </div>
+      </section>
 
-      {/* Products Grid */}
-      <div className="container-editorial py-8">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-          {filteredProducts.map((product) => (
+      <section className="container-editorial py-8 sm:py-10">
+        <div className="mb-6 flex flex-col gap-2 border-b border-border pb-4 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-brand">
+              Directory
+            </span>
+            <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline">
+              {resultsHeading}
+            </h2>
+          </div>
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground font-sans">
+            <Layers size={13} aria-hidden="true" />
+            {locale === "ne"
+              ? "कृषि तथा स्थानीय उत्पादन सूची"
+              : "Agriculture & local produce directory"}
+          </p>
+        </div>
+
+        {filteredProducts.length === 0 ? (
+          <div className="border border-dashed border-border bg-surface/60 px-6 py-20 text-center">
+            <SearchX
+              size={32}
+              className="mx-auto mb-4 text-muted-foreground"
+              aria-hidden="true"
+            />
+            <p className="text-base text-muted-foreground font-sans">
+              {rawSearchQuery
+                ? locale === "ne"
+                  ? `“${rawSearchQuery}” सँग मिल्ने उत्पादन भेटिएन।`
+                  : `No products match “${rawSearchQuery}”.`
+                : locale === "ne"
+                  ? "यो विधामा उत्पादन भेटिएन।"
+                  : "No products found in this category."}
+            </p>
             <Link
-              key={product.slug}
-              href={`/products/district/${slug}/${product.slug}`}
-              className="editorial-card-bordered rounded-none overflow-hidden group flex flex-col h-full border border-border border-t-4 border-t-brand bg-card"
+              href={emptyStateHref}
+              className="mt-5 inline-flex items-center gap-2 border border-border bg-background px-4 py-2 text-sm font-bold text-foreground transition-colors hover:border-brand/40 hover:bg-surface hover:text-brand"
             >
-              <div className="relative h-48 overflow-hidden bg-surface border-b border-border">
-                <Image
-                  src={product.image}
-                  alt={t(product.name, locale)}
-                  fill
-                  className="object-cover transition-transform duration-500 group-hover:scale-105"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                />
-                <div className="absolute top-3 left-3 bg-surface/90 backdrop-blur-sm px-2.5 py-1 text-[10px] font-bold text-brand uppercase tracking-wider border border-border">
-                  {t(product.category, locale)}
-                </div>
-              </div>
-              <div className="p-4 sm:p-5 flex flex-col flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-bold font-headline text-xl text-foreground group-hover:text-brand transition-colors">
-                    {t(product.name, locale)}
-                  </h3>
-                  <div className="flex items-center gap-1.5 bg-surface px-2 py-1 border border-border">
-                    <span className="text-xs font-bold text-brand-secondary">
-                      {product.farmerCount}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground font-medium uppercase">
-                      {locale === "ne" ? "किसानहरू" : "Farmers"}
+              {rawSearchQuery
+                ? locale === "ne"
+                  ? "खोजी हटाउनुहोस्"
+                  : "Clear search"
+                : locale === "ne"
+                  ? "सबै उत्पादन हेर्नुहोस्"
+                  : "View all products"}
+              <ArrowRight size={14} aria-hidden="true" />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filteredProducts.map((product) => {
+              const productName = t(product.name, locale);
+              const categoryLabel = t(product.category, locale);
+
+              return (
+                <Link
+                  key={product.slug}
+                  href={`/products/district/${slug}/${product.slug}`}
+                  className="group flex h-full flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-brand/40 hover:shadow-[0_14px_34px_rgba(5,150,91,0.10)]"
+                >
+                  <div className="relative aspect-[4/3] overflow-hidden border-b border-border bg-surface">
+                    <ProductImage
+                      src={product.image}
+                      alt={productName}
+                      categoryId={product.categoryId}
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                    />
+                    <span className="absolute left-3 top-3 border border-border bg-background/95 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] text-brand backdrop-blur-sm">
+                      {categoryLabel}
                     </span>
                   </div>
-                </div>
-                <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
-                  {t(product.desc, locale)}
-                </p>
-                <div className="mt-4 pt-3 border-t border-dotted border-border text-xs font-bold text-brand flex items-center justify-between">
-                  <span>
-                    {locale === "ne" ? "विवरण हेर्नुहोस्" : "View Details"}
-                  </span>
-                  <ChevronRight
-                    size={14}
-                    className="group-hover:translate-x-1 transition-transform"
-                  />
-                </div>
-              </div>
+
+                  <div className="flex flex-1 flex-col p-4 sm:p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-headline text-xl font-bold leading-snug text-foreground transition-colors group-hover:text-brand">
+                        {productName}
+                      </h3>
+                      <span className="inline-flex shrink-0 items-center gap-1 border border-border bg-surface px-2 py-1 text-[10px] font-bold text-muted-foreground">
+                        <Sprout
+                          size={11}
+                          className="text-brand"
+                          aria-hidden="true"
+                        />
+                        {product.farmerCount}
+                      </span>
+                    </div>
+
+                    <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                      {t(product.desc, locale)}
+                    </p>
+
+                    <div className="mt-auto flex items-center justify-between border-t border-dotted border-border pt-3 text-xs font-bold text-brand">
+                      <span>
+                        {locale === "ne" ? "विवरण हेर्नुहोस्" : "View details"}
+                      </span>
+                      <ArrowRight
+                        size={14}
+                        aria-hidden="true"
+                        className="transition-transform duration-200 group-hover:translate-x-1"
+                      />
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        )}
+      </section>
+
+      <section className="border-t border-border bg-surface/70">
+        <div className="container-editorial py-9 sm:py-11">
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-brand">
+                {locale === "ne" ? "प्रदेशभर" : "Across the province"}
+              </span>
+              <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl font-headline">
+                {locale === "ne"
+                  ? "थप स्थानीय उत्पादनहरू पत्ता लगाउनुहोस्"
+                  : "Explore more local products"}
+              </h2>
+              <p className="mt-2 max-w-xl text-sm leading-relaxed text-muted-foreground font-sans">
+                {locale === "ne"
+                  ? "सुदूरपश्चिमका अन्य जिल्लाका किसान, उत्पादक र स्थानीय उत्पादनहरूको सूची हेर्नुहोस्।"
+                  : "Browse the district directories to discover farmers, producers, and local products across Sudurpashchim."}
+              </p>
+            </div>
+
+            <Link
+              href="/products"
+              className="inline-flex shrink-0 items-center justify-center gap-2 border border-brand bg-transparent px-5 py-3 text-sm font-bold text-brand transition-colors hover:bg-brand hover:text-white"
+            >
+              <span>{locale === "ne" ? "सबै जिल्ला" : "All districts"}</span>
+              <ArrowRight size={15} aria-hidden="true" />
             </Link>
-          ))}
+          </div>
         </div>
-      </div>
+      </section>
     </main>
   );
 }

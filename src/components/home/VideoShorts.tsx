@@ -17,23 +17,26 @@ import {
   ExternalLink,
   ArrowRight,
 } from "lucide-react";
-import { VIDEOS } from "@/data/articles";
+import FTEmptyState from "@/components/common/FTEmptyState";
 import type { VideoItem } from "@/types";
-import { formatViews } from "@/lib/utils";
+import { formatViews, normalizeImageUrl } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import RelativeTime from "@/components/common/RelativeTime";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 interface VideoShortsProps {
   filterDistrict?: string;
   title?: { ne: string; en: string };
   hideDivider?: boolean;
+  videos?: VideoItem[];
 }
 
 export default function VideoShorts({
   filterDistrict,
   title,
   hideDivider,
+  videos,
 }: VideoShortsProps = {}) {
   const { t, locale } = useLanguage();
   const {
@@ -74,10 +77,17 @@ export default function VideoShorts({
     v8: { ne: "घोडाघोडी ताल • रामसार", en: "RAMSAR • WETLAND ECOLOGY" },
   };
 
+  const allVideos = videos || [];
   const filteredVideos = filterDistrict
-    ? VIDEOS.filter((v) => v.district === filterDistrict)
-    : VIDEOS;
-  const displayVideos = filteredVideos.length > 0 ? filteredVideos : VIDEOS;
+    ? allVideos.filter((v) => {
+        const dSlug =
+          typeof v.district === "object" && v.district !== null
+            ? v.district.slug
+            : v.district;
+        return dSlug === filterDistrict;
+      })
+    : allVideos;
+  const displayVideos = filteredVideos;
 
   // Modal navigation
   const openModal = (video: VideoItem) => {
@@ -91,26 +101,30 @@ export default function VideoShorts({
 
   const navigateModal = (direction: "next" | "prev") => {
     if (!activeModalVideo) return;
-    const currentIndex = VIDEOS.findIndex((v) => v.id === activeModalVideo.id);
+    const currentIndex = displayVideos.findIndex(
+      (v) => String(v.id) === String(activeModalVideo.id)
+    );
     if (currentIndex === -1) return;
 
     if (direction === "next") {
-      const nextIndex = (currentIndex + 1) % VIDEOS.length;
-      setActiveModalVideo(VIDEOS[nextIndex]);
+      const nextIndex = (currentIndex + 1) % displayVideos.length;
+      setActiveModalVideo(displayVideos[nextIndex]);
     } else {
-      const prevIndex = (currentIndex - 1 + VIDEOS.length) % VIDEOS.length;
-      setActiveModalVideo(VIDEOS[prevIndex]);
+      const prevIndex =
+        (currentIndex - 1 + displayVideos.length) % displayVideos.length;
+      setActiveModalVideo(displayVideos[prevIndex]);
     }
     setIsPlaying(true);
   };
 
   // Handle Like
-  const toggleLike = (id: string) => {
-    setLikedMap((prev) => ({ ...prev, [id]: !prev[id] }));
+  const toggleLike = (id: string | number) => {
+    const key = String(id);
+    setLikedMap((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   // Handle Share
-  const handleShare = async (id: string) => {
+  const handleShare = async (id: string | number) => {
     if (typeof window === "undefined") return;
     try {
       const url = `${window.location.origin}/videos/${id}`;
@@ -120,20 +134,20 @@ export default function VideoShorts({
     } catch {}
   };
 
-  // Handle ESC key for modal
+  // Safely lock background scroll with global reference-counted lock
+  useBodyScrollLock(!!activeModalVideo);
+
+  // Handle ESC key and arrow keys for modal
   useEffect(() => {
+    if (!activeModalVideo) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") closeModal();
       if (e.key === "ArrowRight") navigateModal("next");
       if (e.key === "ArrowLeft") navigateModal("prev");
     };
-    if (activeModalVideo) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
+    window.addEventListener("keydown", handleKeyDown);
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [activeModalVideo]);
 
@@ -185,7 +199,26 @@ export default function VideoShorts({
       )}
 
       {/* ── Financial Times Seamless Video Reel Track ── */}
-      <div className="relative">
+      {displayVideos.length === 0 ? (
+        <FTEmptyState
+          title={
+            locale === "ne"
+              ? "हाल कुनै भिडियो सामग्री उपलब्ध छैन"
+              : "No Video Dispatches Available"
+          }
+          description={
+            locale === "ne"
+              ? "सुदूरपश्चिम डिजिटलको स्थलगत भिडियो रिपोर्टहरू चाँडै यस खण्डमा उपलब्ध हुनेछन्।"
+              : "Visual journalism and on-the-ground dispatches will be published here soon."
+          }
+          kicker={locale === "ne" ? "भिडियो आर्काइभ" : "VIDEO ARCHIVE"}
+          icon={<Play size={22} className="text-brand-secondary ml-0.5" />}
+          accentColor="var(--color-brand-secondary)"
+          actionText={locale === "ne" ? "भिडियो खण्ड हेर्नुहोस्" : "Go to Videos"}
+          actionHref="/videos"
+        />
+      ) : (
+        <div className="relative">
         {/* Video Reel Cards Slider */}
         <div className="w-full max-w-full overflow-hidden min-w-0">
           <div
@@ -194,18 +227,23 @@ export default function VideoShorts({
             className="flex gap-3.5 sm:gap-4.5 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory py-1"
           >
             {displayVideos.map((video) => {
-              const districtObj = video.district
-                ? districtLabels[video.district]
-                : undefined;
-              const districtName = districtObj
+              let districtName = "";
+              if (video.district) {
+                if (typeof video.district === "object" && video.district !== null) {
+                  districtName = t(video.district.name);
+                } else if (typeof video.district === "string") {
+                  const districtObj = districtLabels[video.district];
+                  districtName = districtObj
+                    ? locale === "ne"
+                      ? districtObj.ne
+                      : districtObj.en
+                    : video.district;
+                }
+              }
+              const kicker = videoKickers[String(video.id)]
                 ? locale === "ne"
-                  ? districtObj.ne
-                  : districtObj.en
-                : "";
-              const kicker = videoKickers[video.id]
-                ? locale === "ne"
-                  ? videoKickers[video.id].ne
-                  : videoKickers[video.id].en
+                  ? videoKickers[String(video.id)].ne
+                  : videoKickers[String(video.id)].en
                 : "स्थलगत • रिपोर्ट";
 
               return (
@@ -218,7 +256,7 @@ export default function VideoShorts({
                   <div className="relative aspect-[9/15] bg-surface border border-border border-t-[3px] border-t-brand-secondary group-hover:border-brand-secondary transition-all duration-300 overflow-hidden rounded-none shadow-xs group-hover:shadow-md">
                     {/* Background Poster Image */}
                     <Image
-                      src={video.thumbnail || "/images/places/api_himal.jpg"}
+                      src={normalizeImageUrl(video.thumbnail) || "/images/places/api_himal.jpg"}
                       alt={t(video.title)}
                       fill
                       className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -304,6 +342,7 @@ export default function VideoShorts({
           </div>
         </div>
       </div>
+      )}
 
       {/* ── Interactive Instant Video Modal / Lightbox ── */}
       {activeModalVideo && (
@@ -323,7 +362,7 @@ export default function VideoShorts({
             {/* Left: 9:16 Video Player Column */}
             <div className="relative md:w-[320px] aspect-[9/15] md:aspect-auto md:h-[520px] bg-black shrink-0 overflow-hidden">
               <Image
-                src={activeModalVideo.thumbnail}
+                src={normalizeImageUrl(activeModalVideo.thumbnail) || "/images/places/api_himal.jpg"}
                 alt={t(activeModalVideo.title)}
                 fill
                 sizes="(max-width: 768px) 100vw, 320px"
@@ -384,11 +423,14 @@ export default function VideoShorts({
                 {/* Meta details */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-sans font-bold text-brand-secondary">
-                    {activeModalVideo.district &&
-                    districtLabels[activeModalVideo.district]
-                      ? locale === "ne"
-                        ? districtLabels[activeModalVideo.district].ne
-                        : districtLabels[activeModalVideo.district].en
+                    {activeModalVideo.district
+                      ? typeof activeModalVideo.district === "object" && activeModalVideo.district !== null
+                        ? t(activeModalVideo.district.name)
+                        : typeof activeModalVideo.district === "string" && districtLabels[activeModalVideo.district]
+                          ? (locale === "ne"
+                              ? districtLabels[activeModalVideo.district].ne
+                              : districtLabels[activeModalVideo.district].en)
+                          : String(activeModalVideo.district)
                       : "सुदूरपश्चिम"}
                   </span>
                   <span className="text-muted-foreground">•</span>
@@ -478,8 +520,8 @@ export default function VideoShorts({
                 </button>
 
                 <span className="text-xs font-sans text-muted-foreground">
-                  {VIDEOS.findIndex((v) => v.id === activeModalVideo.id) + 1} /{" "}
-                  {VIDEOS.length}
+                  {displayVideos.findIndex((v) => v.id === activeModalVideo.id) + 1} /{" "}
+                  {displayVideos.length}
                 </span>
 
                 <button

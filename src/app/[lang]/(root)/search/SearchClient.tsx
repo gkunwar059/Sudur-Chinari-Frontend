@@ -23,11 +23,13 @@ const TRENDING_TOPICS = [
 export default function SearchClient({ 
   initialArticles, 
   districts, 
-  categories 
+  categories,
+  trendingTopics = TRENDING_TOPICS,
 }: { 
   initialArticles: any[], 
   districts: any[], 
-  categories: any[] 
+  categories: any[],
+  trendingTopics?: string[],
 }) {
   const { locale } = useLanguage();
   const router = useRouter();
@@ -163,7 +165,7 @@ export default function SearchClient({
                 <Flame size={13} className="text-warning" />
                 चर्चित खोज:
               </span>
-              {TRENDING_TOPICS.map((topic) => (
+              {trendingTopics.map((topic) => (
                 <button
                   key={topic}
                   type="button"
@@ -321,7 +323,7 @@ export default function SearchClient({
 
               {/* Article Results List */}
               {results.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-3 scroll-reveal">
                   {results.map((article: any) => (
                     <Link
                       key={article.id}
@@ -401,7 +403,7 @@ export default function SearchClient({
                   </p>
 
                   <div className="flex flex-wrap items-center justify-center gap-2 max-w-lg mx-auto">
-                    {TRENDING_TOPICS.map((topic) => (
+                    {trendingTopics.map((topic) => (
                       <button
                         key={topic}
                         type="button"

@@ -8,11 +8,30 @@ import {
   InstagramIcon,
 } from "@/components/common/SocialIcons";
 import BackToTopButton from "@/components/layout/BackToTopButton";
+import NewsletterSubscription from "@/components/common/NewsletterSubscription";
 import type { Locale } from "@/lib/i18n/config";
 
 export default function Footer({ locale }: { locale: Locale }) {
   return (
-    <footer className="bg-surface border-t-2 border-border text-foreground mt-16 font-sans">
+    <footer className="relative isolate overflow-hidden border-t-2 border-border text-foreground mt-16 font-sans">
+      {/* ── Background image, opacity and gradients ── */}
+      <div aria-hidden="true" className="absolute inset-0 -z-20 bg-surface" />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10"
+      >
+        <Image
+          src="/images/himalaya_banner.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          quality={70}
+          className="object-cover object-center opacity-60 dark:opacity-20"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-surface via-surface/70 to-surface" />
+        <div className="absolute inset-0 bg-gradient-to-r from-brand/10 via-transparent to-brand-secondary/15" />
+      </div>
+
       {/* ── 1. Top Newsletter & Charter Row ── */}
       <div className="border-b border-border">
         <div className="container-editorial py-8 sm:py-10">
@@ -36,27 +55,33 @@ export default function Footer({ locale }: { locale: Locale }) {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-2.5 text-xs text-muted-foreground">
-                <div className="flex items-center gap-2.5">
-                  <MapPin size={16} className="text-brand-secondary shrink-0" />
-                  <span>
-                    {locale === "ne"
-                      ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश"
-                      : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province"}
-                  </span>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-8">
+                <div className="flex flex-col gap-2.5 text-xs text-muted-foreground">
+                  <div className="flex items-center gap-2.5">
+                    <MapPin size={16} className="text-brand-secondary shrink-0" />
+                    <span>
+                      {locale === "ne"
+                        ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश"
+                        : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Phone size={16} className="text-brand-secondary shrink-0" />
+                    <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
+                  </div>
+                  <div className="flex items-center gap-2.5">
+                    <Mail size={16} className="text-brand-secondary shrink-0" />
+                    <a
+                      href="mailto:info@sudurchinari.com"
+                      className="hover:text-brand-secondary transition-colors"
+                    >
+                      info@sudurchinari.com
+                    </a>
+                  </div>
                 </div>
-                <div className="flex items-center gap-2.5">
-                  <Phone size={16} className="text-brand-secondary shrink-0" />
-                  <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
-                </div>
-                <div className="flex items-center gap-2.5">
-                  <Mail size={16} className="text-brand-secondary shrink-0" />
-                  <a
-                    href="mailto:info@sudurchinari.com"
-                    className="hover:text-brand-secondary transition-colors"
-                  >
-                    info@sudurchinari.com
-                  </a>
+
+                <div className="border-t sm:border-t-0 sm:border-l border-border pt-4 sm:pt-0 sm:pl-8">
+                  <NewsletterSubscription locale={locale} />
                 </div>
               </div>
             </div>
@@ -312,7 +337,10 @@ export default function Footer({ locale }: { locale: Locale }) {
                 rel="noreferrer"
                 className="hover:text-brand-secondary transition-colors flex items-center gap-2"
               >
-                <FacebookIcon size={14} className="text-foreground hover:text-brand-secondary" />
+                <FacebookIcon
+                  size={14}
+                  className="text-foreground hover:text-brand-secondary"
+                />
                 <span>{locale === "ne" ? "फेसबुक" : "Facebook"}</span>
               </a>
               <a
@@ -330,7 +358,10 @@ export default function Footer({ locale }: { locale: Locale }) {
                 rel="noreferrer"
                 className="hover:text-brand-secondary transition-colors flex items-center gap-2"
               >
-                <YoutubeIcon size={14} className="text-foreground hover:text-brand-secondary" />
+                <YoutubeIcon
+                  size={14}
+                  className="text-foreground hover:text-brand-secondary"
+                />
                 <span>{locale === "ne" ? "युट्युब" : "YouTube"}</span>
               </a>
               <a
@@ -339,7 +370,10 @@ export default function Footer({ locale }: { locale: Locale }) {
                 rel="noreferrer"
                 className="hover:text-brand-secondary transition-colors flex items-center gap-2"
               >
-                <InstagramIcon size={14} className="text-foreground hover:text-brand-secondary" />
+                <InstagramIcon
+                  size={14}
+                  className="text-foreground hover:text-brand-secondary"
+                />
                 <span>{locale === "ne" ? "इन्स्टाग्राम" : "Instagram"}</span>
               </a>
             </div>

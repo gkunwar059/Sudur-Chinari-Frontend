@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.DJANGO_API_URL || "http://127.0.0.1:8001";
+const rawBackend = process.env.DJANGO_API_URL || "http://127.0.0.1:8001";
+const BACKEND_URL = rawBackend.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
 
 async function proxyRequest(request: NextRequest) {
   try {
@@ -18,6 +19,9 @@ async function proxyRequest(request: NextRequest) {
     // Remove host so fetch doesn't send original Next.js host header to Django
     headers.delete("host");
     headers.delete("connection");
+    if (!headers.get("user-agent")) {
+      headers.set("user-agent", "Mozilla/5.0 (compatible; SudurChinari/1.0; +https://sudurchinari.com)");
+    }
 
     // Pass through access token cookie if Authorization header is missing
     const token = request.cookies.get("access_token")?.value;

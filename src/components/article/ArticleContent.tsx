@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -11,11 +11,13 @@ import {
   MapPin,
   Check,
 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import type { Article } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { formatViews, cn, getArticleSlug } from "@/lib/utils";
 import FTCategoryBadge from "@/components/common/FTCategoryBadge";
 import RelativeTime from "@/components/common/RelativeTime";
+import { fetchCommentsAction } from "@/app/actions/comments";
 import ArticleReactions from "./ArticleReactions";
 import ArticleComments from "./ArticleComments";
 import AdBanner from "@/components/common/AdBanner";
@@ -25,6 +27,33 @@ interface ArticleContentProps {
   article: Article;
   related: Article[];
   popular: Article[];
+}
+
+function parseArticleParagraphs(content: string): string[] {
+  if (!content) return [];
+
+  // Check if content is HTML containing <p> tags
+  if (/<p[^>]*>/i.test(content)) {
+    const list: string[] = [];
+    const pRegex = /<p[^>]*>([\s\S]*?)<\/p>/gi;
+    let match;
+    while ((match = pRegex.exec(content)) !== null) {
+      const inner = match[1].trim();
+      if (inner) {
+        list.push(inner);
+      }
+    }
+    if (list.length > 0) {
+      return list;
+    }
+  }
+
+  // Fallback: strip any stray unclosed tags and split by double newlines
+  const cleaned = content.replace(/<\/?p[^>]*>/gi, "\n\n");
+  return cleaned
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
 }
 
 export default function ArticleContent({
@@ -49,23 +78,45 @@ export default function ArticleContent({
     setFontSizeIndex((prev) => Math.min(fontClasses.length - 1, prev + 1));
   const handleResetFont = () => setFontSizeIndex(1);
 
+  const currentSlug = getArticleSlug(article);
+  const fallbackUrl = `https://chinari.sthajeevan.com.np/article/${currentSlug}`;
+  const [articleUrl, setArticleUrl] = useState(fallbackUrl);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      setArticleUrl(window.location.href);
+    }
+  }, []);
+
+  // TanStack Query for live comments count synchronized with ArticleComments
+  const { data: liveComments } = useQuery({
+    queryKey: ["comments", article.id],
+    queryFn: async () => {
+      const res = await fetchCommentsAction(article.id);
+      if (res.success && Array.isArray(res.comments)) {
+        return res.comments;
+      }
+      return [];
+    },
+    staleTime: 1000 * 30,
+  });
+
+  const liveCommentsCount = liveComments
+    ? liveComments.length
+    : (article.commentsCount ?? 0);
+
   const currentContent =
     typeof article.content === "string"
       ? article.content
       : (article.content as any)?.[locale] ||
         (article.content as any)?.ne ||
         "";
-  const paragraphs = currentContent.split("\n\n").filter(Boolean);
-
-  const currentSlug = getArticleSlug(article);
-  const articleUrl =
-    typeof window !== "undefined"
-      ? window.location.href
-      : `https://chinari.sthajeevan.com.np/article/${currentSlug}`;
+  const paragraphs = parseArticleParagraphs(currentContent);
 
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(articleUrl);
+      const copyUrl = typeof window !== "undefined" ? window.location.href : articleUrl;
+      await navigator.clipboard.writeText(copyUrl);
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     } catch {}
@@ -293,11 +344,11 @@ export default function ArticleContent({
         >
           {paragraphs.map((paragraph: string, i: number) => (
             <div key={i} className="space-y-6">
-              <p>{paragraph}</p>
+              <p dangerouslySetInnerHTML={{ __html: paragraph }} />
               {/* Native In-Article Sponsored Placement */}
               {i === 1 && (
                 <div className="my-8">
-                  <AdBanner placement="in-article" />
+                  <AdBanner placement="in-article" page="article" />
                 </div>
               )}
             </div>
@@ -326,7 +377,7 @@ export default function ArticleContent({
           articleId={article.id}
           articleTitle={t(article.title)}
           initialLikes={article.likes || 142}
-          commentsCount={article.commentsCount || 3}
+          commentsCount={liveCommentsCount}
         />
 
         {/* ── Author Bio Box (Sharp Broadsheet Layout) ── */}
@@ -363,7 +414,9 @@ export default function ArticleContent({
         </div>
 
         {/* ── Comments Section ── */}
-        <ArticleComments articleId={article.id} />
+        <div className="scroll-reveal">
+          <ArticleComments articleId={article.id} />
+        </div>
 
         {/* ── Related Articles Section ── */}
         {/* {related.length > 0 && (
@@ -462,8 +515,8 @@ export default function ArticleContent({
         </div>
 
         {/* Sidebar Advertisement */}
-        <div className="rounded-none border border-border overflow-hidden">
-          <AdBanner placement="sidebar" />
+        <div className="rounded-none border border-border overflow-hidden scroll-reveal scroll-delay-100">
+          <AdBanner placement="sidebar" page="article" />
         </div>
       </aside>
     </div>

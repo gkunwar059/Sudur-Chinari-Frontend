@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Compass, MapPin } from "lucide-react";
@@ -12,6 +13,8 @@ import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { DISTRICT_GEO_DETAILS } from "@/data/districtMaps";
 import HotelSearch from "./HotelSearch";
 import HotelCard from "@/components/common/HotelCard";
+import FTEmptyState from "@/components/common/FTEmptyState";
+import PageSkeleton from "@/components/common/PageSkeleton";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -57,7 +60,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-export default async function StayDistrictPage({
+export default function StayDistrictPage({ params, searchParams }: Props) {
+  return (
+    <Suspense fallback={<PageSkeleton variant="grid" />}>
+      <StayDistrictPageContent params={params} searchParams={searchParams} />
+    </Suspense>
+  );
+}
+
+async function StayDistrictPageContent({
   params,
   searchParams,
 }: Props) {
@@ -177,9 +188,27 @@ export default async function StayDistrictPage({
 
       {/* ── Hotels Grid ── */}
       <div className="container-editorial py-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {hotels.map((hotel: any) => {
-            return (
+        {hotels.length === 0 ? (
+          <FTEmptyState
+            title={
+              locale === "ne"
+                ? `${districtName} जिल्लामा हाल कुनै होटल वा होमस्टे सूचीकृत छैनन्`
+                : `No Hotels or Stays Listed in ${districtName}`
+            }
+            description={
+              locale === "ne"
+                ? "यस जिल्लाका होटल, रिसोर्ट तथा होमस्टेहरूको विवरण चाँडै थप गरिनेछ। यदि तपाईं यहाँको होटल व्यवसायी हुनुहुन्छ भने आफ्नो व्यवसाय दर्ता गराउन सम्पर्क गर्नुहोस्।"
+                : `Directory listings for hotels and resorts in ${districtName} are being compiled. Check back soon or contact us to register your property.`
+            }
+            kicker={locale === "ne" ? `${districtName} निर्देशिका` : `${districtName} DIRECTORY`}
+            icon={<Compass size={24} style={{ color: districtThemeColor }} />}
+            accentColor={districtThemeColor}
+            actionText={locale === "ne" ? "सबै जिल्लाहरू हेर्नुहोस्" : "Explore All Districts"}
+            actionHref="/stay"
+          />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {hotels.map((hotel: any) => (
               <HotelCard
                 key={hotel.slug}
                 hotel={hotel}
@@ -187,18 +216,9 @@ export default async function StayDistrictPage({
                 accentColor={districtThemeColor}
                 locale={locale}
               />
-            );
-          })}
-
-          {hotels.length === 0 && (
-            <div className="col-span-full py-16 text-center text-muted-foreground font-mono text-sm border border-dashed border-border bg-surface/50">
-              <Compass size={32} className="mx-auto mb-3 opacity-20" />
-              {locale === "ne"
-                ? `${districtName} जिल्लामा हाल कुनै होटलहरू उपलब्ध छैनन्।`
-                : `No hotels available in ${districtName} at the moment.`}
-            </div>
-          )}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </main>
   );

@@ -65,7 +65,7 @@ export default function RegionDistrictsList({
         if (regionDistricts.length === 0) return null;
 
         return (
-          <section key={region.id}>
+          <section key={region.id} className="scroll-reveal">
             {/* Signature FT Section Divider */}
             <FTSectionDivider
               sectionIndex={locale === "ne" ? `०${rIdx + 1}` : `0${rIdx + 1}`}

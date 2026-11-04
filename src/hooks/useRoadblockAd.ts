@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/context/LanguageContext";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 export interface PopupAdData {
   id: number | string;
@@ -136,15 +137,8 @@ export function useRoadblockAd() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [isOpen]);
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prevOverflow;
-    };
-  }, [isOpen]);
+  // Prevent background scroll safely with global reference-counted lock
+  useBodyScrollLock(isOpen);
 
   const progressPercent = Math.min(
     100,

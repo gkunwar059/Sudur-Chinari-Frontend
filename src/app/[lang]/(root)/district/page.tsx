@@ -9,6 +9,7 @@ import { normalizeImageUrl } from "@/lib/utils";
 import RegionDistrictsList from "@/components/district/RegionDistrictsList";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { buildMetadata } from "@/lib/seo";
+import { mergeDistrict } from "@/lib/districts";
 
 interface Props {
   params: Promise<{ lang: string }>;
@@ -44,25 +45,15 @@ export default async function DistrictDirectoryPage({ params }: Props) {
   let districtsData: any[] = [];
   const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
   if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
-    districtsData = apiDistricts.results.map((apiD: any) => {
-      const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
-      return {
-        ...fallback,
-        ...apiD,
-        theme: fallback?.theme || {
-          light: "var(--surface)",
-          border: "var(--border)",
-          badgeBg: "var(--surface-tint)",
-          badgeText: apiD.accentColor || "var(--brand)",
-        },
-        heroImage:
-          normalizeImageUrl(apiD.heroImage) ||
-          fallback?.heroImage ||
-          '/images/himalaya_banner.jpg',
-        accentColor: apiD.accentColor || fallback?.accentColor || "var(--brand)",
-        storyCount: fallback?.storyCount || 20,
-      };
-    });
+    districtsData = apiDistricts.results
+      .map((apiD: any) => {
+        const fallback = FALLBACK_DISTRICTS.find((f) => f.slug === apiD.slug);
+        const merged = mergeDistrict(apiD, fallback);
+        if (!merged) return null;
+        merged.storyCount = apiD.storyCount ?? fallback?.storyCount ?? 20;
+        return merged;
+      })
+      .filter(Boolean);
   }
 
   if (districtsData.length === 0) {
@@ -164,7 +155,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
 
         {/* ── District Partners Network ── */}
         {districtPartners && districtPartners.length > 0 && (
-          <div className="container-editorial py-8">
+          <div className="container-editorial py-8 scroll-reveal">
             <PartnersSection
               partners={districtPartners}
               locale={locale}

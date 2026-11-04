@@ -1,5 +1,4 @@
 import { newsApi } from "@/lib/api";
-import { ARTICLES } from "@/data/articles";
 import { getArticleSlug, t } from "@/lib/utils";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
@@ -12,11 +11,7 @@ export async function GET() {
       articles = res.results;
     }
   } catch (e) {
-    articles = ARTICLES;
-  }
-
-  if (articles.length === 0) {
-    articles = ARTICLES;
+    articles = [];
   }
 
   // Google News guidelines: only articles published in the last 48 hours, or the most recent up to 1000
@@ -27,7 +22,9 @@ export async function GET() {
       const slug = getArticleSlug(art);
       const title =
         typeof art.title === "string" ? art.title : t(art.title, "ne");
-      const pubDate = new Date(art.publishedAt || art.createdAt || Date.now()).toISOString();
+      const pubDate = new Date(
+        art.publishedAt || art.created_at || art.createdAt || Date.now(),
+      ).toISOString();
       const escapedTitle = title
         .replace(/&/g, "&amp;")
         .replace(/</g, "&lt;")

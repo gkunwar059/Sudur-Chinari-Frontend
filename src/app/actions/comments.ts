@@ -60,12 +60,57 @@ export async function createCommentAction(data: {
 
 export async function likeCommentAction(commentId: string | number) {
   try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
     const res = await serverFetch(`/comments/${commentId}/like/`, {
       method: "POST",
+      headers,
     });
-    return { success: true, likes: res?.likes };
+    return { success: true, likes: res?.likes, has_liked: res?.has_liked };
   } catch (error: any) {
     console.error("likeCommentAction error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function likeVideoCommentAction(commentId: string | number) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await serverFetch(`/video-comments/${commentId}/like/`, {
+      method: "POST",
+      headers,
+    });
+    return { success: true, likes: res?.likes, has_liked: res?.has_liked };
+  } catch (error: any) {
+    console.error("likeVideoCommentAction error:", error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function likeVideoAction(videoId: string | number) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("access_token")?.value;
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const res = await serverFetch(`/videos/${videoId}/like/`, {
+      method: "POST",
+      headers,
+    });
+    return { success: true, likes: res?.likes, has_liked: res?.has_liked };
+  } catch (error: any) {
+    console.error("likeVideoAction error:", error);
     return { success: false, error: error.message };
   }
 }

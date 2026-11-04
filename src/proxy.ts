@@ -4,7 +4,8 @@ import type { NextRequest } from 'next/server';
 const SUPPORTED_LOCALES = ['en', 'ne'] as const;
 const DEFAULT_LOCALE = 'en';
 
-const BACKEND_URL = process.env.DJANGO_API_URL || 'http://127.0.0.1:8001';
+const rawBackend = process.env.DJANGO_API_URL || 'http://127.0.0.1:8001';
+const BACKEND_URL = rawBackend.replace(/\/+$/, '').replace(/\/api\/v1$/, '');
 const ACCESS_COOKIE = 'access_token';
 const REFRESH_COOKIE = 'refresh_token';
 // Refresh when the access token has less than this many seconds left, so a

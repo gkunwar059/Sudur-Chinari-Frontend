@@ -17,6 +17,9 @@ import YatayatTabs, { type YatayatTab } from "@/components/yatayat/YatayatTabs";
 import YatayatBusCard from "@/components/yatayat/YatayatBusCard";
 import YatayatCompactCard from "@/components/yatayat/YatayatCompactCard";
 import YatayatSidebar from "@/components/yatayat/YatayatSidebar";
+import AdBanner from "@/components/common/AdBanner";
+
+import { newsApi } from "@/lib/api";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -93,9 +96,38 @@ interface YatayatDirectoryState {
   tabHref: (tab: YatayatTab) => string;
 }
 
+async function loadYatayatServices(locale: Locale): Promise<YatayatService[]> {
+  try {
+    const res = await newsApi.getYatayatServicesServer(undefined, locale).catch(() => null);
+    if (res?.results && res.results.length > 0) {
+      const liveServices: YatayatService[] = res.results.map((item: any) => ({
+        id: String(item.id),
+        type: item.service_type || item.type || "bus",
+        title: typeof item.title === "object" ? item.title : { ne: item.title, en: item.title_en || item.title },
+        subTitle: typeof item.sub_title === "object" ? item.sub_title : { ne: item.sub_title || "", en: item.sub_title_en || item.sub_title || "" },
+        badge: item.badge || { ne: item.badge_text || "सक्रिय", en: item.badge_text || "Active", color: item.badge_color || "emerald" },
+        verified: item.is_verified ?? true,
+        updatedAt: item.updated_at || "२०८३/०६/२०",
+        origin: item.origin || { ne: item.origin_name || "", en: item.origin_name || "" },
+        destination: item.destination || { ne: item.destination_name || "", en: item.destination_name || "" },
+        route: item.route ? (Array.isArray(item.route) ? { ne: item.route, en: item.route } : item.route) : { ne: [], en: [] },
+        departureTime: typeof item.departureTime === "object" ? item.departureTime : { ne: item.departure_time || "", en: item.departure_time || "" },
+        fare: typeof item.fare === "object" ? item.fare : { ne: item.estimated_fare || "", en: item.estimated_fare || "" },
+        seats: typeof item.seats === "object" ? item.seats : { ne: item.seats || "३५", en: item.seats || "35" },
+        contacts: Array.isArray(item.contacts) ? item.contacts : [item.contacts || "98580-xxxxx"],
+        image: item.image || "/images/yatayat/bus_achham.jpg",
+        notes: typeof item.notes === "object" ? item.notes : { ne: item.notes || "", en: item.notes || "" },
+      }));
+      return liveServices;
+    }
+  } catch (err) {}
+  return [];
+}
+
 function resolveDirectoryState(
   locale: Locale,
-  searchParams: SearchParams
+  searchParams: SearchParams,
+  availableServices: YatayatService[] = []
 ): YatayatDirectoryState {
   const originSlug = firstParam(searchParams.origin);
   const destinationSlug = firstParam(searchParams.destination);
@@ -111,7 +143,7 @@ function resolveDirectoryState(
   );
   const normalizedQuery = query.toLowerCase();
 
-  const filteredServices = YATAYAT_SERVICES.filter((service) => {
+  const filteredServices = availableServices.filter((service) => {
     if (origin && !serviceMatchesLocation(service, origin, "origin")) return false;
     if (destination && !serviceMatchesLocation(service, destination, "destination")) {
       return false;
@@ -194,9 +226,11 @@ async function YatayatDirectoryFilters({
   locale: Locale;
   searchParams: Promise<SearchParams>;
 }) {
+  const services = await loadYatayatServices(locale);
   const { activeTab, filteredServices, counts, tabHref } = resolveDirectoryState(
     locale,
-    await searchParams
+    await searchParams,
+    services
   );
 
   return (
@@ -225,9 +259,11 @@ async function YatayatDirectoryResults({
   locale: Locale;
   searchParams: Promise<SearchParams>;
 }) {
+  const services = await loadYatayatServices(locale);
   const { activeTab, filteredServices, counts, tabHref } = resolveDirectoryState(
     locale,
-    await searchParams
+    await searchParams,
+    services
   );
   const isNe = locale === "ne";
 
@@ -238,7 +274,7 @@ async function YatayatDirectoryResults({
   return (
     <>
       {(activeTab === "all" || activeTab === "bus") && (
-        <section className="space-y-4">
+        <section className="space-y-4 scroll-reveal">
           <FTSectionDivider
             title={isNe ? "बस सेवा" : "Bus Services"}
             enTitle={isNe ? "Bus Services" : undefined}
@@ -265,7 +301,7 @@ async function YatayatDirectoryResults({
             </div>
           )}
 
-          {activeTab === "all" && (
+          {activeTab === "all" && counts.bus > 0 && (
             <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-surface border border-border border-t-[2px] border-t-brand rounded-none text-sm font-semibold">
               <div className="flex items-center gap-2.5 text-foreground font-sans">
                 <Bus size={17} aria-hidden="true" className="text-brand" />
@@ -289,7 +325,7 @@ async function YatayatDirectoryResults({
       )}
 
       {(activeTab === "all" || activeTab === "hiace") && (
-        <section className="space-y-4">
+        <section className="space-y-4 scroll-reveal">
           <FTSectionDivider
             title={isNe ? "हाइस सेवा" : "Hiace Services"}
             enTitle={isNe ? "Hiace Services" : undefined}
@@ -324,7 +360,7 @@ async function YatayatDirectoryResults({
       )}
 
       {(activeTab === "all" || activeTab === "jeep") && (
-        <section className="space-y-4">
+        <section className="space-y-4 scroll-reveal">
           <FTSectionDivider
             title={isNe ? "जीप सेवा" : "Jeep Services"}
             enTitle={isNe ? "Jeep Services" : undefined}
@@ -380,6 +416,10 @@ export default function YatayatDirectoryView({
               <Suspense fallback={<YatayatDirectoryResultsFallback />}>
                 <YatayatDirectoryResults locale={locale} searchParams={searchParams} />
               </Suspense>
+
+              <div className="scroll-reveal scroll-delay-100">
+                <AdBanner placement="billboard-mid" page="yatayat" className="mt-8" />
+              </div>
             </div>
 
             <YatayatSidebar locale={locale} />

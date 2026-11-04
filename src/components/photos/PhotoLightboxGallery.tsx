@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 
 interface PhotoLightboxGalleryProps {
   images: string[];
@@ -47,17 +48,8 @@ export default function PhotoLightboxGallery({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isOpen, goToNext, goToPrev]);
 
-  // Lock body scroll when modal is open
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  // Safely lock body scroll with global reference-counted lock
+  useBodyScrollLock(isOpen);
 
   return (
     <>

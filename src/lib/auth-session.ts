@@ -3,7 +3,8 @@ import { cookies } from "next/headers";
 import { apiFetch } from "@/lib/api";
 import type { User } from "@/context/AuthContext";
 
-const BACKEND_URL = process.env.DJANGO_API_URL || "http://127.0.0.1:8001";
+const rawBackend = process.env.DJANGO_API_URL || "http://127.0.0.1:8001";
+const BACKEND_URL = rawBackend.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
 
 const ACCESS_COOKIE = "access_token";
 const REFRESH_COOKIE = "refresh_token";

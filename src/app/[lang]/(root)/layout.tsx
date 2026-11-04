@@ -3,6 +3,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import RoadblockAdModal from "@/components/ads/RoadblockAdModal";
+import ScrollObserver from "@/components/common/ScrollObserver";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 
@@ -75,6 +76,7 @@ export default async function RootRouteGroupLayout({
         <MobileBottomNav />
       </Suspense>
       <RoadblockAdModal />
+      <ScrollObserver />
     </div>
   );
 }

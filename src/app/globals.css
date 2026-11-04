@@ -591,5 +591,62 @@ button, [role="button"] {
   animation: flowingBorder 2.8s linear infinite;
 }
 
+/* ============================================================
+   SCROLL REVEAL ANIMATIONS (Tailwind v4 & GPU Composited)
+   ============================================================ */
 
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
 
+.scroll-reveal.is-revealed,
+.scroll-reveal[data-revealed="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.scroll-reveal-fade {
+  opacity: 0;
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity;
+}
+
+.scroll-reveal-fade.is-revealed,
+.scroll-reveal-fade[data-revealed="true"] {
+  opacity: 1;
+}
+
+.scroll-reveal-scale {
+  opacity: 0;
+  transform: scale(0.96) translateY(16px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-scale.is-revealed,
+.scroll-reveal-scale[data-revealed="true"] {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+/* Stagger Delays */
+.scroll-delay-100 { transition-delay: 100ms; }
+.scroll-delay-200 { transition-delay: 200ms; }
+.scroll-delay-300 { transition-delay: 300ms; }
+.scroll-delay-400 { transition-delay: 400ms; }
+
+/* Accessibility: User prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal,
+  .scroll-reveal-fade,
+  .scroll-reveal-scale {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}

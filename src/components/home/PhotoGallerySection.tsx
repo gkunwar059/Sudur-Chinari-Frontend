@@ -3,15 +3,23 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Camera, ChevronRight, ChevronLeft, MapPin, ArrowRight } from "lucide-react";
-import { PHOTO_STORIES } from "@/data/articles";
+import FTEmptyState from "@/components/common/FTEmptyState";
 import { useLanguage } from "@/context/LanguageContext";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
+import { normalizeImageUrl } from "@/lib/utils";
 
 import { useScrollRail } from "@/hooks/useScrollRail";
 
-export default function PhotoGallerySection() {
+import type { PhotoStory } from "@/types";
+
+interface PhotoGallerySectionProps {
+  photoStories?: PhotoStory[];
+}
+
+export default function PhotoGallerySection({ photoStories }: PhotoGallerySectionProps = {}) {
   const { locale, t } = useLanguage();
   const { ref: scrollRef, scroll } = useScrollRail(380);
+  const stories = photoStories || [];
 
   return (
     <section className="mb-12">
@@ -56,12 +64,31 @@ export default function PhotoGallerySection() {
       />
 
       {/* Horizontal Slider Track */}
-      <div className="relative w-full max-w-full overflow-hidden min-w-0">
-        <div
-          ref={scrollRef}
-          className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-2 snap-x snap-mandatory"
-        >
-          {PHOTO_STORIES.map((story) => (
+      {stories.length === 0 ? (
+        <FTEmptyState
+          title={
+            locale === "ne"
+              ? "हाल कुनै फोटो फिचर उपलब्ध छैन"
+              : "No Photo Essays Available"
+          }
+          description={
+            locale === "ne"
+              ? "सुदूरपश्चिमका प्राकृतिक तथा सांस्कृतिक सौन्दर्य समेटिएका नयाँ फोटो कथाहरू चाँडै यहाँ प्रस्तुत गरिनेछ।"
+              : "Scenic visual stories and photo dispatches from Sudurpaschim will be published here soon."
+          }
+          kicker={locale === "ne" ? "फोटो ग्यालरी" : "PHOTO ESSAYS"}
+          icon={<Camera size={22} className="text-brand-secondary" />}
+          accentColor="var(--color-brand-secondary)"
+          actionText={locale === "ne" ? "सबै फोटोहरू हेर्नुहोस्" : "Browse All Galleries"}
+          actionHref="/photos"
+        />
+      ) : (
+        <div className="relative w-full max-w-full overflow-hidden min-w-0">
+          <div
+            ref={scrollRef}
+            className="flex gap-4 sm:gap-6 overflow-x-auto no-scrollbar scroll-smooth pb-2 snap-x snap-mandatory"
+          >
+          {stories.map((story) => (
             <Link
               key={story.id}
               href="/photos"
@@ -70,7 +97,7 @@ export default function PhotoGallerySection() {
               {/* 16:10 Photo Frame with Broadsheet Borders */}
               <div className="relative aspect-[16/10] bg-surface border border-border overflow-hidden mb-3">
                 <Image
-                  src={story.coverImage}
+                  src={normalizeImageUrl(story.coverImage)}
                   alt={t(story.title)}
                   fill
                   className="object-cover group-hover:scale-104 transition-transform duration-500"
@@ -82,7 +109,11 @@ export default function PhotoGallerySection() {
                 {story.district && (
                   <div className="absolute top-2 left-2 flex items-center gap-1 bg-surface/90 text-white text-[10.5px] font-medium px-2 py-0.5 font-mono">
                     <MapPin size={10} className="text-brand-secondary" />
-                    <span>{story.district}</span>
+                    <span>
+                      {typeof story.district === "object" && story.district !== null
+                        ? t(story.district.name)
+                        : story.district}
+                    </span>
                   </div>
                 )}
 
@@ -112,6 +143,7 @@ export default function PhotoGallerySection() {
           ))}
         </div>
       </div>
+      )}
     </section>
   );
 }

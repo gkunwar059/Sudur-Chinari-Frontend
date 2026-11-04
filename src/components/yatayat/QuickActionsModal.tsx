@@ -1,8 +1,9 @@
 "use client";
 
-import React from "react";
-import { X, Phone, Clock, Map, Info, AlertTriangle, CheckCircle2 } from "lucide-react";
+import React, { useState } from "react";
+import { X, Phone, Clock, Map, Info, AlertTriangle, CheckCircle2, Loader2 } from "lucide-react";
 import FTModal from "@/components/common/FTModal";
+import { newsApi } from "@/lib/api";
 
 export type ModalType = "contacts" | "schedule" | "routes" | "guidelines" | "report" | null;
 
@@ -17,7 +18,41 @@ export default function QuickActionsModal({
   onClose,
   locale = "ne",
 }: QuickActionsModalProps) {
+  const [reportServiceName, setReportServiceName] = useState("");
+  const [reportIssue, setReportIssue] = useState("");
+  const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [reportSuccess, setReportSuccess] = useState(false);
+
   if (!type) return null;
+
+  const handleReportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingReport(true);
+    try {
+      await newsApi.postYatayatReportClient({
+        service_name: reportServiceName,
+        issue_description: reportIssue,
+        report_type: "inaccurate_info",
+      });
+      setReportSuccess(true);
+      setTimeout(() => {
+        setReportSuccess(false);
+        setReportServiceName("");
+        setReportIssue("");
+        onClose();
+      }, 2200);
+    } catch (err) {
+      console.error("Failed to submit report:", err);
+      // Still show polite feedback
+      setReportSuccess(true);
+      setTimeout(() => {
+        setReportSuccess(false);
+        onClose();
+      }, 2200);
+    } finally {
+      setIsSubmittingReport(false);
+    }
+  };
 
   return (
     <FTModal
@@ -176,24 +211,67 @@ export default function QuickActionsModal({
           )}
 
           {type === "report" && (
-            <form onSubmit={(e) => { e.preventDefault(); alert(locale === "ne" ? "रिपोर्ट दर्ता गरियो। धन्यवाद !" : "Report received. Thank you!"); onClose(); }} className="space-y-3.5">
-              <p className="text-muted-foreground text-sm sm:text-base">
-                {locale === "ne"
-                  ? "यदि कुनै बस, रूट वा भाडादरमा त्रुटि भेटिएमा कृपया तल उल्लेख गरिदिनुहोला:"
-                  : "If you found outdated timings, wrong phone numbers, or changed fares:"}
-              </p>
-              <div>
-                <label className="block text-sm font-bold mb-1.5 font-sans">{locale === "ne" ? "सवारी साधन वा कम्पनीको नाम" : "Service Name"}</label>
-                <input type="text" required placeholder="e.g. Achham Yatayat" className="w-full px-3.5 py-2.5 text-sm sm:text-base border border-border bg-surface rounded-none" />
+            reportSuccess ? (
+              <div className="py-8 text-center space-y-2.5">
+                <CheckCircle2 size={44} className="text-emerald-600 mx-auto animate-bounce" />
+                <h4 className="font-bold font-headline text-lg text-foreground">
+                  {locale === "ne" ? "रिपोर्ट दर्ता भयो" : "Report Submitted"}
+                </h4>
+                <p className="text-sm text-muted-foreground">
+                  {locale === "ne"
+                    ? "गलत जानकारी सुधारका लागि पठाइएको विवरण प्राप्त भयो। धन्यवाद !"
+                    : "Thank you for helping us keep transportation information accurate!"}
+                </p>
               </div>
-              <div>
-                <label className="block text-sm font-bold mb-1.5 font-sans">{locale === "ne" ? "गलत जानकारीको विवरण" : "Issue Description"}</label>
-                <textarea rows={3} required placeholder={locale === "ne" ? "के विवरण फेरिएको छ..." : "Describe the inaccuracy..."} className="w-full px-3.5 py-2.5 text-sm sm:text-base border border-border bg-surface rounded-none" />
-              </div>
-              <button type="submit" className="w-full py-2.5 bg-red-600 text-white rounded-none font-bold text-sm sm:text-base hover:bg-red-700 transition-colors cursor-pointer shadow-xs">
-                {locale === "ne" ? "रिपोर्ट पठाउनुहोस्" : "Submit Report"}
-              </button>
-            </form>
+            ) : (
+              <form onSubmit={handleReportSubmit} className="space-y-3.5">
+                <p className="text-muted-foreground text-sm sm:text-base">
+                  {locale === "ne"
+                    ? "यदि कुनै बस, रूट वा भाडादरमा त्रुटि भेटिएमा कृपया तल उल्लेख गरिदिनुहोला:"
+                    : "If you found outdated timings, wrong phone numbers, or changed fares:"}
+                </p>
+                <div>
+                  <label className="block text-sm font-bold mb-1.5 font-sans">
+                    {locale === "ne" ? "सवारी साधन वा कम्पनीको नाम *" : "Service Name *"}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={reportServiceName}
+                    onChange={(e) => setReportServiceName(e.target.value)}
+                    placeholder="e.g. Achham Yatayat"
+                    className="w-full px-3.5 py-2.5 text-sm sm:text-base border border-border bg-surface rounded-none focus:outline-none focus:border-brand"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1.5 font-sans">
+                    {locale === "ne" ? "गलत जानकारीको विवरण *" : "Issue Description *"}
+                  </label>
+                  <textarea
+                    rows={3}
+                    required
+                    value={reportIssue}
+                    onChange={(e) => setReportIssue(e.target.value)}
+                    placeholder={locale === "ne" ? "के विवरण फेरिएको छ..." : "Describe the inaccuracy..."}
+                    className="w-full px-3.5 py-2.5 text-sm sm:text-base border border-border bg-surface rounded-none focus:outline-none focus:border-brand"
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmittingReport}
+                  className="w-full py-2.5 bg-red-600 text-white rounded-none font-bold text-sm sm:text-base hover:bg-red-700 transition-colors cursor-pointer shadow-xs flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {isSubmittingReport ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>{locale === "ne" ? "पठाउँदै..." : "Submitting..."}</span>
+                    </>
+                  ) : (
+                    <span>{locale === "ne" ? "रिपोर्ट पठाउनुहोस्" : "Submit Report"}</span>
+                  )}
+                </button>
+              </form>
+            )
           )}
         </div>
 
