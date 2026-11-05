@@ -136,7 +136,8 @@ export function normalizeImageUrl(url?: string | null): string {
     trimmed.startsWith('categories/') ||
     trimmed.startsWith('contributions/') ||
     trimmed.startsWith('seed/') ||
-    trimmed.startsWith('partners/')
+    trimmed.startsWith('partners/') ||
+    trimmed.startsWith('videos/')
   ) {
     return `/media/${trimmed}`;
   }

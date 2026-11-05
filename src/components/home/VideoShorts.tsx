@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import FTEmptyState from "@/components/common/FTEmptyState";
 import type { VideoItem } from "@/types";
-import { formatViews, normalizeImageUrl } from "@/lib/utils";
+import { formatViews, normalizeImageUrl, cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import RelativeTime from "@/components/common/RelativeTime";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
@@ -88,6 +88,18 @@ export default function VideoShorts({
       })
     : allVideos;
   const displayVideos = filteredVideos;
+
+  const getDistrictName = (v: VideoItem) => {
+    if (!v.district) return locale === "ne" ? "सुदूरपश्चिम" : "Sudurpashchim";
+    if (typeof v.district === "object" && v.district !== null) {
+      return t(v.district.name);
+    }
+    const slug = String(v.district).toLowerCase();
+    if (districtLabels[slug]) {
+      return locale === "ne" ? districtLabels[slug].ne : districtLabels[slug].en;
+    }
+    return String(v.district);
+  };
 
   // Modal navigation
   const openModal = (video: VideoItem) => {
@@ -346,61 +358,202 @@ export default function VideoShorts({
 
       {/* ── Interactive Instant Video Modal / Lightbox ── */}
       {activeModalVideo && (
-        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6 animate-fadeIn">
+        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center md:p-6 animate-fadeIn">
           {/* Modal Container */}
-          <div className="relative w-full max-w-3xl bg-surface border border-border text-white shadow-2xl flex flex-col md:flex-row overflow-hidden rounded-none max-h-[92vh]">
-            {/* Close Button Top Right */}
+          <div className="relative w-full h-full md:h-[560px] md:max-h-[92vh] md:max-w-4xl bg-black md:bg-surface border-0 md:border md:border-border text-white md:text-foreground shadow-2xl flex flex-col md:flex-row overflow-hidden rounded-none">
+            {/* Close Button Top Right (Desktop) */}
             <button
               type="button"
               onClick={closeModal}
               aria-label="Close modal"
-              className="absolute top-3 right-3 z-30 w-8 h-8 rounded-none bg-black/70 hover:bg-brand-secondary text-white border border-white/20 flex items-center justify-center transition-colors cursor-pointer"
+              className="hidden md:flex absolute top-3 right-3 z-40 w-8 h-8 rounded-none bg-black/70 hover:bg-brand-secondary text-white border border-white/20 items-center justify-center transition-colors cursor-pointer"
             >
               <X size={16} />
             </button>
 
-            {/* Left: 9:16 Video Player Column */}
-            <div className="relative md:w-[320px] aspect-[9/15] md:aspect-auto md:h-[520px] bg-black shrink-0 overflow-hidden">
-              <Image
-                src={normalizeImageUrl(activeModalVideo.thumbnail) || "/images/places/api_himal.jpg"}
-                alt={t(activeModalVideo.title)}
-                fill
-                sizes="(max-width: 768px) 100vw, 320px"
-                className={`object-cover transition-all duration-700 ${isPlaying ? "scale-102 brightness-95" : "brightness-75"}`}
-                preload
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
-
-              {/* Play/Pause Overlay */}
-              <div
-                onClick={() => setIsPlaying(!isPlaying)}
-                className="absolute inset-0 flex items-center justify-center cursor-pointer group"
-              >
-                <div className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-sm border border-white/50 flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-secondary transition-all">
-                  {isPlaying ? (
-                    <Pause size={22} className="text-white" />
-                  ) : (
-                    <Play
-                      size={22}
-                      fill="white"
-                      className="text-white ml-0.5"
-                    />
-                  )}
+            {/* ── 1. Video Player Area (Full screen on mobile, 340px column on desktop) ── */}
+            <div className="relative w-full h-full md:w-[340px] lg:w-[360px] md:h-full bg-black shrink-0 overflow-hidden flex items-center justify-center">
+              {/* Actual Video Player or Thumbnail */}
+              {isPlaying && activeModalVideo.youtube_id ? (
+                <div className="relative w-full h-full flex items-center justify-center bg-black">
+                  <iframe
+                    src={`https://www.youtube-nocookie.com/embed/${activeModalVideo.youtube_id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`}
+                    title={t(activeModalVideo.title)}
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                    allowFullScreen
+                    className="w-full h-full object-cover border-0"
+                  />
                 </div>
+              ) : isPlaying && activeModalVideo.video_url && activeModalVideo.video_url.endsWith(".mp4") ? (
+                <video
+                  src={normalizeImageUrl(activeModalVideo.video_url)}
+                  autoPlay
+                  controls
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div
+                  onClick={() => setIsPlaying(true)}
+                  className="relative w-full h-full cursor-pointer group flex items-center justify-center"
+                >
+                  <Image
+                    src={
+                      normalizeImageUrl(activeModalVideo.thumbnail) ||
+                      "/images/places/api_himal.jpg"
+                    }
+                    alt={t(activeModalVideo.title)}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 360px"
+                    className="object-cover transition-all duration-700 brightness-85 group-hover:brightness-95 group-hover:scale-102"
+                    preload
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
+
+                  {/* Play Button Overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-sm border border-white/50 flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-secondary transition-all shadow-xl">
+                      <Play
+                        size={26}
+                        fill="white"
+                        className="text-white ml-1"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* ── Top Badges & Mobile Close Button (Overlaid on top of video) ── */}
+              <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
+                <div className="flex items-center gap-1.5 pointer-events-auto">
+                  <span className="text-[10px] font-sans font-bold px-2 py-0.5 bg-brand-secondary text-white rounded-none shadow-xs">
+                    {locale === "ne" ? "फिल्ड रिपोर्ट" : "FIELD DISPATCH"}
+                  </span>
+                  <span className="text-[10px] font-sans font-semibold px-2 py-0.5 bg-black/75 text-white/90 border border-white/20 rounded-none shadow-xs">
+                    {activeModalVideo.duration}
+                  </span>
+                </div>
+
+                {/* Mobile Close Button */}
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  aria-label="Close modal"
+                  className="md:hidden pointer-events-auto w-9 h-9 rounded-full bg-black/70 backdrop-blur-md text-white border border-white/30 flex items-center justify-center active:scale-90 transition-transform cursor-pointer shadow-lg"
+                >
+                  <X size={18} />
+                </button>
               </div>
 
-              {/* Player Top Badges */}
-              <div className="absolute top-3 left-3 flex items-center gap-1.5">
-                <span className="text-[10px] font-sans font-bold px-2 py-0.5 bg-brand-secondary text-white rounded-none">
-                  {locale === "ne" ? "फिल्ड रिपोर्ट" : "FIELD DISPATCH"}
-                </span>
-                <span className="text-[10px] font-sans font-semibold px-2 py-0.5 bg-black/70 text-muted-foreground border border-white/20 rounded-none">
-                  {activeModalVideo.duration}
-                </span>
+              {/* ── MOBILE-ONLY Overlays: Floating Action Rail (Right) ── */}
+              <div className="md:hidden absolute right-3 bottom-28 z-30 flex flex-col items-center gap-4 pointer-events-auto">
+                {/* Like Button */}
+                <button
+                  type="button"
+                  onClick={() => toggleLike(activeModalVideo.id)}
+                  aria-label="Like video"
+                  className="flex flex-col items-center group cursor-pointer"
+                >
+                  <div
+                    className={cn(
+                      "w-11 h-11 rounded-full flex items-center justify-center backdrop-blur-md border transition-all shadow-lg active:scale-90",
+                      likedMap[activeModalVideo.id]
+                        ? "bg-red-600/90 border-red-500 text-white"
+                        : "bg-black/60 border-white/25 text-white hover:bg-black/80",
+                    )}
+                  >
+                    <Heart
+                      size={20}
+                      className={
+                        likedMap[activeModalVideo.id] ? "fill-white" : ""
+                      }
+                    />
+                  </div>
+                  <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
+                    {formatViews((activeModalVideo.likes || 0) + (likedMap[activeModalVideo.id] ? 1 : 0))}
+                  </span>
+                </button>
+
+                {/* Share Button */}
+                <button
+                  type="button"
+                  onClick={() => handleShare(activeModalVideo.id)}
+                  aria-label="Share video"
+                  className="flex flex-col items-center group cursor-pointer"
+                >
+                  <div className="w-11 h-11 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:bg-black/80 active:scale-90 transition-all shadow-lg">
+                    {copied ? (
+                      <Check size={20} className="text-emerald-400" />
+                    ) : (
+                      <Share2 size={19} />
+                    )}
+                  </div>
+                  <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
+                    {copied ? (locale === "ne" ? "कपी" : "Copied") : (locale === "ne" ? "सेयर" : "Share")}
+                  </span>
+                </button>
+
+                {/* Full Page Link */}
+                <Link
+                  href={`/videos/${activeModalVideo.id}`}
+                  aria-label="Open full page"
+                  className="flex flex-col items-center group"
+                >
+                  <div className="w-11 h-11 rounded-full bg-black/60 backdrop-blur-md border border-white/25 flex items-center justify-center text-white hover:bg-brand-secondary active:scale-90 transition-all shadow-lg">
+                    <ExternalLink size={18} />
+                  </div>
+                  <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
+                    {locale === "ne" ? "पुरा" : "Full"}
+                  </span>
+                </Link>
               </div>
 
-              {/* Player Bottom Status */}
-              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white/80 font-sans">
+              {/* ── MOBILE-ONLY Overlays: Bottom Headline & District ── */}
+              <div className="md:hidden absolute bottom-14 left-0 right-16 z-20 p-4 pointer-events-none bg-gradient-to-t from-black/95 via-black/60 to-transparent">
+                <div className="flex items-center gap-2 mb-1.5 text-xs">
+                  <span className="font-bold text-brand-secondary">
+                    {getDistrictName(activeModalVideo)}
+                  </span>
+                  <span className="text-white/50">•</span>
+                  <span className="text-white/80">
+                    <RelativeTime
+                      date={activeModalVideo.publishedAt}
+                      locale={locale}
+                    />
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold font-headline text-white leading-snug drop-shadow-md line-clamp-2">
+                  {t(activeModalVideo.title)}
+                </h3>
+              </div>
+
+              {/* ── MOBILE-ONLY Overlays: Bottom Pager Bar ── */}
+              <div className="md:hidden absolute bottom-0 left-0 right-0 z-30 px-4 py-2.5 bg-black/90 border-t border-white/10 flex items-center justify-between text-xs text-white pb-[max(0.625rem,env(safe-area-inset-bottom))]">
+                <button
+                  type="button"
+                  onClick={() => navigateModal("prev")}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-none bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-all cursor-pointer font-sans font-semibold"
+                >
+                  <ChevronLeft size={16} />
+                  <span>{locale === "ne" ? "अघिल्लो" : "Prev"}</span>
+                </button>
+
+                <span className="text-white/70 font-mono text-xs">
+                  {displayVideos.findIndex((v) => String(v.id) === String(activeModalVideo.id)) + 1} / {displayVideos.length}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={() => navigateModal("next")}
+                  className="flex items-center gap-1 px-3 py-1.5 rounded-none bg-white/10 hover:bg-white/20 active:scale-95 text-white transition-all cursor-pointer font-sans font-semibold"
+                >
+                  <span>{locale === "ne" ? "अर्को" : "Next"}</span>
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              {/* Desktop Bottom Status Bar (Left Column Only) */}
+              <div className="hidden md:flex absolute bottom-3 left-3 right-3 items-center justify-between text-xs text-white/80 font-sans z-20 pointer-events-none">
                 <span>
                   {isPlaying
                     ? locale === "ne"
@@ -417,21 +570,13 @@ export default function VideoShorts({
               </div>
             </div>
 
-            {/* Right: Info, Actions & Navigation */}
-            <div className="flex-1 p-5 sm:p-7 flex flex-col justify-between overflow-y-auto">
+            {/* ── 2. DESKTOP-ONLY Right Column: Editorial Details & Actions ── */}
+            <div className="hidden md:flex flex-1 p-6 lg:p-8 flex-col justify-between overflow-y-auto bg-surface text-foreground">
               <div>
                 {/* Meta details */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-xs font-sans font-bold text-brand-secondary">
-                    {activeModalVideo.district
-                      ? typeof activeModalVideo.district === "object" && activeModalVideo.district !== null
-                        ? t(activeModalVideo.district.name)
-                        : typeof activeModalVideo.district === "string" && districtLabels[activeModalVideo.district]
-                          ? (locale === "ne"
-                              ? districtLabels[activeModalVideo.district].ne
-                              : districtLabels[activeModalVideo.district].en)
-                          : String(activeModalVideo.district)
-                      : "सुदूरपश्चिम"}
+                    {getDistrictName(activeModalVideo)}
                   </span>
                   <span className="text-muted-foreground">•</span>
                   <span className="text-xs font-sans text-muted-foreground">
@@ -457,34 +602,35 @@ export default function VideoShorts({
                   <button
                     type="button"
                     onClick={() => toggleLike(activeModalVideo.id)}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-bold border transition-colors cursor-pointer rounded-none ${
+                    className={cn(
+                      "flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-bold border transition-colors cursor-pointer rounded-none",
                       likedMap[activeModalVideo.id]
                         ? "bg-brand-secondary border-brand-secondary text-white"
-                        : "bg-surface border-border text-muted-foreground hover:text-white hover:border-brand-secondary"
-                    }`}
+                        : "bg-surface border-border text-muted-foreground hover:text-foreground hover:border-brand-secondary",
+                    )}
                   >
                     <Heart
                       size={14}
                       className={
-                        likedMap[activeModalVideo.id] ? "fill-white" : ""
+                        likedMap[activeModalVideo.id] ? "fill-white text-white" : ""
                       }
                     />
                     <span>
                       {likedMap[activeModalVideo.id]
-                        ? "मन पर्यो (Liked)"
-                        : "Like"}
+                        ? (locale === "ne" ? "मन पर्यो (Liked)" : "Liked")
+                        : (locale === "ne" ? "मन पराउनुहोस्" : "Like")}
                     </span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => handleShare(activeModalVideo.id)}
-                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-bold border border-border bg-surface text-muted-foreground hover:text-white hover:border-foreground transition-colors cursor-pointer rounded-none"
+                    className="flex items-center gap-1.5 px-3.5 py-1.5 text-xs font-sans font-bold border border-border bg-surface text-muted-foreground hover:text-foreground hover:border-foreground transition-colors cursor-pointer rounded-none"
                   >
                     {copied ? (
                       <>
-                        <Check size={14} className="text-emerald-400" />
-                        <span className="text-emerald-400">
+                        <Check size={14} className="text-emerald-500" />
+                        <span className="text-emerald-500">
                           {locale === "ne" ? "लिङ्क कपी भयो" : "Copied"}
                         </span>
                       </>
@@ -508,8 +654,8 @@ export default function VideoShorts({
                 </div>
               </div>
 
-              {/* Bottom Next/Prev Reel Carousel Controls */}
-              <div className="pt-5 mt-4 flex items-center justify-between">
+              {/* Bottom Next/Prev Reel Carousel Controls (Desktop) */}
+              <div className="pt-5 mt-4 flex items-center justify-between border-t border-border/60">
                 <button
                   type="button"
                   onClick={() => navigateModal("prev")}
@@ -519,8 +665,8 @@ export default function VideoShorts({
                   <span>{locale === "ne" ? "अघिल्लो" : "Prev"}</span>
                 </button>
 
-                <span className="text-xs font-sans text-muted-foreground">
-                  {displayVideos.findIndex((v) => v.id === activeModalVideo.id) + 1} /{" "}
+                <span className="text-xs font-sans text-muted-foreground font-mono">
+                  {displayVideos.findIndex((v) => String(v.id) === String(activeModalVideo.id)) + 1} /{" "}
                   {displayVideos.length}
                 </span>
 

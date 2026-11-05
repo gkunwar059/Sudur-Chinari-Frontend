@@ -181,6 +181,8 @@ export interface VideoItem {
   publishedAt: string;
   district?: string | District;
   isShort: boolean;
+  youtube_id?: string;
+  video_url?: string;
 }
 
 // -------------------------------------------------------

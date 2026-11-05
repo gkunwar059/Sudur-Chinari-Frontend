@@ -283,24 +283,33 @@ export default function FTLeadHero({
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
+          {/* Background Images with smooth crossfade */}
           {provinceFeatures.map((feature, index) => {
             const isActive = index === currentSlide;
             return (
               <div
-                key={`${feature.id}-${index}`}
+                key={`bg-${feature.id}-${index}`}
                 className={cn(
-                  "absolute inset-0 w-full h-full transition-all duration-700 ease-in-out",
+                  "absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out",
                   isActive
-                    ? "opacity-100 scale-100 z-10 pointer-events-auto"
-                    : "opacity-0 scale-105 z-0 pointer-events-none",
+                    ? "opacity-100 z-10 pointer-events-auto"
+                    : "opacity-0 z-0 pointer-events-none",
                 )}
+                aria-hidden={!isActive}
               >
-                <Link href={feature.link} className="absolute inset-0 z-0">
+                <Link
+                  href={feature.link}
+                  className="absolute inset-0 z-0"
+                  tabIndex={isActive ? 0 : -1}
+                >
                   <Image
                     src={normalizeImageUrl(feature.featuredImage)}
                     alt={feature.title}
                     fill
-                    className="object-cover"
+                    className={cn(
+                      "object-cover transition-transform duration-1000 ease-out",
+                      isActive ? "scale-100" : "scale-105",
+                    )}
                     sizes="(max-width: 1024px) 100vw, 75vw"
                     quality={70}
                     preload={index === 0}
@@ -309,92 +318,101 @@ export default function FTLeadHero({
                   <div className="absolute inset-0 bg-gradient-to-t from-brand/65 via-brand/40 dark:from-background/95 dark:via-background/70 to-transparent pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-r from-brand/60 via-transparent dark:from-background/70 to-transparent pointer-events-none sm:block hidden" />
                 </Link>
+              </div>
+            );
+          })}
 
-                <div className="relative z-10 p-5 sm:p-6 lg:p-8 flex flex-col justify-end h-full w-full sm:w-[90%] lg:w-[80%] pointer-events-none">
-                  <div className="mb-2 sm:mb-3 pointer-events-auto">
-                    <FTCategoryBadge
-                      category={feature.category as any}
-                      size="sm"
-                      className="!bg-white/20 !border-white/30 !text-white hover:!bg-white hover:!text-brand"
-                    />
-                  </div>
+          {/* Foreground Text Overlay - rendered once so slides NEVER overlap */}
+          {provinceFeatures[currentSlide] && (() => {
+            const feature = provinceFeatures[currentSlide];
+            return (
+              <div
+                key={`content-${currentSlide}-${feature.id}`}
+                className="relative z-20 p-5 sm:p-6 lg:p-8 flex flex-col justify-end h-full w-full sm:w-[90%] lg:w-[80%] pointer-events-none animate-fadeIn"
+              >
+                <div className="mb-2 sm:mb-3 pointer-events-auto">
+                  <FTCategoryBadge
+                    category={feature.category as any}
+                    size="sm"
+                    className="!bg-white/20 !border-white/30 !text-white hover:!bg-white hover:!text-brand"
+                  />
+                </div>
 
-                  <Link
-                    href={feature.link}
-                    className="block pointer-events-auto"
-                  >
-                    {index === 0 ? (
-                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
-                        {feature.title}
-                      </h1>
-                    ) : (
-                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
-                        {feature.title}
-                      </h2>
-                    )}
-                    <p className="text-[13px] sm:text-sm text-white/90 leading-snug font-sans line-clamp-3 sm:line-clamp-4 mb-1.5 drop-shadow break-words max-w-2xl">
-                      {feature.excerpt}
-                    </p>
-                  </Link>
+                <Link
+                  href={feature.link}
+                  className="block pointer-events-auto"
+                >
+                  {currentSlide === 0 ? (
+                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
+                      {feature.title}
+                    </h1>
+                  ) : (
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
+                      {feature.title}
+                    </h2>
+                  )}
+                  <p className="text-[13px] sm:text-sm text-white/90 leading-snug font-sans line-clamp-3 sm:line-clamp-4 mb-1.5 drop-shadow break-words max-w-2xl">
+                    {feature.excerpt}
+                  </p>
+                </Link>
 
-                  {/* Optional Buttons */}
-                  {(feature as any).buttons && (
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4 pointer-events-auto">
-                      {(feature as any).buttons.map((btn: any, i: number) => {
-                        const btnClass = cn(
-                          "inline-flex items-center justify-center rounded-none px-4 py-1.5 sm:px-5 sm:py-2 font-sans font-semibold text-[13px] sm:text-[14px] transition-all group",
-                          btn.primary
-                            ? "bg-surface text-foreground hover:bg-card shadow-md"
-                            : "bg-transparent border border-white/40 text-white hover:bg-white/10 cursor-pointer",
-                        );
+                {/* Optional Buttons */}
+                {(feature as any).buttons && (
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4 pointer-events-auto">
+                    {(feature as any).buttons.map((btn: any, i: number) => {
+                      const btnClass = cn(
+                        "inline-flex items-center justify-center rounded-none px-4 py-1.5 sm:px-5 sm:py-2 font-sans font-semibold text-[13px] sm:text-[14px] transition-all group",
+                        btn.primary
+                          ? "bg-surface text-foreground hover:bg-card shadow-md"
+                          : "bg-transparent border border-white/40 text-white hover:bg-white/10 cursor-pointer",
+                      );
 
-                        if (btn.onClick) {
-                          return (
-                            <button
-                              key={i}
-                              type="button"
-                              onClick={btn.onClick}
-                              className={btnClass}
-                            >
-                              {btn.label}
-                              {btn.icon && (
-                                <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
-                              )}
-                            </button>
-                          );
-                        }
-
+                      if (btn.onClick) {
                         return (
-                          <Link key={i} href={btn.href} className={btnClass}>
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={btn.onClick}
+                            className={btnClass}
+                          >
                             {btn.label}
                             {btn.icon && (
                               <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
                             )}
-                          </Link>
+                          </button>
                         );
-                      })}
-                    </div>
-                  )}
+                      }
 
-                  {/* Optional Stats */}
-                  {(feature as any).stats && (
-                    <div className="mt-4 sm:mt-5 pt-4 border-t border-white/20 flex items-center gap-6 sm:gap-10 pointer-events-auto w-full max-w-2xl">
-                      {(feature as any).stats.map((stat: any, i: number) => (
-                        <div key={i} className="flex flex-col">
-                          <span className="text-xl sm:text-2xl font-bold font-headline text-white leading-none mb-1">
-                            {stat.value}
-                          </span>
-                          <span className="text-[11px] sm:text-xs font-sans text-white/70 font-semibold tracking-wide">
-                            {stat.label}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
+                      return (
+                        <Link key={i} href={btn.href} className={btnClass}>
+                          {btn.label}
+                          {btn.icon && (
+                            <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
+                          )}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Optional Stats */}
+                {(feature as any).stats && (
+                  <div className="mt-4 sm:mt-5 pt-4 border-t border-white/20 flex items-center gap-6 sm:gap-10 pointer-events-auto w-full max-w-2xl">
+                    {(feature as any).stats.map((stat: any, i: number) => (
+                      <div key={i} className="flex flex-col">
+                        <span className="text-xl sm:text-2xl font-bold font-headline text-white leading-none mb-1">
+                          {stat.value}
+                        </span>
+                        <span className="text-[11px] sm:text-xs font-sans text-white/70 font-semibold tracking-wide">
+                          {stat.label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
-          })}
+          })()}
 
           {/* Slider Controls */}
           {provinceFeatures.length > 1 && (
