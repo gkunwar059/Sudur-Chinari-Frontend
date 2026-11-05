@@ -9,6 +9,7 @@ import { t, normalizeImageUrl } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import PhotoLightboxGallery from "@/components/photos/PhotoLightboxGallery";
 import { newsApi } from "@/lib/api";
+import { PHOTO_STORIES } from "@/data/articles";
 
 interface Props {
   params: Promise<{ lang: string; id: string }>;
@@ -17,20 +18,26 @@ interface Props {
 export async function generateStaticParams() {
   try {
     const res = await newsApi.getPhotoStoriesServer().catch(() => null);
-    const photos = res?.results || [];
-    return photos.flatMap((s) => [
+    const photos = res?.results && res.results.length > 0 ? res.results : PHOTO_STORIES;
+    return photos.flatMap((s: any) => [
       { lang: "en", id: String(s.id) },
       { lang: "ne", id: String(s.id) },
     ]);
   } catch {
-    return [];
+    return PHOTO_STORIES.flatMap((s) => [
+      { lang: "en", id: String(s.id) },
+      { lang: "ne", id: String(s.id) },
+    ]);
   }
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
-  const story = await newsApi.getPhotoStoryByIdServer(id, locale).catch(() => null);
+  let story: any = await newsApi.getPhotoStoryByIdServer(id, locale).catch(() => null);
+  if (!story) {
+    story = PHOTO_STORIES.find((s) => String(s.id) === String(id)) || null;
+  }
   if (!story) return {};
 
   const title = `${t(story.title, locale)} | ${locale === "ne" ? "फोटो फिचर" : "Photo Feature"}`;
@@ -53,7 +60,10 @@ export default async function PhotoStoryDetailsPage({ params }: Props) {
     : defaultLocale;
   const id = resolvedParams.id;
 
-  const story = await newsApi.getPhotoStoryByIdServer(id, lang as Locale).catch(() => null);
+  let story: any = await newsApi.getPhotoStoryByIdServer(id, lang as Locale).catch(() => null);
+  if (!story) {
+    story = PHOTO_STORIES.find((s) => String(s.id) === String(id)) || null;
+  }
 
   if (!story) {
     notFound();

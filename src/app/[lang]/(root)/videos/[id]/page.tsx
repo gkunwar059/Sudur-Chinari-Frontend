@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
 import { t, normalizeImageUrl } from "@/lib/utils";
 import { newsApi } from "@/lib/api";
+import { VIDEOS } from "@/data/articles";
 
 interface Props {
   params: Promise<{ lang: string; id: string }>;
@@ -16,13 +17,16 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com"
 export async function generateStaticParams() {
   try {
     const res = await newsApi.getVideosServer().catch(() => null);
-    const videos = res?.results || [];
-    return videos.flatMap((v) => [
+    const videos = res?.results && res.results.length > 0 ? res.results : VIDEOS;
+    return videos.flatMap((v: any) => [
       { lang: "en", id: String(v.id) },
       { lang: "ne", id: String(v.id) },
     ]);
   } catch {
-    return [];
+    return VIDEOS.flatMap((v) => [
+      { lang: "en", id: String(v.id) },
+      { lang: "ne", id: String(v.id) },
+    ]);
   }
 }
 
@@ -30,7 +34,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   if (!isLocale(lang)) return {};
 
-  const video = await newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null);
+  let video: any = await newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null);
+  if (!video) {
+    video = VIDEOS.find((v) => String(v.id) === String(id)) || null;
+  }
   if (!video) return {};
 
   const title = lang === "en" ? `${t(video.title, 'en')} — Video` : `${t(video.title, 'ne')} — भिडियो`;
@@ -63,15 +70,17 @@ export default async function VideoDetailPage({ params }: Props) {
   const { lang, id } = await params;
   if (!isLocale(lang)) notFound();
 
-  const [video, apiVideosRes] = await Promise.all([
+  const [apiVideo, apiVideosRes] = await Promise.all([
     newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null),
     newsApi.getVideosServer(undefined, lang as Locale).catch(() => null),
   ]);
 
+  const video = apiVideo || VIDEOS.find((v) => String(v.id) === String(id)) || null;
+
   if (!video) notFound();
 
-  const allVideos = apiVideosRes?.results || [];
-  const otherVideos = allVideos.filter((v) => String(v.id) !== String(id));
+  const allVideos = (apiVideosRes?.results && apiVideosRes.results.length > 0) ? apiVideosRes.results : VIDEOS;
+  const otherVideos = allVideos.filter((v: any) => String(v.id) !== String(id));
 
   return (
     <>
