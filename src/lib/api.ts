@@ -131,7 +131,12 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
   // During Docker image build time (npm run build), the backend container is offline.
   // Return safe fallbacks so SSG/prerendering immediately completes with fallback data
   // instead of hanging for 60s per page or throwing build-breaking exceptions!
-  if (process.env.SKIP_BUILD_FETCH === 'true') {
+  // Guard on NEXT_PHASE so a leaked SKIP_BUILD_FETCH env var in the running
+  // container can never blank out all server-rendered data at runtime.
+  if (
+    process.env.SKIP_BUILD_FETCH === 'true' &&
+    process.env.NEXT_PHASE === 'phase-production-build'
+  ) {
     return getBuildTimeFallback<T>(endpoint);
   }
 
