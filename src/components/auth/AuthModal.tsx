@@ -4,7 +4,6 @@ import React, { useState, useEffect } from "react";
 import FTModal from "@/components/common/FTModal";
 import { useAuth } from "@/context/AuthContext";
 import { useLanguage } from "@/context/LanguageContext";
-import { GoogleIcon } from "@/components/common/SocialIcons";
 import toast from "react-hot-toast";
 
 interface AuthModalProps {
@@ -85,39 +84,32 @@ export default function AuthModal({
           ? "विवरण मिलेन। कृपया पुन: प्रयास गर्नुहोस्।"
           : "Authentication failed. Please check your credentials.";
       if (err.response?.data) {
-        if (err.response.data.detail) errorMsg = err.response.data.detail;
-        else if (err.response.data.phone)
-          errorMsg = `${locale === "ne" ? "फोन" : "Phone"}: ${err.response.data.phone[0]}`;
-        else if (err.response.data.username)
-          errorMsg = `${locale === "ne" ? "प्रयोगकर्ता नाम" : "Username"}: ${err.response.data.username[0]}`;
-        else if (err.response.data.password)
-          errorMsg = `${locale === "ne" ? "पासवर्ड" : "Password"}: ${err.response.data.password[0]}`;
-        else if (err.response.data.email)
-          errorMsg = `${locale === "ne" ? "ईमेल" : "Email"}: ${err.response.data.email[0]}`;
-        else if (err.response.data.non_field_errors)
-          errorMsg = err.response.data.non_field_errors[0];
+        if (typeof err.response.data === "string") {
+          errorMsg = err.response.data;
+        } else if (err.response.data.detail) {
+          errorMsg = err.response.data.detail;
+        } else if (err.response.data.phone) {
+          const msg = Array.isArray(err.response.data.phone) ? err.response.data.phone[0] : err.response.data.phone;
+          errorMsg = `${locale === "ne" ? "फोन" : "Phone"}: ${msg}`;
+        } else if (err.response.data.username) {
+          const msg = Array.isArray(err.response.data.username) ? err.response.data.username[0] : err.response.data.username;
+          errorMsg = `${locale === "ne" ? "प्रयोगकर्ता नाम" : "Username"}: ${msg}`;
+        } else if (err.response.data.password) {
+          const msg = Array.isArray(err.response.data.password) ? err.response.data.password[0] : err.response.data.password;
+          errorMsg = `${locale === "ne" ? "पासवर्ड" : "Password"}: ${msg}`;
+        } else if (err.response.data.email) {
+          const msg = Array.isArray(err.response.data.email) ? err.response.data.email[0] : err.response.data.email;
+          errorMsg = `${locale === "ne" ? "ईमेल" : "Email"}: ${msg}`;
+        } else if (err.response.data.non_field_errors) {
+          errorMsg = Array.isArray(err.response.data.non_field_errors) ? err.response.data.non_field_errors[0] : err.response.data.non_field_errors;
+        }
+      } else if (err.message && err.message !== "Authentication failed" && err.message !== "Registration failed") {
+        errorMsg = err.message;
       }
       setAuthError(errorMsg);
     } finally {
       setAuthLoading(false);
     }
-  };
-
-  const handleSocialLogin = (provider: string) => {
-    toast(
-      locale === "ne"
-        ? `${provider} मार्फत लगइन चाँडै सुरु हुँदैछ।`
-        : `${provider} login will be available soon.`,
-      {
-        icon: "ℹ️",
-        style: {
-          borderRadius: "0px",
-          background: "var(--foreground)",
-          color: "var(--background)",
-          fontSize: "13px",
-        },
-      }
-    );
   };
 
   return (
@@ -295,47 +287,6 @@ export default function AuthModal({
                   </button>
                 </div>
               </form>
-
-              {/* ── Social Login Section at Bottom ── */}
-              <div className="relative my-4 sm:my-5">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full border-t border-border/80" />
-                </div>
-                <div className="relative flex justify-center text-[11px] sm:text-xs uppercase tracking-wider">
-                  <span className="bg-background px-3 text-muted-foreground font-sans">
-                    {locale === "ne"
-                      ? "वा सामाजिक सञ्जालबाट"
-                      : "Or continue with"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2.5">
-                {/* Google Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin("Google")}
-                  className="flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 border border-border bg-surface hover:bg-muted/50 hover:border-foreground/30 text-xs sm:text-sm font-bold text-foreground transition-all cursor-pointer shadow-2xs font-sans group"
-                >
-                  <GoogleIcon size={18} className="transition-transform group-hover:scale-105" />
-                  <span>Google</span>
-                </button>
-
-                {/* Facebook Button */}
-                <button
-                  type="button"
-                  onClick={() => handleSocialLogin("Facebook")}
-                  className="flex items-center justify-center gap-2 py-2 sm:py-2.5 px-3 border border-border bg-surface hover:bg-muted/50 hover:border-brand/40 text-xs sm:text-sm font-bold text-foreground transition-all cursor-pointer shadow-2xs font-sans group"
-                >
-                  <svg
-                    className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-foreground hover:text-brand-secondary fill-current transition-transform group-hover:scale-105"
-                    viewBox="0 0 24 24"
-                  >
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                  </svg>
-                  <span>Facebook</span>
-                </button>
-              </div>
             </div>
 
             {/* Toggle Link */}
