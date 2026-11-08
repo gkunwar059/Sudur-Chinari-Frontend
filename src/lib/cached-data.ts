@@ -57,7 +57,7 @@ export async function getMenuCached(lang?: ApiLang) {
   cacheLife("minutes");
   cacheTag("categories");
   if (lang) cacheTag(`categories-${lang}`);
-  return apiFetch<Category[]>("/categories/menu/", { lang });
+  return apiFetch<Category[]>("/categories/menu/", { lang }).catch(() => []);
 }
 
 export async function getCategoryBySlugCached(slug: string, lang?: ApiLang) {
@@ -81,7 +81,7 @@ export async function getDistrictBySlugCached(slug: string, lang?: ApiLang) {
   if (lang) cacheTag(`district-${slug}-${lang}`);
   return apiFetch<ApiDistrictRecord>(`/districts/${encodeURIComponent(slug)}/`, {
     lang,
-  });
+  }).catch(() => null);
 }
 
 export async function getPartnersCached(
@@ -95,7 +95,7 @@ export async function getPartnersCached(
   return apiFetch<PaginatedResponse<PartnerRecord>>("/partners/", {
     lang,
     params: { limit: FULL_LIST_LIMIT, ...params },
-  });
+  }).catch(() => ({ count: 0, next: null, previous: null, results: [] }));
 }
 
 export async function getHotelsCached(

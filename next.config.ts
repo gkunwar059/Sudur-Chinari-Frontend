@@ -82,6 +82,15 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: "http",
+        hostname: "sudur-backend",
+        port: "8000",
+      },
+      {
+        protocol: "http",
+        hostname: "sudur-backend",
+      },
+      {
+        protocol: "http",
         hostname: "api.sudurchinari.com",
       },
       {

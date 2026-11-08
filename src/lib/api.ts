@@ -191,7 +191,13 @@ export async function apiFetch<T = any>(endpoint: string, options: ApiFetchOptio
     if (!res.ok) {
       let errorData: any;
       try {
-        errorData = await res.json();
+        const cloned = res.clone();
+        try {
+          errorData = await cloned.json();
+        } catch {
+          const text = await res.text().catch(() => '');
+          errorData = text || res.statusText;
+        }
       } catch {
         errorData = res.statusText;
       }
