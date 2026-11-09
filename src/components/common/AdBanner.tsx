@@ -231,6 +231,21 @@ export default function AdBanner({
               )}
             </a>
           </>
+        ) : loading ? (
+          /* ── Loading Skeleton ── */
+          <div
+            role="status"
+            aria-live="polite"
+            className={`skeleton-shimmer w-full ${config.containerClass} overflow-hidden rounded-none border border-border flex items-center justify-center`}
+          >
+            <div className="relative flex flex-col items-center gap-2 text-muted-foreground/50">
+              <Megaphone size={16} />
+              <div className="h-2 w-24 bg-foreground/10" />
+            </div>
+            <span className="sr-only">
+              {isNe ? "विज्ञापन लोड हुँदैछ..." : "Loading advertisement..."}
+            </span>
+          </div>
         ) : (
           /* ── Empty Ad Slot: Button Only ── */
           allowEmptyUpload && (

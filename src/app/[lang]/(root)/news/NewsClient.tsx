@@ -6,6 +6,7 @@ import { useQuery } from "@tanstack/react-query";
 import { newsApi } from "@/lib/api";
 
 import EditorialCard from "@/components/common/EditorialCard";
+import AdBanner from "@/components/common/AdBanner";
 import { useLanguage } from "@/context/LanguageContext";
 
 export default function NewsClient({
@@ -72,6 +73,8 @@ export default function NewsClient({
             />
           ))}
         </div>
+
+        <AdBanner placement="billboard-mid" page="all" className="mt-10" />
       </div>
     </main>
   );

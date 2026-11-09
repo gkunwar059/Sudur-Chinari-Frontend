@@ -45,6 +45,20 @@ export async function generateMetadata({
       url: `${SITE_URL}${localizedPath(lang as Locale, "/")}`,
       title: dict.meta.home.title,
       description: dict.meta.home.description,
+      images: [
+        {
+          url: `${SITE_URL}/images/og-default.png`,
+          width: 1200,
+          height: 630,
+          alt: dict.meta.home.title,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: dict.meta.home.title,
+      description: dict.meta.home.description,
+      images: [`${SITE_URL}/images/og-default.png`],
     },
   };
 }

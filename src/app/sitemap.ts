@@ -16,6 +16,8 @@ const staticPages = [
   "/products",
   "/yatayat",
   "/tourism",
+  "/privacy",
+  "/terms",
 ];
 
 function languageAlternates(path: string) {

@@ -23,6 +23,7 @@ import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import { buildMetadata } from "@/lib/seo";
 import ProductContributionModal from "@/components/products/ProductContributionModal";
 import ProductImage from "@/components/products/ProductImage";
+import AdBanner from "@/components/common/AdBanner";
 import PageSkeleton from "@/components/common/PageSkeleton";
 import { newsApi } from "@/lib/api";
 
@@ -664,11 +665,11 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
                 </div>
               </div>
 
-              <div className="flex min-h-[88px] items-center justify-center border border-dashed border-border bg-background/70 px-4">
-                <span className="text-[10px] font-sans uppercase tracking-[0.24em] text-muted-foreground">
-                  {locale === "ne" ? "विज्ञापन" : "Advertisement"}
-                </span>
-              </div>
+              <AdBanner
+                placement="sidebar"
+                page="products"
+                className="!my-0 w-full"
+              />
             </aside>
           </div>
         </div>

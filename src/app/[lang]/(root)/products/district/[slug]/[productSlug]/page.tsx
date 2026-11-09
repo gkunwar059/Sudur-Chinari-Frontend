@@ -13,6 +13,7 @@ import { buildMetadata } from "@/lib/seo";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import PageSkeleton from "@/components/common/PageSkeleton";
+import AdBanner from "@/components/common/AdBanner";
 
 import { newsApi } from "@/lib/api";
 
@@ -234,6 +235,8 @@ async function ProductDetailsPageContent({ params }: Props) {
             )}
           </div>
         </div>
+
+        <AdBanner placement="billboard-mid" page="products" className="mt-10" />
       </div>
     </main>
   );

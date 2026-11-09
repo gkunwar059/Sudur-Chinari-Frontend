@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useScrollRail } from "@/hooks/useScrollRail";
 import Image from "next/image";
 import Link from "next/link";
@@ -30,6 +31,16 @@ interface VideoShortsProps {
   title?: { ne: string; en: string };
   hideDivider?: boolean;
   videos?: VideoItem[];
+}
+
+function getYouTubeId(video: VideoItem): string {
+  if (video.youtube_id) return video.youtube_id;
+  const url = video.video_url;
+  if (!url) return "";
+  const match = url.match(
+    /(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([\w-]{11})/,
+  );
+  return match?.[1] || "";
 }
 
 export default function VideoShorts({
@@ -88,6 +99,9 @@ export default function VideoShorts({
       })
     : allVideos;
   const displayVideos = filteredVideos;
+  const activeYouTubeId = activeModalVideo
+    ? getYouTubeId(activeModalVideo)
+    : "";
 
   const getDistrictName = (v: VideoItem) => {
     if (!v.district) return locale === "ne" ? "सुदूरपश्चिम" : "Sudurpashchim";
@@ -357,8 +371,9 @@ export default function VideoShorts({
       )}
 
       {/* ── Interactive Instant Video Modal / Lightbox ── */}
-      {activeModalVideo && (
-        <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center md:p-6 animate-fadeIn">
+      {activeModalVideo &&
+        createPortal(
+          <div className="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-md flex items-center justify-center md:p-6 animate-fadeIn">
           {/* Modal Container */}
           <div className="relative w-full h-full md:h-[560px] md:max-h-[92vh] md:max-w-4xl bg-black md:bg-surface border-0 md:border md:border-border text-white md:text-foreground shadow-2xl flex flex-col md:flex-row overflow-hidden rounded-none">
             {/* Close Button Top Right (Desktop) */}
@@ -373,30 +388,50 @@ export default function VideoShorts({
 
             {/* ── 1. Video Player Area (Full screen on mobile, 340px column on desktop) ── */}
             <div className="relative w-full h-full md:w-[340px] lg:w-[360px] md:h-full bg-black shrink-0 overflow-hidden flex items-center justify-center">
+              {!activeModalVideo.isShort && (
+                <Image
+                  src={
+                    normalizeImageUrl(activeModalVideo.thumbnail) ||
+                    "/images/places/api_himal.jpg"
+                  }
+                  alt=""
+                  fill
+                  aria-hidden="true"
+                  className="object-cover scale-110 blur-2xl opacity-40 md:hidden"
+                />
+              )}
+              <div
+                className={cn(
+                  "relative flex items-center justify-center",
+                  activeModalVideo.isShort
+                    ? "w-full h-full"
+                    : "w-full aspect-video md:w-full md:h-full md:aspect-auto",
+                )}
+              >
               {/* Actual Video Player or Thumbnail */}
-              {isPlaying && activeModalVideo.youtube_id ? (
+              {isPlaying && activeYouTubeId ? (
                 <div className="relative w-full h-full flex items-center justify-center bg-black">
                   <iframe
-                    src={`https://www.youtube-nocookie.com/embed/${activeModalVideo.youtube_id}?autoplay=1&playsinline=1&rel=0&modestbranding=1`}
+                    src={`https://www.youtube-nocookie.com/embed/${activeYouTubeId}?autoplay=1&playsinline=1&rel=0&modestbranding=1`}
                     title={t(activeModalVideo.title)}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowFullScreen
                     className="w-full h-full object-cover border-0"
                   />
                 </div>
-              ) : isPlaying && activeModalVideo.video_url && activeModalVideo.video_url.endsWith(".mp4") ? (
+              ) : isPlaying && activeModalVideo.video_url ? (
                 <video
                   src={normalizeImageUrl(activeModalVideo.video_url)}
                   autoPlay
                   controls
                   playsInline
-                  className="w-full h-full object-cover"
+                  className={cn(
+                    "w-full h-full",
+                    activeModalVideo.isShort ? "object-cover" : "object-contain",
+                  )}
                 />
               ) : (
-                <div
-                  onClick={() => setIsPlaying(true)}
-                  className="relative w-full h-full cursor-pointer group flex items-center justify-center"
-                >
+                <div className="relative w-full h-full flex items-center justify-center">
                   <Image
                     src={
                       normalizeImageUrl(activeModalVideo.thumbnail) ||
@@ -405,23 +440,34 @@ export default function VideoShorts({
                     alt={t(activeModalVideo.title)}
                     fill
                     sizes="(max-width: 768px) 100vw, 360px"
-                    className="object-cover transition-all duration-700 brightness-85 group-hover:brightness-95 group-hover:scale-102"
+                    className="object-cover brightness-85"
                     preload
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-transparent to-black/40" />
 
-                  {/* Play Button Overlay */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-16 h-16 rounded-full bg-black/60 backdrop-blur-sm border border-white/50 flex items-center justify-center group-hover:scale-110 group-hover:bg-brand-secondary transition-all shadow-xl">
+                  <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 px-6 text-center">
+                    <div className="w-14 h-14 rounded-full bg-black/60 backdrop-blur-sm border border-white/40 flex items-center justify-center">
                       <Play
-                        size={26}
+                        size={22}
                         fill="white"
-                        className="text-white ml-1"
+                        className="text-white ml-0.5"
                       />
                     </div>
+                    <p className="text-sm font-semibold text-white">
+                      {locale === "ne" ? "भिडियो उपलब्ध छैन" : "Video unavailable"}
+                    </p>
+                    <Link
+                      href={`/videos/${activeModalVideo.id}`}
+                      className="text-xs text-white/80 underline underline-offset-2"
+                    >
+                      {locale === "ne"
+                        ? "पुरा पृष्ठमा हेर्नुहोस्"
+                        : "Open full page"}
+                    </Link>
                   </div>
                 </div>
               )}
+              </div>
 
               {/* ── Top Badges & Mobile Close Button (Overlaid on top of video) ── */}
               <div className="absolute top-3 left-3 right-3 z-30 flex items-center justify-between pointer-events-none">
@@ -445,9 +491,8 @@ export default function VideoShorts({
                 </button>
               </div>
 
-              {/* ── MOBILE-ONLY Overlays: Floating Action Rail (Right) ── */}
-              <div className="md:hidden absolute right-3 bottom-28 z-30 flex flex-col items-center gap-4 pointer-events-auto">
-                {/* Like Button */}
+              {/* ── Mobile Reel Action Rail ── */}
+              <div className="md:hidden absolute right-3 bottom-44 z-30 flex flex-col items-center gap-4 pointer-events-auto">
                 <button
                   type="button"
                   onClick={() => toggleLike(activeModalVideo.id)}
@@ -470,11 +515,13 @@ export default function VideoShorts({
                     />
                   </div>
                   <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
-                    {formatViews((activeModalVideo.likes || 0) + (likedMap[activeModalVideo.id] ? 1 : 0))}
+                    {formatViews(
+                      (activeModalVideo.likes || 0) +
+                        (likedMap[activeModalVideo.id] ? 1 : 0),
+                    )}
                   </span>
                 </button>
 
-                {/* Share Button */}
                 <button
                   type="button"
                   onClick={() => handleShare(activeModalVideo.id)}
@@ -489,11 +536,16 @@ export default function VideoShorts({
                     )}
                   </div>
                   <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
-                    {copied ? (locale === "ne" ? "कपी" : "Copied") : (locale === "ne" ? "सेयर" : "Share")}
+                    {copied
+                      ? locale === "ne"
+                        ? "कपी"
+                        : "Copied"
+                      : locale === "ne"
+                        ? "सेयर"
+                        : "Share"}
                   </span>
                 </button>
 
-                {/* Full Page Link */}
                 <Link
                   href={`/videos/${activeModalVideo.id}`}
                   aria-label="Open full page"
@@ -508,8 +560,8 @@ export default function VideoShorts({
                 </Link>
               </div>
 
-              {/* ── MOBILE-ONLY Overlays: Bottom Headline & District ── */}
-              <div className="md:hidden absolute bottom-14 left-0 right-16 z-20 p-4 pointer-events-none bg-gradient-to-t from-black/95 via-black/60 to-transparent">
+              {/* ── Mobile Reel Caption ── */}
+              <div className="md:hidden absolute bottom-20 left-0 right-16 z-20 p-4 pointer-events-none bg-gradient-to-t from-black/95 via-black/60 to-transparent">
                 <div className="flex items-center gap-2 mb-1.5 text-xs">
                   <span className="font-bold text-brand-secondary">
                     {getDistrictName(activeModalVideo)}
@@ -527,7 +579,7 @@ export default function VideoShorts({
                 </h3>
               </div>
 
-              {/* ── MOBILE-ONLY Overlays: Bottom Pager Bar ── */}
+              {/* ── Mobile Reel Pager ── */}
               <div className="md:hidden absolute bottom-0 left-0 right-0 z-30 px-4 py-2.5 bg-black/90 border-t border-white/10 flex items-center justify-between text-xs text-white pb-[max(0.625rem,env(safe-area-inset-bottom))]">
                 <button
                   type="button"
@@ -539,7 +591,10 @@ export default function VideoShorts({
                 </button>
 
                 <span className="text-white/70 font-mono text-xs">
-                  {displayVideos.findIndex((v) => String(v.id) === String(activeModalVideo.id)) + 1} / {displayVideos.length}
+                  {displayVideos.findIndex(
+                    (v) => String(v.id) === String(activeModalVideo.id),
+                  ) + 1}{" "}
+                  / {displayVideos.length}
                 </span>
 
                 <button
@@ -570,8 +625,8 @@ export default function VideoShorts({
               </div>
             </div>
 
-            {/* ── 2. DESKTOP-ONLY Right Column: Editorial Details & Actions ── */}
-            <div className="hidden md:flex flex-1 p-6 lg:p-8 flex-col justify-between overflow-y-auto bg-surface text-foreground">
+            {/* ── 2. Editorial Details & Actions ── */}
+            <div className="hidden md:flex flex-1 flex-col justify-between overflow-y-auto bg-surface p-6 text-foreground lg:p-8">
               <div>
                 {/* Meta details */}
                 <div className="flex items-center gap-2 mb-2">
@@ -681,8 +736,9 @@ export default function VideoShorts({
               </div>
             </div>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </section>
   );
 }

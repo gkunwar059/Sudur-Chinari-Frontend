@@ -8,6 +8,7 @@ import { notFound } from "next/navigation";
 import { t, normalizeImageUrl } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import PhotoLightboxGallery from "@/components/photos/PhotoLightboxGallery";
+import AdBanner from "@/components/common/AdBanner";
 import { newsApi } from "@/lib/api";
 import { PHOTO_STORIES } from "@/data/articles";
 
@@ -166,6 +167,8 @@ export default async function PhotoStoryDetailsPage({ params }: Props) {
           lang={lang}
           title={t(story.title, lang as Locale)}
         />
+
+        <AdBanner placement="billboard-mid" page="photo" className="mt-12" />
       </div>
     </div>
   );

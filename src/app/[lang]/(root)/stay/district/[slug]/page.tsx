@@ -15,6 +15,7 @@ import HotelSearch from "./HotelSearch";
 import HotelCard from "@/components/common/HotelCard";
 import FTEmptyState from "@/components/common/FTEmptyState";
 import PageSkeleton from "@/components/common/PageSkeleton";
+import AdBanner from "@/components/common/AdBanner";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -219,6 +220,8 @@ async function StayDistrictPageContent({
             ))}
           </div>
         )}
+
+        <AdBanner placement="billboard-mid" page="stay" className="mt-10" />
       </div>
     </main>
   );

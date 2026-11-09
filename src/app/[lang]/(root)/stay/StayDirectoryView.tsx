@@ -8,6 +8,7 @@ import { normalizeImageUrl, t } from "@/lib/utils";
 import { DISTRICT_REAL_INDIVIDUAL_PATHS } from "@/data/districtMaps";
 import { mergeDistrictList } from "@/lib/districts";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
+import AdBanner from "@/components/common/AdBanner";
 
 interface StayDirectoryViewProps {
   districts: any[];
@@ -76,13 +77,12 @@ export default function StayDirectoryView({
             </div>
 
             {/* Right Ad Section */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto">
-              {/* Advertisement Placeholder */}
-              <div className="hidden sm:flex items-center justify-center w-[250px] lg:w-[320px] min-h-[100px] h-full bg-surface border border-dashed border-border select-none">
-                <span className="text-[10px] text-muted-foreground font-sans tracking-widest uppercase">
-                  {locale === "ne" ? "विज्ञापन" : "Advertisement"}
-                </span>
-              </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-[250px] lg:w-[320px]">
+              <AdBanner
+                placement="sidebar"
+                page="stay"
+                className="!my-0"
+              />
             </div>
           </div>
         </div>

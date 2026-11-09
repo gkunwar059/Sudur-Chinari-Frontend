@@ -1,10 +1,20 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { useTheme } from "next-themes";
-import { Search, Menu, X, Sun, Moon, User, ChevronDown } from "lucide-react";
+import {
+  Search,
+  Menu,
+  X,
+  Sun,
+  Moon,
+  User,
+  ChevronDown,
+  LogOut,
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigationMenu } from "@/context/NavigationContext";
@@ -15,6 +25,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import LocalizedLink from "@/components/i18n/LocalizedLink";
 import LanguageSwitcher from "@/components/i18n/LanguageSwitcher";
 import { stripLocalePrefix } from "@/lib/i18n/paths";
+import { useBodyScrollLock } from "@/lib/scroll-lock";
 import AuthModal from "@/components/auth/AuthModal";
 import type { BilingualText, Category } from "@/types";
 
@@ -110,6 +121,10 @@ export default function Header() {
     null,
   );
   const [isScrolled, setIsScrolled] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+
+  useBodyScrollLock(menuOpen);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -159,7 +174,29 @@ export default function Header() {
   // Reset transient menu state on navigation
   useEffect(() => {
     setHoveredKey(null);
+    setProfileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!profileOpen) return;
+    const handlePointerDown = (event: PointerEvent) => {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
+        setProfileOpen(false);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setProfileOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [profileOpen]);
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -274,21 +311,69 @@ export default function Header() {
                 <User size={18} strokeWidth={2} />
               </button>
             ) : (
-              <button
-                type="button"
-                onClick={() => logout()}
-                className="sm:hidden text-foreground hover:text-red-500 transition-colors p-2 min-h-[40px] flex items-center justify-center cursor-pointer"
-              >
-                <X size={18} strokeWidth={2} />
-              </button>
+              <div ref={profileRef} className="relative sm:hidden">
+                <button
+                  type="button"
+                  onClick={() => setProfileOpen((open) => !open)}
+                  aria-label="Open profile"
+                  aria-expanded={profileOpen}
+                  className="flex items-center justify-center p-2 min-h-[40px] cursor-pointer"
+                >
+                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-brand text-xs font-bold text-white">
+                    {(user.first_name || user.username || "U")
+                      .charAt(0)
+                      .toUpperCase()}
+                  </span>
+                </button>
+                <AnimatePresence>
+                  {profileOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -6 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-full z-50 mt-2 w-64 rounded-xl border border-border bg-background p-4 shadow-xl"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand text-sm font-bold text-white">
+                          {(user.first_name || user.username || "U")
+                            .charAt(0)
+                            .toUpperCase()}
+                        </span>
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {user.first_name
+                              ? `${user.first_name} ${user.last_name || ""}`.trim()
+                              : user.username}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setProfileOpen(false);
+                          logout();
+                        }}
+                        className="mt-3 flex w-full items-center justify-center gap-2 rounded-lg border border-border px-3 py-2 text-xs font-semibold text-muted-foreground hover:border-red-200 hover:bg-red-50 hover:text-red-500 transition-colors cursor-pointer dark:hover:bg-red-950/30"
+                      >
+                        <LogOut size={14} />
+                        {locale === "ne" ? "लगआउट" : "Logout"}
+                      </button>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
 
-            {/* Theme Toggle */}
+            {/* Theme Toggle (desktop) */}
             <button
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
               aria-label="Toggle theme"
-              className="text-foreground hover:text-brand transition-colors p-2 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer rounded-full hover:bg-surface"
+              className="hidden sm:flex text-foreground hover:text-brand transition-colors p-2 min-h-[40px] min-w-[40px] items-center justify-center cursor-pointer rounded-full hover:bg-surface"
             >
               {mounted && theme === "dark" ? (
                 <Moon size={18} className="text-brand" />
@@ -447,189 +532,246 @@ export default function Header() {
       </div>
 
       {/* ── Mobile Menu Sidebar ── */}
-      <AnimatePresence>
-        {menuOpen && (
-          <>
-            {/* Backdrop */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setMenuOpen(false)}
-              className="fixed inset-0 bg-black/40 z-[100] xl:hidden backdrop-blur-sm"
-            />
+      {mounted &&
+        createPortal(
+          <AnimatePresence>
+            {menuOpen && (
+              <>
+                {/* Backdrop */}
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={() => setMenuOpen(false)}
+                  className="fixed inset-0 bg-black/40 z-[300] xl:hidden backdrop-blur-sm"
+                />
 
-            {/* Sidebar */}
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ type: "spring", bounce: 0, duration: 0.4 }}
-              className="fixed top-0 right-0 bottom-0 w-[280px] bg-background z-[101] xl:hidden shadow-2xl flex flex-col"
-            >
-              <div className="flex items-center justify-between p-4 border-b border-border">
-                <span className="font-bold text-lg text-foreground">Menu</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setTheme(theme === "dark" ? "light" : "dark")
-                    }
-                    aria-label="Toggle theme"
-                    className="p-2 text-foreground hover:text-brand transition-colors bg-surface rounded-full min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer"
-                  >
-                    {mounted && theme === "dark" ? (
-                      <Moon size={16} className="text-brand" />
-                    ) : (
-                      <Sun size={16} className="text-warning" />
-                    )}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setMenuOpen(false)}
-                    aria-label="Close menu"
-                    className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-surface rounded-full min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer"
-                  >
-                    <X size={20} />
-                  </button>
-                </div>
-              </div>
+                {/* Sidebar */}
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                  className="fixed top-0 right-0 bottom-0 w-[280px] bg-background z-[301] xl:hidden shadow-2xl flex flex-col"
+                >
+                  <div className="flex items-center justify-between p-4 border-b border-border">
+                    <span className="font-bold text-lg text-foreground">Menu</span>
+                    <button
+                      type="button"
+                      onClick={() => setMenuOpen(false)}
+                      aria-label="Close menu"
+                      className="p-2 text-muted-foreground hover:text-foreground transition-colors bg-surface rounded-full min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer"
+                    >
+                      <X size={20} />
+                    </button>
+                  </div>
 
-              <div className="flex-1 overflow-y-auto py-4 px-4">
-                <nav className="flex flex-col gap-1">
-                  {navItems.map((item) => {
-                    const isActive = isNavItemActive(item, unprefixedPath);
-                    const hasChildren = item.children.length > 0;
-                    const isExpanded =
-                      expandedMobileKey === item.key ||
-                      (expandedMobileKey === null && isActive && hasChildren);
-                    return (
-                      <div key={item.key}>
-                        <div className="flex items-center gap-1">
-                          <LocalizedLink
-                            href={item.href}
-                            onClick={() => setMenuOpen(false)}
-                            className={cn(
-                              "flex-1 px-4 py-3 rounded-xl text-base font-medium transition-all flex items-center gap-2.5",
-                              isActive
-                                ? "bg-brand/10 text-brand"
-                                : "text-foreground hover:bg-surface",
-                            )}
-                          >
-                            {item.icon && (
-                              <item.icon size={18} className="shrink-0" />
-                            )}
-                            {t(item.label)}
-                          </LocalizedLink>
-                          {hasChildren && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setExpandedMobileKey(isExpanded ? "" : item.key)
-                              }
-                              aria-label={`Toggle ${t(item.label)} sub-menu`}
-                              aria-expanded={isExpanded}
-                              className="p-3 rounded-xl text-muted-foreground hover:bg-surface hover:text-brand transition-colors"
-                            >
-                              <ChevronDown
-                                size={18}
-                                className={cn(
-                                  "transition-transform duration-200",
-                                  isExpanded && "rotate-180",
-                                )}
-                              />
-                            </button>
-                          )}
-                        </div>
-
-                        <AnimatePresence initial={false}>
-                          {hasChildren && isExpanded && (
-                            <motion.div
-                              initial={{ height: 0, opacity: 0 }}
-                              animate={{ height: "auto", opacity: 1 }}
-                              exit={{ height: 0, opacity: 0 }}
-                              transition={{ duration: 0.2 }}
-                              className="overflow-hidden"
-                            >
-                              <div className="ml-4 pl-3 border-l-2 border-brand/20 py-1 flex flex-col gap-0.5">
-                                {item.children.map((child) => {
-                                  const childHref = categoryHref(child);
-                                  const childLabel = t(child.name);
-                                  return (
-                                    <LocalizedLink
-                                      key={child.slug}
-                                      href={childHref}
-                                      onClick={() => setMenuOpen(false)}
-                                      className={cn(
-                                        "flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium transition-colors",
-                                        unprefixedPath === childHref
-                                          ? "text-brand bg-brand/5"
-                                          : "text-foreground hover:bg-surface",
-                                      )}
-                                    >
-                                      <CategoryThumb
-                                        image={child.image}
-                                        label={childLabel}
-                                        size={30}
-                                      />
-                                      {childLabel}
-                                    </LocalizedLink>
-                                  );
-                                })}
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    );
-                  })}
-                </nav>
-              </div>
-
-              <div className="p-4 pb-safe mb-16 md:mb-0 border-t border-border bg-surface/50 flex items-center justify-between gap-2">
-                <LanguageSwitcher />
-                <div className="flex items-center gap-2.5">
-                  <span className="text-xs text-muted-foreground font-medium font-sans">
-                    {mounted && theme === "dark"
-                      ? locale === "ne"
-                        ? "डार्क"
-                        : "Dark"
-                      : locale === "ne"
-                        ? "लाइट"
-                        : "Light"}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setTheme(theme === "dark" ? "light" : "dark")
-                    }
-                    aria-label="Toggle theme"
-                    className={cn(
-                      "relative inline-flex h-[26px] w-[50px] items-center rounded-full transition-colors cursor-pointer shrink-0 border border-transparent shadow-inner",
-                      theme === "dark" ? "bg-brand" : "bg-gray-300",
-                    )}
-                  >
-                    <span
+                  <div className="flex items-center gap-3 px-4 py-4 border-b border-border">
+                    <div
                       className={cn(
-                        "inline-flex flex-shrink-0 items-center justify-center h-[20px] w-[20px] transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm",
-                        theme === "dark"
-                          ? "translate-x-[26px]"
-                          : "translate-x-[4px]",
+                        "flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-lg font-bold",
+                        user
+                          ? "bg-brand text-white"
+                          : "bg-surface text-muted-foreground",
                       )}
                     >
-                      {mounted && theme === "dark" ? (
-                        <Moon size={12} className="text-brand" />
+                      {user ? (
+                        (user.first_name || user.username || "U")
+                          .charAt(0)
+                          .toUpperCase()
                       ) : (
-                        <Sun size={12} className="text-warning" />
+                        <User size={22} />
                       )}
-                    </span>
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      {user ? (
+                        <>
+                          <p className="truncate text-sm font-semibold text-foreground">
+                            {user.first_name
+                              ? `${user.first_name} ${user.last_name || ""}`.trim()
+                              : user.username}
+                          </p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {user.email}
+                          </p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-semibold text-foreground">
+                            {locale === "ne" ? "अतिथि" : "Guest"}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {locale === "ne"
+                              ? "खातामा लगइन गर्नुहोस्"
+                              : "Sign in to your account"}
+                          </p>
+                        </>
+                      )}
+                    </div>
+                    {user ? (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          logout();
+                          setMenuOpen(false);
+                        }}
+                        aria-label={locale === "ne" ? "लगआउट" : "Logout"}
+                        title={locale === "ne" ? "लगआउट" : "Logout"}
+                        className="p-2 text-muted-foreground hover:text-red-500 transition-colors bg-surface rounded-full min-h-[38px] min-w-[38px] flex items-center justify-center cursor-pointer shrink-0"
+                      >
+                        <LogOut size={18} />
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setIsLoginModalOpen(true);
+                        }}
+                        className="text-xs font-semibold text-brand hover:text-brand-dark transition-colors shrink-0"
+                      >
+                        {locale === "ne" ? "लगइन" : "Login"}
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto overscroll-contain py-4 px-4">
+                    <nav className="flex flex-col gap-1">
+                      {navItems.map((item) => {
+                        const isActive = isNavItemActive(item, unprefixedPath);
+                        const hasChildren = item.children.length > 0;
+                        const isExpanded =
+                          expandedMobileKey === item.key ||
+                          (expandedMobileKey === null && isActive && hasChildren);
+                        return (
+                          <div key={item.key}>
+                            <div className="flex items-center gap-1">
+                              <LocalizedLink
+                                href={item.href}
+                                onClick={() => setMenuOpen(false)}
+                                className={cn(
+                                  "flex-1 px-4 py-2.5 rounded-xl text-base font-medium transition-all flex items-center gap-2.5",
+                                  isActive
+                                    ? "bg-brand/10 text-brand"
+                                    : "text-foreground hover:bg-surface",
+                                )}
+                              >
+                                {item.icon && (
+                                  <item.icon size={18} className="shrink-0" />
+                                )}
+                                {t(item.label)}
+                              </LocalizedLink>
+                              {hasChildren && (
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setExpandedMobileKey(isExpanded ? "" : item.key)
+                                  }
+                                  aria-label={`Toggle ${t(item.label)} sub-menu`}
+                                  aria-expanded={isExpanded}
+                                  className="p-2.5 rounded-xl text-muted-foreground hover:bg-surface hover:text-brand transition-colors"
+                                >
+                                  <ChevronDown
+                                    size={18}
+                                    className={cn(
+                                      "transition-transform duration-200",
+                                      isExpanded && "rotate-180",
+                                    )}
+                                  />
+                                </button>
+                              )}
+                            </div>
+
+                            <AnimatePresence initial={false}>
+                              {hasChildren && isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: "auto", opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  <div className="ml-4 pl-3 border-l-2 border-brand/20 py-1 flex flex-col gap-0.5">
+                                    {item.children.map((child) => {
+                                      const childHref = categoryHref(child);
+                                      const childLabel = t(child.name);
+                                      return (
+                                        <LocalizedLink
+                                          key={child.slug}
+                                          href={childHref}
+                                          onClick={() => setMenuOpen(false)}
+                                          className={cn(
+                                            "flex items-center gap-3 px-2 py-2 rounded-lg text-sm font-medium transition-colors",
+                                            unprefixedPath === childHref
+                                              ? "text-brand bg-brand/5"
+                                              : "text-foreground hover:bg-surface",
+                                          )}
+                                        >
+                                          <CategoryThumb
+                                            image={child.image}
+                                            label={childLabel}
+                                            size={30}
+                                          />
+                                          {childLabel}
+                                        </LocalizedLink>
+                                      );
+                                    })}
+                                  </div>
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })}
+                    </nav>
+                  </div>
+
+                  <div className="p-4 pb-safe border-t border-border bg-surface/50 flex items-center justify-between gap-2">
+                    <LanguageSwitcher />
+                    <div className="flex items-center gap-2.5">
+                      <span className="text-xs text-muted-foreground font-medium font-sans">
+                        {mounted && theme === "dark"
+                          ? locale === "ne"
+                            ? "डार्क"
+                            : "Dark"
+                          : locale === "ne"
+                            ? "लाइट"
+                            : "Light"}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setTheme(theme === "dark" ? "light" : "dark")
+                        }
+                        aria-label="Toggle theme"
+                        className={cn(
+                          "relative inline-flex h-[26px] w-[50px] items-center rounded-full transition-colors cursor-pointer shrink-0 border border-transparent shadow-inner",
+                          theme === "dark" ? "bg-brand" : "bg-gray-300",
+                        )}
+                      >
+                        <span
+                          className={cn(
+                            "inline-flex flex-shrink-0 items-center justify-center h-[20px] w-[20px] transform rounded-full bg-white transition-transform duration-200 ease-in-out shadow-sm",
+                            theme === "dark"
+                              ? "translate-x-[26px]"
+                              : "translate-x-[4px]",
+                          )}
+                        >
+                          {mounted && theme === "dark" ? (
+                            <Moon size={12} className="text-brand" />
+                          ) : (
+                            <Sun size={12} className="text-warning" />
+                          )}
+                        </span>
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>,
+          document.body,
         )}
-      </AnimatePresence>
 
       {/* ── Auth Modal (Extracted Component) ── */}
       <AuthModal

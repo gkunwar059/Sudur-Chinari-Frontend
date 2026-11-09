@@ -35,6 +35,8 @@ export interface CategoryPageViewProps {
   parentHref?: string;
   /** Canonical path of this page (used for JSON-LD/breadcrumbs) */
   pagePath?: string;
+  /** Backend BannerAd page key for ad targeting (defaults to derived section) */
+  pageKey?: string;
 }
 
 export default function CategoryPageView({
@@ -49,10 +51,19 @@ export default function CategoryPageView({
   basePath = "/category",
   parentHref,
   pagePath,
+  pageKey,
 }: CategoryPageViewProps) {
   const isEn = lang === "en";
   const leadArticle = articles[0];
   const gridArticles = articles.slice(1);
+
+  const adPage =
+    pageKey ??
+    (SECTION_PATHS[slug]
+      ? slug
+      : parentCategory && SECTION_PATHS[parentCategory.slug]
+        ? parentCategory.slug
+        : "category");
 
   const defaultDesc = CATEGORY_DESCRIPTIONS[slug] || {
     ne: `सुदूरपश्चिम प्रदेशको ${t(category.name, "ne")} सम्बन्धी आधिकारिक तथा भरपर्दो समाचार।`,
@@ -60,7 +71,7 @@ export default function CategoryPageView({
   };
 
   const siteUrl =
-    process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
+    process.env.NEXT_PUBLIC_SITE_URL || "https://sudurchinari.com";
   const currentPath = pagePath ?? `${basePath}/${slug}`;
   const parentPath =
     parentHref ?? (parentCategory ? `${basePath}/${parentCategory.slug}` : null);
@@ -220,7 +231,7 @@ export default function CategoryPageView({
         {/* ── Main Editorial Content Grid ── */}
         <div className="container-editorial py-6 sm:py-10">
           {/* Top Leaderboard Ad */}
-          <AdBanner placement="top-leaderboard" page="category" className="mb-8" />
+          <AdBanner placement="top-leaderboard" page={adPage} className="mb-8" />
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
             {/* ── Left Articles Column (8 cols) ── */}
@@ -315,7 +326,7 @@ export default function CategoryPageView({
 
               {/* Sidebar MREC Ad Slot */}
               <div className="scroll-reveal scroll-delay-100">
-                <AdBanner placement="sidebar" page="category" />
+                <AdBanner placement="sidebar" page={adPage} />
               </div>
 
               {/* 2. Other Categories */}

@@ -6,6 +6,7 @@ import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import JsonLd from "@/components/common/JsonLd";
 import PageSkeleton from "@/components/common/PageSkeleton";
 import DistrictStoriesFeed from "@/components/district/DistrictStoriesFeed";
+import AdBanner from "@/components/common/AdBanner";
 import { getArticlesCached, getDistrictBySlugCached } from "@/lib/cached-data";
 import { getDistrictBySlug, mergeDistrict } from "@/lib/districts";
 import { isLocale } from "@/lib/i18n/config";
@@ -155,6 +156,8 @@ async function DistrictStoriesContent({ params }: Props) {
             totalCount={total}
             accentColor={theme.primary}
           />
+
+          <AdBanner placement="billboard-mid" page="district" className="mt-10" />
         </div>
       </main>
     </>

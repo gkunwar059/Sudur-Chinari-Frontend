@@ -8,6 +8,7 @@ import { getCategoryBySlugCached, getHotelsCached } from "@/lib/cached-data";
 import { t } from "@/lib/utils";
 import HotelCard from "@/components/common/HotelCard";
 import PageSkeleton from "@/components/common/PageSkeleton";
+import AdBanner from "@/components/common/AdBanner";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -85,6 +86,8 @@ async function StayOrHotelPageContent({ params }: Props) {
             </p>
           </div>
         )}
+
+        <AdBanner placement="billboard-mid" page="stay" className="mt-10" />
       </div>
     </>
   );

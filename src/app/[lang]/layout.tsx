@@ -107,7 +107,7 @@ export async function generateMetadata({
       locale: ogLocale[lang as Locale],
       alternateLocale: lang === "en" ? ogLocale.ne : ogLocale.en,
       siteName: dict.brand.name,
-      images: ["/images/sudur-logo.png"],
+      images: ["/images/og-default.png"],
     },
     twitter: {
       card: "summary_large_image",

@@ -55,13 +55,12 @@ export default function ProductsDirectoryView({
               <ProductContributionModal />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto">
-              {/* Advertisement Placeholder */}
-              <div className="hidden sm:flex items-center justify-center w-[250px] lg:w-[320px] min-h-[100px] h-full bg-surface border border-dashed border-border select-none">
-                <span className="text-[10px] text-muted-foreground font-sans tracking-widest uppercase">
-                  {locale === "ne" ? "विज्ञापन" : "Advertisement"}
-                </span>
-              </div>
+            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-[250px] lg:w-[320px]">
+              <AdBanner
+                placement="sidebar"
+                page="products"
+                className="!my-0"
+              />
             </div>
           </div>
         </div>

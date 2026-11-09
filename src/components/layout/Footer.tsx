@@ -314,7 +314,7 @@ export default function Footer({ locale }: { locale: Locale }) {
                   href="/terms"
                   className="hover:text-brand-secondary transition-colors"
                 >
-                  {locale === "ne" ? "प्रयोगका सर्तहरू" : "Terms of Use"}
+                  {locale === "ne" ? "प्रयोगका सर्तहरू" : "Terms & Conditions"}
                 </Link>
               </li>
             </ul>

@@ -1,7 +1,7 @@
 import { newsApi } from "@/lib/api";
 import { getArticleSlug, t } from "@/lib/utils";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurchinari.com";
 
 export async function GET() {
   let articles: any[] = [];

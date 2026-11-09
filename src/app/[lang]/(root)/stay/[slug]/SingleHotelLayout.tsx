@@ -21,6 +21,7 @@ import HotelGallery from "@/components/stay/HotelGallery";
 import HotelLocation from "@/components/stay/HotelLocation";
 import HotelStory from "@/components/stay/HotelStory";
 import HotelSidebar from "@/components/stay/HotelSidebar";
+import AdBanner from "@/components/common/AdBanner";
 
 interface Props {
   hotel: Hotel;
@@ -123,6 +124,7 @@ export default function SingleHotelLayout({ hotel }: Props) {
 
         <div className="space-y-8 lg:sticky lg:top-32 lg:self-start">
           <HotelSidebar hotel={hotel} isEn={isEn} t={t} />
+          <AdBanner placement="sidebar" page="stay" className="!my-0" />
         </div>
       </main>
     </div>

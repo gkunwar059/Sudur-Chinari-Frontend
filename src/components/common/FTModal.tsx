@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { lockBodyScroll } from "@/lib/scroll-lock";
+
+const emptySubscribe = () => () => {};
 
 /**
  * Shared modal behavior: Escape-to-close + body scroll lock.
@@ -66,12 +69,23 @@ export default function FTModal({
 }: FTModalProps) {
   useModalDismiss(onClose);
 
+  // Render in a portal so `position: fixed` is always relative to the viewport,
+  // even when the modal is mounted inside transformed/`will-change` ancestors
+  // (e.g. `.scroll-reveal` wrappers around ad slots).
+  const mounted = useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false
+  );
+
   const panelBase =
     variant === "accent-top"
       ? "relative bg-background w-full rounded-none shadow-2xl overflow-hidden flex flex-col border-t-4 animate-in fade-in zoom-in-95 duration-200"
       : "relative bg-background border border-border border-t-[4px] border-t-brand w-full rounded-none shadow-2xl overflow-hidden flex flex-col animate-scaleUp";
 
-  return (
+  if (!mounted) return null;
+
+  return createPortal(
     <div
       role="dialog"
       aria-modal="true"
@@ -87,6 +101,7 @@ export default function FTModal({
       >
         {children}
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

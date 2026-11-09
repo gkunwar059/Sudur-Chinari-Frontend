@@ -8,7 +8,7 @@ export const SITE_URL =
 
 export const SITE_NAME = "सुदूर चिनारी";
 
-export const DEFAULT_OG_IMAGE = "/images/sudur-logo.png";
+export const DEFAULT_OG_IMAGE = "/images/og-default.png";
 
 export function absoluteUrl(locale: Locale, path: string): string {
   return `${SITE_URL}${localizedPath(locale, path)}`;

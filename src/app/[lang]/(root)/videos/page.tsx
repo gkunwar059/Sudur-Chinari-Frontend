@@ -80,11 +80,7 @@ export default async function VideosPage({ params }: Props) {
 
               {/* Sidebar Ad */}
               <div className="hidden lg:block lg:w-1/3">
-                <div className="w-full aspect-video sm:aspect-square md:aspect-video lg:aspect-[4/3] border border-dashed border-border bg-black/[0.02] flex items-center justify-center p-4">
-                  <span className="text-[10px] font-bold text-muted-foreground/50 tracking-widest uppercase text-center">
-                    Advertisement
-                  </span>
-                </div>
+                <AdBanner placement="sidebar" page="video" className="!my-0" />
               </div>
             </div>
           </div>

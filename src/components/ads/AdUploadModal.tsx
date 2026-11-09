@@ -434,7 +434,7 @@ export default function AdUploadModal({
         </div>
 
         {/* Modal Body */}
-        <div className="p-5 sm:p-7 overflow-y-auto flex-1 text-sm">
+        <div className="p-5 sm:p-7 overflow-y-auto overscroll-contain flex-1 min-h-0 text-sm">
           {!user ? (
             <div className="text-center py-8 px-4 bg-surface border border-border">
               <Megaphone className="mx-auto h-12 w-12 text-brand mb-3 opacity-90" />

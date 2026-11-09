@@ -8,6 +8,7 @@ import { Search, Clock, Filter, X, ArrowRight, SearchX, MapPin, Flame, BookOpen 
 import { t, getArticleSlug } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
 import FTCategoryBadge from "@/components/common/FTCategoryBadge";
+import AdBanner from "@/components/common/AdBanner";
 import RelativeTime from "@/components/common/RelativeTime";
 
 const TRENDING_TOPICS = [
@@ -419,6 +420,10 @@ export default function SearchClient({
             </div>
           </div>
         </section>
+
+        <div className="container-editorial pb-10">
+          <AdBanner placement="billboard-mid" page="all" className="!mt-0" />
+        </div>
       </main>
                 </>
   );
