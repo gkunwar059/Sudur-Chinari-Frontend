@@ -1,8 +1,9 @@
 import type { MetadataRoute } from "next";
+import { cacheLife, cacheTag } from "next/cache";
 import { localizedPath } from "@/lib/i18n/paths";
 import { locales } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { newsApi } from "@/lib/api";
+import { getHotelsCached, getSitemapCached } from "@/lib/cached-data";
 import { SITE_URL } from "@/lib/seo";
 import { DISTRICTS } from "@/data/districts";
 
@@ -49,6 +50,10 @@ function localizedEntries(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("sitemap");
+
   const now = new Date();
 
   const staticEntries = staticPages.flatMap((page) =>
@@ -67,9 +72,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const articleEntries: MetadataRoute.Sitemap = [];
   const hotelEntries: MetadataRoute.Sitemap = [];
   try {
-    const items = await newsApi.getSitemapServer();
+    const [items, hotelsRes] = await Promise.all([
+      getSitemapCached(),
+      getHotelsCached({ limit: 200 }),
+    ]);
 
-    for (const item of items) {
+    for (const item of items || []) {
       if (!item.slug) continue;
       if (item.type === "district") continue; // covered by districtEntries
       if (item.type !== "article" && item.type !== "category") continue;
@@ -85,7 +93,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       );
     }
 
-    const hotelsRes = await newsApi.getHotelsServer({ limit: 200 });
     for (const hotel of hotelsRes?.results || []) {
       if (!hotel.slug) continue;
       hotelEntries.push(...localizedEntries(`/stay/${hotel.slug}`, now));

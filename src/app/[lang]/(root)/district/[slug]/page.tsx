@@ -14,7 +14,7 @@ import {
   getDistrictBySlugCached,
   getPartnersCached,
 } from "@/lib/cached-data";
-import { newsApi, type ApiLang } from "@/lib/api";
+import type { ApiLang } from "@/lib/api";
 import type { District } from "@/types";
 import PartnersSection from "@/components/home/PartnersSection";
 
@@ -49,9 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ? district.description.en
         : district.description.ne;
   const description = (rawDesc || "").slice(0, 160);
-  const apiDistrict = await newsApi
-    .getDistrictBySlugServer(slug, lang as Locale)
-    .catch(() => null);
+  const apiDistrict = await getDistrictBySlugCached(
+    slug,
+    lang as Locale,
+  ).catch(() => null);
 
   return buildMetadata({
     locale: lang as Locale,
@@ -80,9 +81,10 @@ async function DistrictPageContent({ params, searchParams }: Props) {
   if (!fallbackDistrict) notFound();
 
   let district: District = fallbackDistrict;
-  const apiDistrict = await newsApi
-    .getDistrictBySlugServer(slug, lang as ApiLang)
-    .catch(() => null);
+  const apiDistrict = await getDistrictBySlugCached(
+    slug,
+    lang as ApiLang,
+  ).catch(() => null);
   if (apiDistrict && apiDistrict.slug) {
     district = mergeDistrict(apiDistrict, fallbackDistrict, {
       apiThemeWins: true,
@@ -103,9 +105,10 @@ async function DistrictPageContent({ params, searchParams }: Props) {
   const nearbyDistricts = DISTRICTS.filter((d) => d.slug !== slug).slice(0, 4);
 
   // Fetch partners specific to this district
-  const pRes = await newsApi
-    .getPartnersServer({ district: slug }, lang as ApiLang)
-    .catch(() => null);
+  const pRes = await getPartnersCached(
+    { district: slug },
+    lang as ApiLang,
+  ).catch(() => null);
   const districtPartners = pRes?.results || [];
 
   const districtDisplayName =

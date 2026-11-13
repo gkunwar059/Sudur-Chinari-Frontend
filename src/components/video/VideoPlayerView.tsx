@@ -23,7 +23,6 @@ import RelativeTime from "@/components/common/RelativeTime";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import AdBanner from "@/components/common/AdBanner";
 import { newsApi } from "@/lib/api";
-import { likeVideoAction } from "@/app/actions/comments";
 
 interface VideoPlayerViewProps {
   video: VideoItem;
@@ -80,17 +79,9 @@ export default function VideoPlayerView({
     setLikes((prev: number) => (nextLiked ? prev + 1 : Math.max(0, prev - 1)));
 
     try {
-      let res: any;
-      try {
-        res = await newsApi.likeVideoClient(video.id);
-      } catch {
-        res = await likeVideoAction(video.id);
-      }
-      if (!res) {
-        res = await likeVideoAction(video.id);
-      }
+      const res = await newsApi.likeVideoClient(video.id);
 
-      if (res && res.success !== false) {
+      if (res) {
         if (typeof res.likes === "number") setLikes(res.likes);
         if (typeof res.has_liked === "boolean") {
           setHasLiked(res.has_liked);
@@ -102,8 +93,6 @@ export default function VideoPlayerView({
             }
           } catch {}
         }
-      } else if (res?.error) {
-        throw new Error(res.error);
       }
     } catch (err: any) {
       // Revert optimistic state on error

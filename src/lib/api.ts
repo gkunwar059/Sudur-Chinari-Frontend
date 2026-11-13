@@ -1,6 +1,5 @@
-import { cache } from 'react';
 import type { Locale } from '@/lib/i18n/config';
-import type { Article, Category, District, VideoItem, PhotoStory, ArticleComment, Author, HeroSlide } from '@/types';
+import type { Article, District, VideoItem, ArticleComment, HeroSlide } from '@/types';
 import { normalizeImageUrl } from '@/lib/utils';
 
 const CLIENT_ARTICLE_LIMIT = 24;
@@ -223,23 +222,6 @@ export const newsApi = {
     });
   },
 
-  getArticlesServer: cache(async (params?: { lang?: ApiLang; [key: string]: any }) => {
-    const { lang, ...rest } = params || {};
-    return apiFetch<PaginatedResponse<Article>>('/articles/', {
-      lang,
-      params: rest,
-      next: { revalidate: 60, tags: ['articles', ...(lang ? [`articles-${lang}`] : [])] },
-    });
-  }),
-
-  getArticleBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    const lowerSlug = slug.toLowerCase();
-    return apiFetch<Article>(`/articles/${encodeURIComponent(lowerSlug)}/`, {
-      lang,
-      next: { revalidate: 60, tags: [`article-${lowerSlug}`, ...(lang ? [`article-${lowerSlug}-${lang}`] : [])] },
-    });
-  }),
-
   // Hero Slides
   getHeroSlidesClient: (params?: { lang?: ApiLang; [key: string]: any }) => {
     return apiFetch<PaginatedResponse<HeroSlide>>('/hero-slides/', {
@@ -247,30 +229,7 @@ export const newsApi = {
     });
   },
 
-  getHeroSlidesServer: cache(async (params?: { lang?: ApiLang; [key: string]: any }) => {
-    const { lang, ...rest } = params || {};
-    return apiFetch<PaginatedResponse<HeroSlide>>('/hero-slides/', {
-      lang,
-      params: rest,
-      next: { revalidate: 60, tags: ['hero-slides', ...(lang ? [`hero-slides-${lang}`] : [])] },
-    });
-  }),
-
   // Districts
-  getDistrictsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<ApiDistrictRecord>>('/districts/', {
-      lang,
-      next: { revalidate: 3600, tags: ['districts', ...(lang ? [`districts-${lang}`] : [])] },
-    });
-  }),
-
-  getDistrictBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    return apiFetch<ApiDistrictRecord>(`/districts/${encodeURIComponent(slug)}/`, {
-      lang,
-      next: { revalidate: 60, tags: [`district-${slug}`, ...(lang ? [`district-${slug}-${lang}`] : [])] },
-    });
-  }),
-
   getDistrictsClient: async (lang?: ApiLang) => {
     return apiFetch<PaginatedResponse<ApiDistrictRecord>>('/districts/', {
       lang,
@@ -278,93 +237,10 @@ export const newsApi = {
     });
   },
 
-  // Categories
-  getCategoriesServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<Category>>('/categories/', {
-      lang,
-      next: { revalidate: 3600, tags: ['categories', ...(lang ? [`categories-${lang}`] : [])] },
-    });
-  }),
-
-  getMenuServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<Category[]>('/categories/menu/', {
-      lang,
-      next: { revalidate: 300, tags: ['categories', ...(lang ? [`categories-${lang}`] : [])] },
-    });
-  }),
-
-  getCategoryBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    try {
-      return await apiFetch<Category>(`/categories/${encodeURIComponent(slug)}/`, {
-        lang,
-        next: { revalidate: 300, tags: ['categories', `category-${slug}`] },
-      });
-    } catch (e: any) {
-      if (e?.response?.status === 404) return null;
-      throw e;
-    }
-  }),
-
-  // Authors
-  getAuthorsServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<Author>>('/authors/', {
-      lang,
-      params,
-      next: { revalidate: 3600, tags: ['authors', ...(lang ? [`authors-${lang}`] : [])] },
-    });
-  }),
-
-  getAuthorBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    return apiFetch<Author>(`/authors/${encodeURIComponent(slug)}/`, {
-      lang,
-      next: { revalidate: 3600, tags: [`author-${slug}`] },
-    });
-  }),
-
-  // Partners
-  getPartnersServer: cache(async (params?: Record<string, string | number>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<PartnerRecord>>('/partners/', {
-      lang,
-      params,
-      next: { revalidate: 3600, tags: ['partners', ...(lang ? [`partners-${lang}`] : [])] },
-    });
-  }),
-
-  // Hotels
-  getHotelsServer: cache(async (params?: Record<string, string | number>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/hotels/', {
-      lang,
-      params,
-      next: { revalidate: 60, tags: ['hotels', ...(lang ? [`hotels-${lang}`] : [])] },
-    });
-  }),
-
-  getHotelBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    return apiFetch<any>(`/hotels/${encodeURIComponent(slug)}/`, {
-      lang,
-      next: { revalidate: 60, tags: [`hotel-${slug}`, ...(lang ? [`hotel-${slug}-${lang}`] : [])] },
-    });
-  }),
-
   // Videos
-  getVideosServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<VideoItem>>('/videos/', {
-      lang,
-      params,
-      next: { revalidate: 300, tags: ['videos', ...(lang ? [`videos-${lang}`] : [])] },
-    });
-  }),
-
   getVideosClient: async (params: Record<string, any> = {}) => {
     return apiFetch<PaginatedResponse<VideoItem>>('/videos/', { params });
   },
-
-  getVideoByIdServer: cache(async (id: string | number, lang?: ApiLang) => {
-    return apiFetch<VideoItem>(`/videos/${encodeURIComponent(String(id))}/`, {
-      lang,
-      next: { revalidate: 300, tags: [`video-${id}`] },
-    });
-  }),
 
   postVideoClient: async (data: any) => {
     const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
@@ -373,30 +249,6 @@ export const newsApi = {
       body: isFormData ? data : JSON.stringify(data),
     });
   },
-
-  // Photo Stories
-  getPhotoStoriesServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<PhotoStory>>('/photo-stories/', {
-      lang,
-      params,
-      next: { revalidate: 300, tags: ['photo-stories', ...(lang ? [`photo-stories-${lang}`] : [])] },
-    });
-  }),
-
-  getPhotoStoryByIdServer: cache(async (id: string | number, lang?: ApiLang) => {
-    return apiFetch<PhotoStory>(`/photo-stories/${encodeURIComponent(String(id))}/`, {
-      lang,
-      next: { revalidate: 300, tags: [`photo-story-${id}`] },
-    });
-  }),
-
-  // Breaking News
-  getBreakingNewsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/breaking-news/', {
-      lang,
-      next: { revalidate: 60, tags: ['breaking-news'] },
-    });
-  }),
 
   // Comments
   getCommentsClient: async (params: { articleId?: string | number; [key: string]: any } = {}) => {
@@ -417,36 +269,13 @@ export const newsApi = {
   },
 
   // Popup Ads
-  getPopupAdsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/popup-ads/', {
-      lang,
-      next: { revalidate: 300, tags: ['popup-ads'] },
-    });
-  }),
-
   getActivePopupAdClient: async (lang?: ApiLang) => {
     return apiFetch<{ active: boolean; data: any }>('/popup-ads/active/', {
       lang,
     });
   },
 
-  // Homepage Placements
-  getHomepagePlacementsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/homepage-placements/', {
-      lang,
-      next: { revalidate: 300, tags: ['homepage-placements'] },
-    });
-  }),
-
   // Banner Ads
-  getBannerAdsServer: cache(async (placement?: string, page?: string, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/banner-ads/', {
-      lang,
-      params: { ...(placement ? { placement } : {}), ...(page ? { page } : {}) },
-      next: { revalidate: 300, tags: ['banner-ads', ...(placement ? [`banner-ads-${placement}`] : [])] },
-    });
-  }),
-
   getActiveBannerAdClient: async (placement: string, page?: string, lang?: ApiLang) => {
     const params: Record<string, string> = { placement };
     if (page) params.page = page;
@@ -480,35 +309,11 @@ export const newsApi = {
   },
 
   // Local Products
-  getProductsServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/products/', {
-      lang,
-      params,
-      next: { revalidate: 60, tags: ['products', ...(lang ? [`products-${lang}`] : [])] },
-    });
-  }),
-
-  getProductBySlugServer: cache(async (slug: string, lang?: ApiLang) => {
-    return apiFetch<any>(`/products/${encodeURIComponent(slug)}/`, {
-      lang,
-      next: { revalidate: 60, tags: [`product-${slug}`, ...(lang ? [`product-${slug}-${lang}`] : [])] },
-    });
-  }),
-
-  getProductCategoriesServer: cache(async (lang?: ApiLang) => {
+  getProductCategoriesClient: async (lang?: ApiLang) => {
     return apiFetch<PaginatedResponse<any>>('/product-categories/', {
       lang,
-      next: { revalidate: 3600, tags: ['product-categories'] },
     });
-  }),
-
-  getFarmersServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/producers/', {
-      lang,
-      params,
-      next: { revalidate: 60, tags: ['producers'] },
-    });
-  }),
+  },
 
   postProductContributionClient: async (data: any) => {
     const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
@@ -519,28 +324,6 @@ export const newsApi = {
   },
 
   // Transit / Yatayat
-  getYatayatServicesServer: cache(async (params?: Record<string, any>, lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/yatayat/', {
-      lang,
-      params,
-      next: { revalidate: 60, tags: ['yatayat'] },
-    });
-  }),
-
-  getYatayatLocationsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/yatayat-locations/', {
-      lang,
-      next: { revalidate: 3600, tags: ['yatayat-locations'] },
-    });
-  }),
-
-  getYatayatHelplinesServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/yatayat-helplines/', {
-      lang,
-      next: { revalidate: 3600, tags: ['yatayat-helplines'] },
-    });
-  }),
-
   postYatayatRegistrationClient: async (data: any) => {
     const isFormData = typeof FormData !== 'undefined' && data instanceof FormData;
     return apiFetch('/yatayat/', {
@@ -641,20 +424,7 @@ export const newsApi = {
     });
   },
 
-  getSitemapServer: cache(async () => {
-    return apiFetch<any[]>('/sitemap/', {
-      next: { revalidate: 3600, tags: ['sitemap'] },
-    });
-  }),
-
-  // Trending Topics & Global Search
-  getTrendingTopicsServer: cache(async (lang?: ApiLang) => {
-    return apiFetch<PaginatedResponse<any>>('/trending-topics/', {
-      lang,
-      next: { revalidate: 300, tags: ['trending-topics'] },
-    });
-  }),
-
+  // Global Search
   globalSearchClient: async (query: string, lang?: ApiLang) => {
     return apiFetch<any>('/search/', {
       lang,

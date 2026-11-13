@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import FTModal from "@/components/common/FTModal";
 import AuthModal from "@/components/auth/AuthModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { newsApi } from "@/lib/api";
+import { revalidateCacheTagsAction } from "@/app/actions/cache";
 import {
   Camera,
   Image as ImageIcon,
@@ -51,6 +53,7 @@ export default function PhotoContributionModal({
   const { t, locale } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: districtsResponse } = useQuery({
     queryKey: ["districts", locale],
@@ -313,8 +316,14 @@ export default function PhotoContributionModal({
 
       await newsApi.postPhotoStoryClient(formData);
 
-      // Invalidate queries so lists refresh immediately
+      // Invalidate server "use cache" tags and client queries so lists refresh immediately
+      await revalidateCacheTagsAction([
+        "photo-stories",
+        "photo-stories-ne",
+        "photo-stories-en",
+      ]).catch(() => {});
       queryClient.invalidateQueries({ queryKey: ["photo-stories"] });
+      router.refresh();
 
       setIsSuccess(true);
       setTimeout(() => {

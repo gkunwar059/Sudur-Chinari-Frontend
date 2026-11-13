@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { MapPin, ChevronRight } from "lucide-react";
@@ -29,11 +29,6 @@ export default function DistrictMapCards({ initialDistricts }: DistrictMapCardsP
     useState<string>("kailali");
   const [viewMode, setViewMode] = useState<"cards" | "map">("map");
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  useEffect(() => {
-    // Automatically show modal on page reload / entry
-    setIsModalOpen(true);
-  }, []);
 
   const { data: apiDistricts } = useQuery({
     queryKey: ["districts", locale],

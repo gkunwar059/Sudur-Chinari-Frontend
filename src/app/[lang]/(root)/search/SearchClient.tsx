@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
 import Image from "next/image";
 import Link from "@/components/i18n/LocalizedLink";
 import { Search, Clock, Filter, X, ArrowRight, SearchX, MapPin, Flame, BookOpen } from "lucide-react";
 import { t, getArticleSlug } from "@/lib/utils";
+import { newsApi } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import FTCategoryBadge from "@/components/common/FTCategoryBadge";
 import AdBanner from "@/components/common/AdBanner";
@@ -41,9 +43,44 @@ export default function SearchClient({
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [sortBy, setSortBy] = useState<"latest" | "popular">("latest");
 
+  useEffect(() => {
+    const qParam = searchParams.get("q");
+    if (qParam !== null) {
+      setQuery(qParam);
+    }
+  }, [searchParams]);
+
+  const trimmedQuery = query.trim();
+
+  const { data: remoteSearchData } = useQuery({
+    queryKey: ["global-search", trimmedQuery, locale],
+    queryFn: () => newsApi.globalSearchClient(trimmedQuery, locale),
+    enabled: trimmedQuery.length > 0,
+    staleTime: 60 * 1000,
+  });
+
+  const sourceArticles = useMemo(() => {
+    if (!trimmedQuery || !remoteSearchData?.articles) {
+      return initialArticles;
+    }
+    const byId = new Map<string | number, any>();
+    for (const art of remoteSearchData.articles) {
+      if (art?.id != null) byId.set(art.id, art);
+    }
+    for (const art of initialArticles) {
+      if (art?.id != null && !byId.has(art.id)) {
+        byId.set(art.id, art);
+      }
+    }
+    return Array.from(byId.values());
+  }, [trimmedQuery, remoteSearchData, initialArticles]);
+
   const results = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    const filtered = initialArticles.filter((a: any) => {
+    const q = trimmedQuery.toLowerCase();
+    const remoteArticleIds = new Set(
+      (remoteSearchData?.articles || []).map((a: any) => a?.id),
+    );
+    const filtered = sourceArticles.filter((a: any) => {
       const titleNe = typeof a.title === "string" ? a.title : (a.title?.ne || "");
       const titleEn = typeof a.title === "string" ? a.title : (a.title?.en || "");
       const excerptNe = typeof a.excerpt === "string" ? a.excerpt : (a.excerpt?.ne || a.excerpt || "");
@@ -52,6 +89,7 @@ export default function SearchClient({
       
       const matchQ =
         !q ||
+        remoteArticleIds.has(a.id) ||
         titleNe.toLowerCase().includes(q) ||
         titleEn.toLowerCase().includes(q) ||
         excerptNe.toLowerCase().includes(q) ||
@@ -71,7 +109,7 @@ export default function SearchClient({
     return [...filtered].sort(
       (a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
     );
-  }, [query, districtFilter, categoryFilter, sortBy, initialArticles]);
+  }, [trimmedQuery, remoteSearchData, districtFilter, categoryFilter, sortBy, sourceArticles]);
 
   const handleQuerySubmit = (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,10 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "@/components/i18n/LocalizedLink";
 import { ArrowRight, ThumbsUp, ThumbsDown } from "lucide-react";
-import type { Article, Locale } from "@/types";
-import { t as translate } from "@/lib/utils";
+import type { Article } from "@/types";
+import { t as translate, getArticleSlug, cn } from "@/lib/utils";
+import { newsApi } from "@/lib/api";
 import FTSectionDivider from "../common/FTSectionDivider";
 import VideoShorts from "@/components/home/VideoShorts";
 
@@ -23,6 +25,99 @@ export default function DistrictPhotosView({
 }: DistrictPhotosViewProps) {
   const t = (val: any) => translate(val, locale as "ne" | "en");
   const photoFeatures = articles.slice(0, 6);
+
+  const [reactions, setReactions] = useState<
+    Record<string, "like" | "dislike" | null>
+  >({});
+  const [likesCount, setLikesCount] = useState<Record<string, number>>({});
+  const [dislikesCount, setDislikesCount] = useState<Record<string, number>>(
+    {},
+  );
+
+  useEffect(() => {
+    const initialReactions: Record<string, "like" | "dislike" | null> = {};
+    const initialLikes: Record<string, number> = {};
+    photoFeatures.forEach((art) => {
+      const key = String(art.id);
+      initialLikes[key] = art.likes || 0;
+      try {
+        const saved = localStorage.getItem(`sudur_reaction_${art.id}`);
+        if (saved === "like" || saved === "dislike") {
+          initialReactions[key] = saved;
+        }
+      } catch {
+        // ignore storage errors
+      }
+    });
+    setReactions(initialReactions);
+    setLikesCount((prev) => ({ ...initialLikes, ...prev }));
+  }, [articles]);
+
+  const handleLike = async (art: Article) => {
+    const key = String(art.id);
+    const current = reactions[key] || null;
+    const currentLikes = likesCount[key] ?? (art.likes || 0);
+
+    if (current === "like") {
+      setReactions((prev) => ({ ...prev, [key]: null }));
+      setLikesCount((prev) => ({
+        ...prev,
+        [key]: Math.max(0, currentLikes - 1),
+      }));
+      try {
+        localStorage.removeItem(`sudur_reaction_${art.id}`);
+      } catch {}
+    } else {
+      if (current === "dislike") {
+        setDislikesCount((prev) => ({
+          ...prev,
+          [key]: Math.max(0, (prev[key] || 0) - 1),
+        }));
+      }
+      setReactions((prev) => ({ ...prev, [key]: "like" }));
+      setLikesCount((prev) => ({ ...prev, [key]: currentLikes + 1 }));
+      try {
+        localStorage.setItem(`sudur_reaction_${art.id}`, "like");
+      } catch {}
+      try {
+        const target = getArticleSlug(art) || art.id;
+        const res = await newsApi.likeArticleClient(target);
+        if (res && typeof res.likes === "number") {
+          setLikesCount((prev) => ({ ...prev, [key]: res.likes }));
+        }
+      } catch {}
+    }
+  };
+
+  const handleDislike = (art: Article) => {
+    const key = String(art.id);
+    const current = reactions[key] || null;
+    const currentLikes = likesCount[key] ?? (art.likes || 0);
+    const currentDislikes = dislikesCount[key] || 0;
+
+    if (current === "dislike") {
+      setReactions((prev) => ({ ...prev, [key]: null }));
+      setDislikesCount((prev) => ({
+        ...prev,
+        [key]: Math.max(0, currentDislikes - 1),
+      }));
+      try {
+        localStorage.removeItem(`sudur_reaction_${art.id}`);
+      } catch {}
+    } else {
+      if (current === "like") {
+        setLikesCount((prev) => ({
+          ...prev,
+          [key]: Math.max(0, currentLikes - 1),
+        }));
+      }
+      setReactions((prev) => ({ ...prev, [key]: "dislike" }));
+      setDislikesCount((prev) => ({ ...prev, [key]: currentDislikes + 1 }));
+      try {
+        localStorage.setItem(`sudur_reaction_${art.id}`, "dislike");
+      } catch {}
+    }
+  };
 
   return (
     <div className="container-editorial pb-14">
@@ -71,23 +166,45 @@ export default function DistrictPhotosView({
                 <div className="flex items-center gap-3">
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                    onClick={() => handleLike(art)}
+                    className={cn(
+                      "flex items-center gap-1 text-xs transition-colors group cursor-pointer",
+                      reactions[String(art.id)] === "like"
+                        ? "text-brand font-bold"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
                   >
                     <ThumbsUp
                       size={14}
-                      className="group-hover:text-brand transition-colors"
+                      className={cn(
+                        "transition-colors",
+                        reactions[String(art.id)] === "like"
+                          ? "text-brand fill-brand/20"
+                          : "group-hover:text-brand",
+                      )}
                     />
-                    <span>{art.likes || 0}</span>
+                    <span>{likesCount[String(art.id)] ?? (art.likes || 0)}</span>
                   </button>
                   <button
                     type="button"
-                    className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors group cursor-pointer"
+                    onClick={() => handleDislike(art)}
+                    className={cn(
+                      "flex items-center gap-1 text-xs transition-colors group cursor-pointer",
+                      reactions[String(art.id)] === "dislike"
+                        ? "text-brand-secondary font-bold"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
                   >
                     <ThumbsDown
                       size={14}
-                      className="group-hover:text-brand-secondary transition-colors"
+                      className={cn(
+                        "transition-colors",
+                        reactions[String(art.id)] === "dislike"
+                          ? "text-brand-secondary fill-brand-secondary/20"
+                          : "group-hover:text-brand-secondary",
+                      )}
                     />
-                    <span>0</span>
+                    <span>{dislikesCount[String(art.id)] || 0}</span>
                   </button>
                 </div>
               </div>

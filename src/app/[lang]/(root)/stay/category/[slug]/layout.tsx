@@ -1,6 +1,10 @@
 import { notFound } from "next/navigation";
 import Link from "@/components/i18n/LocalizedLink";
-import { newsApi } from "@/lib/api";
+import {
+  getCategoryBySlugCached,
+  getHotelsCached,
+  getMenuCached,
+} from "@/lib/cached-data";
 import type { Category } from "@/types";
 import { isLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
@@ -8,11 +12,11 @@ import { t } from "@/lib/utils";
 
 
 async function loadCategory(slug: string, lang: any): Promise<any> {
-  return await newsApi.getCategoryBySlugServer(slug, lang).catch(() => null);
+  return await getCategoryBySlugCached(slug, lang).catch(() => null);
 }
 
 async function loadMenu(lang: any): Promise<Category[]> {
-  return (await newsApi.getMenuServer(lang).catch(() => [])) || [];
+  return (await getMenuCached(lang).catch(() => [])) || [];
 }
 
 export default async function StayCategoryLayout({
@@ -53,7 +57,7 @@ export default async function StayCategoryLayout({
     }
   }
 
-  const res = await newsApi.getHotelsServer({ category__slug: slug }, lang as Locale).catch(() => null);
+  const res = await getHotelsCached({ category__slug: slug }, lang as Locale).catch(() => null);
   let hotels: any[] = res?.results || [];
 
   return (

@@ -10,8 +10,7 @@ import {
   LogIn,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { newsApi, apiFetch } from "@/lib/api";
-import { likeVideoCommentAction } from "@/app/actions/comments";
+import { newsApi } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -110,15 +109,7 @@ export default function VideoComments({ videoId }: VideoCommentsProps) {
     setLikedMap((prev) => ({ ...prev, [id]: nextLiked }));
 
     try {
-      let res: any;
-      try {
-        res = await (newsApi as any).likeVideoCommentClient(id);
-      } catch {
-        res = await likeVideoCommentAction(id);
-      }
-      if (!res) {
-        res = await likeVideoCommentAction(id);
-      }
+      await newsApi.likeVideoCommentClient(id);
       queryClient.invalidateQueries({ queryKey: ["video-comments", videoId] });
     } catch (err: any) {
       setLikedMap((prev) => ({ ...prev, [id]: currentLiked }));

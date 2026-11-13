@@ -7,7 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 import FTModal from "@/components/common/FTModal";
 import type { BilingualText } from "@/types";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { newsApi } from "@/lib/api";
 interface UserContributionModalProps {
   isOpen: boolean;
@@ -28,6 +28,7 @@ export default function UserContributionModal({
 }: UserContributionModalProps) {
   const { t, locale } = useLanguage();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
 
   const [districtSlug, setDistrictSlug] = useState(defaultDistrict);
   const [mainCategory, setMainCategory] = useState("culture");
@@ -150,6 +151,7 @@ export default function UserContributionModal({
       }
 
       await newsApi.postStoryContributionClient(formData);
+      queryClient.invalidateQueries({ queryKey: ["community-stories"] });
       setIsSuccess(true);
       setTimeout(() => {
         setIsSuccess(false);

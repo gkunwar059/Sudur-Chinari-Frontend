@@ -1,5 +1,10 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useState,
+} from "react";
 import { apiFetch } from "@/lib/api";
 import { loginAction, registerAction, logoutAction } from "@/app/actions/auth";
 import toast from "react-hot-toast";
@@ -26,34 +31,13 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({
   children,
-  initialUser = null,
+  initialUser,
 }: {
   children: React.ReactNode;
   initialUser?: User | null;
 }) {
-  const [user, setUser] = useState<User | null>(initialUser);
-  const [loading, setLoading] = useState(!initialUser);
-
-  // Fallback hydration for logged-out sessions.
-  // The [lang] layout resolves the session via getSessionUser() and passes
-  // it as initialUser; the /api/v1 proxy injects the HttpOnly token.
-  useEffect(() => {
-    if (initialUser) return;
-    let cancelled = false;
-    apiFetch<User>("/auth/users/me/")
-      .then((u) => {
-        if (!cancelled) setUser(u);
-      })
-      .catch(() => {
-        if (!cancelled) setUser(null);
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [initialUser]);
+  const [user, setUser] = useState<User | null>(initialUser ?? null);
+  const [loading, setLoading] = useState(initialUser === undefined);
 
   const login = async (credentials: any) => {
     const res = await loginAction(credentials);
@@ -108,10 +92,10 @@ export function AuthProvider({
     toast.success("Successfully logged out");
   };
 
-  const seedUser = (nextUser: User | null) => {
+  const seedUser = useCallback((nextUser: User | null) => {
     setUser(nextUser);
     setLoading(false);
-  };
+  }, []);
 
   return (
     <AuthContext.Provider

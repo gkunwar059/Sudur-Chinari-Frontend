@@ -17,13 +17,14 @@ export default function NewsClient({
   const { locale } = useLanguage();
   const { data: articles = initialArticles } = useQuery({
     queryKey: ["articles", "all", locale],
-    queryFn: () => newsApi.getArticlesClient({ lang: locale }),
+    queryFn: () => newsApi.getArticlesClient({ lang: locale, limit: 24 }),
     initialData: {
       count: initialArticles.length,
       next: null,
       previous: null,
       results: initialArticles,
     },
+    staleTime: 60 * 1000,
     select: (data) => data.results || data,
   });
 

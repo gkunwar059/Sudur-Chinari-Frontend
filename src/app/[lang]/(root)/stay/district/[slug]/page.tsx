@@ -5,7 +5,7 @@ import { Compass, MapPin } from "lucide-react";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { buildMetadata } from "@/lib/seo";
-import { newsApi } from "@/lib/api";
+import { getDistrictsCached, getHotelsCached } from "@/lib/cached-data";
 import { normalizeImageUrl, t } from "@/lib/utils";
 import { DISTRICTS as FALLBACK_DISTRICTS } from "@/data/districts";
 import { getDistrictBySlug, mergeDistrict } from "@/lib/districts";
@@ -34,8 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
 
   const apiDistrict =
-    (await newsApi
-      .getDistrictsServer(locale)
+    (await getDistrictsCached(locale)
       .then((res) => res?.results?.find((d: any) => d.slug === slug))
       .catch(() => null)) ?? null;
   const district = mergeDistrict(apiDistrict, getDistrictBySlug(slug));
@@ -81,8 +80,7 @@ async function StayDistrictPageContent({
   const locale = lang as Locale;
 
   const apiDistrict =
-    (await newsApi
-      .getDistrictsServer(locale)
+    (await getDistrictsCached(locale)
       .then((res) => res?.results?.find((d: any) => d.slug === slug))
       .catch(() => null)) ?? null;
   const district = mergeDistrict(apiDistrict, getDistrictBySlug(slug));
@@ -95,7 +93,7 @@ async function StayDistrictPageContent({
     DISTRICT_GEO_DETAILS[district.slug as keyof typeof DISTRICT_GEO_DETAILS] ||
     DISTRICT_GEO_DETAILS.kailali;
 
-  const res = await newsApi.getHotelsServer(
+  const res = await getHotelsCached(
     { district__slug: slug, ...(q ? { search: q } : {}) },
     locale
   ).catch(() => null);

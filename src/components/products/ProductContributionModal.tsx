@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
 import FTModal from "@/components/common/FTModal";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { newsApi } from "@/lib/api";
-import { CheckCircle2, Loader2, UploadCloud, X, MapPin, ImageIcon } from "lucide-react";
+import { revalidateCacheTagsAction } from "@/app/actions/cache";
+import { CheckCircle2, Loader2, UploadCloud, X, MapPin } from "lucide-react";
 
 interface ProductContributionModalProps {
   themePrimary?: string;
@@ -27,6 +28,8 @@ export default function ProductContributionModal({
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { t, locale } = useLanguage();
   const { user } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [districtId, setDistrictId] = useState("");
   const [categorySlug, setCategorySlug] = useState("");
@@ -76,7 +79,7 @@ export default function ProductContributionModal({
 
   const { data: categoriesResponse } = useQuery({
     queryKey: ['product-categories', locale],
-    queryFn: () => newsApi.getProductCategoriesServer(locale as any),
+    queryFn: () => newsApi.getProductCategoriesClient(locale as any),
   });
   const categories = categoriesResponse?.results || [];
 
@@ -148,6 +151,13 @@ export default function ProductContributionModal({
       }
 
       await newsApi.postProductContributionClient(formData);
+      await revalidateCacheTagsAction([
+        "products",
+        "products-ne",
+        "products-en",
+      ]).catch(() => {});
+      queryClient.invalidateQueries({ queryKey: ["products"] });
+      router.refresh();
 
       setSubmitted(true);
       setTimeout(() => {

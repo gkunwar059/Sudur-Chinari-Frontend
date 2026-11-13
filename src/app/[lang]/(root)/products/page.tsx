@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ProductsDirectoryView from "./ProductsDirectoryView";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { newsApi } from "@/lib/api";
+import { getDistrictsCached, getProductsCached } from "@/lib/cached-data";
 import { buildMetadata } from "@/lib/seo";
 
 interface Props {
@@ -39,8 +39,8 @@ export default async function LocalProductsPage({ params }: Props) {
 
   try {
     const [apiDistricts, apiProducts] = await Promise.all([
-      newsApi.getDistrictsServer(locale).catch(() => null),
-      newsApi.getProductsServer({ limit: 500 }, locale).catch(() => null),
+      getDistrictsCached(locale).catch(() => null),
+      getProductsCached({ limit: 500 }, locale).catch(() => null),
     ]);
 
     if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {

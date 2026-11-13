@@ -17,7 +17,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { formatViews, cn, getArticleSlug } from "@/lib/utils";
 import FTCategoryBadge from "@/components/common/FTCategoryBadge";
 import RelativeTime from "@/components/common/RelativeTime";
-import { fetchCommentsAction } from "@/app/actions/comments";
+import { newsApi } from "@/lib/api";
 import ArticleReactions from "./ArticleReactions";
 import ArticleComments from "./ArticleComments";
 import AdBanner from "@/components/common/AdBanner";
@@ -92,11 +92,8 @@ export default function ArticleContent({
   const { data: liveComments } = useQuery({
     queryKey: ["comments", article.id],
     queryFn: async () => {
-      const res = await fetchCommentsAction(article.id);
-      if (res.success && Array.isArray(res.comments)) {
-        return res.comments;
-      }
-      return [];
+      const res = await newsApi.getCommentsClient({ articleId: article.id });
+      return res?.results || (Array.isArray(res) ? res : []);
     },
     staleTime: 1000 * 30,
   });
@@ -375,8 +372,9 @@ export default function ArticleContent({
         {/* ── Interactive Like / Comment Bar (Broadsheet Styled) ── */}
         <ArticleReactions
           articleId={article.id}
+          articleSlug={currentSlug}
           articleTitle={t(article.title)}
-          initialLikes={article.likes || 142}
+          initialLikes={article.likes ?? 0}
           commentsCount={liveCommentsCount}
         />
 

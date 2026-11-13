@@ -1,4 +1,4 @@
-import { newsApi } from "@/lib/api";
+import { getArticlesCached } from "@/lib/cached-data";
 import { getArticleSlug, t } from "@/lib/utils";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurchinari.com";
@@ -6,7 +6,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurchinari.com";
 export async function GET() {
   let articles: any[] = [];
   try {
-    const res = await newsApi.getArticlesServer({ limit: 100, ordering: "-created_at" });
+    const res = await getArticlesCached({ limit: 100, ordering: "-created_at" });
     if (res?.results?.length > 0) {
       articles = res.results;
     }

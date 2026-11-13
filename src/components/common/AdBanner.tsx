@@ -1,8 +1,9 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { Suspense, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Megaphone, Plus } from "lucide-react";
 import { newsApi } from "@/lib/api";
 import { useAuth } from "@/context/AuthContext";
@@ -100,7 +101,7 @@ export function detectPageFromPath(pathname: string): string {
   return "all";
 }
 
-export default function AdBanner({
+function AdBannerContent({
   placement = "billboard-mid",
   page: propPage,
   className = "",
@@ -117,52 +118,49 @@ export default function AdBanner({
 
   const config = PLACEMENT_CONFIG[placement] || PLACEMENT_CONFIG["billboard-mid"];
 
-  const [activeAd, setActiveAd] = useState<AdItem | null>(null);
-  const [loading, setLoading] = useState(true);
+  const queryClient = useQueryClient();
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const impressionRecorded = useRef(false);
+  const impressionRecorded = useRef<number | string | null>(null);
 
-  // Fetch active approved ad from backend
+  const { data: activeAd = null, isLoading: loading } = useQuery<AdItem | null>({
+    queryKey: ["active-banner-ad", placement, detectedPage, locale],
+    queryFn: async () => {
+      const res: any = await newsApi.getActiveBannerAdClient(
+        placement,
+        detectedPage,
+        locale as any,
+      );
+      if (
+        res &&
+        res.active &&
+        res.data &&
+        (res.data.image || res.data.image_url)
+      ) {
+        return {
+          id: res.data.id,
+          image: normalizeImageUrl(res.data.image || res.data.image_url),
+          alt: res.data.alt_text || res.data.title || "Advertisement",
+          href: res.data.target_url || "#",
+          advertiser: res.data.advertiser || "",
+          containerClass: config.containerClass,
+        };
+      }
+      return null;
+    },
+    staleTime: 60 * 1000,
+  });
+
   useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-
-    newsApi
-      .getActiveBannerAdClient(placement, detectedPage)
-      .then((res: any) => {
-        if (!isMounted) return;
-        if (res && res.active && res.data && (res.data.image || res.data.image_url)) {
-          const item: AdItem = {
-            id: res.data.id,
-            image: normalizeImageUrl(res.data.image || res.data.image_url),
-            alt: res.data.alt_text || res.data.title || "Advertisement",
-            href: res.data.target_url || "#",
-            advertiser: res.data.advertiser || "",
-            containerClass: config.containerClass,
-          };
-          setActiveAd(item);
-
-          // Record impression once
-          if (!impressionRecorded.current && typeof item.id === "number") {
-            impressionRecorded.current = true;
-            newsApi.recordBannerImpressionClient(item.id).catch(() => {});
-          }
-        } else {
-          setActiveAd(null);
-        }
-      })
-      .catch(() => {
-        if (isMounted) setActiveAd(null);
-      })
-      .finally(() => {
-        if (isMounted) setLoading(false);
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [placement, detectedPage, config.containerClass]);
+    if (
+      activeAd &&
+      typeof activeAd.id === "number" &&
+      impressionRecorded.current !== activeAd.id
+    ) {
+      impressionRecorded.current = activeAd.id;
+      newsApi.recordBannerImpressionClient(activeAd.id).catch(() => {});
+    }
+  }, [activeAd]);
 
   const handleEmptyClick = () => {
     if (!user) {
@@ -288,19 +286,7 @@ export default function AdBanner({
         slotName={config.labelNe}
         slotDims={config.dims}
         onSuccess={() => {
-          // Re-fetch active ad after submission
-          newsApi.getActiveBannerAdClient(placement, detectedPage).then((res: any) => {
-            if (res?.active && res?.data) {
-              setActiveAd({
-                id: res.data.id,
-                image: normalizeImageUrl(res.data.image || res.data.image_url),
-                alt: res.data.alt_text || res.data.title,
-                href: res.data.target_url || "#",
-                advertiser: res.data.advertiser || "",
-                containerClass: config.containerClass,
-              });
-            }
-          });
+          queryClient.invalidateQueries({ queryKey: ["active-banner-ad"] });
         }}
       />
 
@@ -310,5 +296,26 @@ export default function AdBanner({
         onClose={() => setIsAuthModalOpen(false)}
       />
     </>
+  );
+}
+
+export default function AdBanner(props: AdBannerProps) {
+  const placement = props.placement || "billboard-mid";
+  const config =
+    PLACEMENT_CONFIG[placement] || PLACEMENT_CONFIG["billboard-mid"];
+  return (
+    <Suspense
+      fallback={
+        <div className={`w-full my-3 sm:my-4 ${props.className || ""}`}>
+          <div
+            role="status"
+            aria-live="polite"
+            className={`skeleton-shimmer w-full ${config.containerClass} overflow-hidden rounded-none border border-border flex items-center justify-center`}
+          />
+        </div>
+      }
+    >
+      <AdBannerContent {...props} />
+    </Suspense>
   );
 }

@@ -1,18 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
 import { serverFetch } from "@/lib/api";
-
-export async function fetchCommentsAction(articleId: string | number) {
-  try {
-    const res = await serverFetch(`/comments/?articleId=${encodeURIComponent(String(articleId))}`);
-    return { success: true, comments: res?.results || [] };
-
-  } catch (error: any) {
-    console.error("fetchCommentsAction error:", error);
-    return { success: false, comments: [], error: error.message };
-  }
-}
+import { getValidAccessToken } from "@/lib/auth-session";
 
 export async function createCommentAction(data: {
   articleId: string | number;
@@ -22,8 +11,7 @@ export async function createCommentAction(data: {
   parentId?: string | number;
 }) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = await getValidAccessToken();
 
     const headers: Record<string, string> = {};
     if (token) {
@@ -60,8 +48,7 @@ export async function createCommentAction(data: {
 
 export async function likeCommentAction(commentId: string | number) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = await getValidAccessToken();
     const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -79,8 +66,7 @@ export async function likeCommentAction(commentId: string | number) {
 
 export async function likeVideoCommentAction(commentId: string | number) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = await getValidAccessToken();
     const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;
@@ -98,8 +84,7 @@ export async function likeVideoCommentAction(commentId: string | number) {
 
 export async function likeVideoAction(videoId: string | number) {
   try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("access_token")?.value;
+    const token = await getValidAccessToken();
     const headers: Record<string, string> = {};
     if (token) {
       headers["Authorization"] = `Bearer ${token}`;

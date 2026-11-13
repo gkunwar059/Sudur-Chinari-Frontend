@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { forceUnlockBodyScroll } from "@/lib/scroll-lock";
 
@@ -11,7 +11,7 @@ import { forceUnlockBodyScroll } from "@/lib/scroll-lock";
  * Applies `.is-revealed` when the element intersects the viewport (12% margin).
  * Leaves Server Components 100% untouched while adding smooth broadsheet reveals.
  */
-export default function ScrollObserver() {
+function ScrollObserverContent() {
   const pathname = usePathname();
 
   useEffect(() => {
@@ -76,4 +76,12 @@ export default function ScrollObserver() {
   }, [pathname]);
 
   return null;
+}
+
+export default function ScrollObserver() {
+  return (
+    <Suspense fallback={null}>
+      <ScrollObserverContent />
+    </Suspense>
+  );
 }

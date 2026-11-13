@@ -5,7 +5,7 @@ import { isLocale, ogLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
 import { t, normalizeImageUrl } from "@/lib/utils";
-import { newsApi } from "@/lib/api";
+import { getVideoByIdCached, getVideosCached } from "@/lib/cached-data";
 import { VIDEOS } from "@/data/articles";
 
 interface Props {
@@ -16,7 +16,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com"
 
 export async function generateStaticParams() {
   try {
-    const res = await newsApi.getVideosServer().catch(() => null);
+    const res = await getVideosCached().catch(() => null);
     const videos = res?.results && res.results.length > 0 ? res.results : VIDEOS;
     return videos.flatMap((v: any) => [
       { lang: "en", id: String(v.id) },
@@ -34,7 +34,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   if (!isLocale(lang)) return {};
 
-  let video: any = await newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null);
+  let video: any = await getVideoByIdCached(id, lang as Locale).catch(() => null);
   if (!video) {
     video = VIDEOS.find((v) => String(v.id) === String(id)) || null;
   }
@@ -71,8 +71,8 @@ export default async function VideoDetailPage({ params }: Props) {
   if (!isLocale(lang)) notFound();
 
   const [apiVideo, apiVideosRes] = await Promise.all([
-    newsApi.getVideoByIdServer(id, lang as Locale).catch(() => null),
-    newsApi.getVideosServer(undefined, lang as Locale).catch(() => null),
+    getVideoByIdCached(id, lang as Locale).catch(() => null),
+    getVideosCached(undefined, lang as Locale).catch(() => null),
   ]);
 
   const video = apiVideo || VIDEOS.find((v) => String(v.id) === String(id)) || null;

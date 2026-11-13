@@ -19,7 +19,7 @@ import YatayatCompactCard from "@/components/yatayat/YatayatCompactCard";
 import YatayatSidebar from "@/components/yatayat/YatayatSidebar";
 import AdBanner from "@/components/common/AdBanner";
 
-import { newsApi } from "@/lib/api";
+import { getYatayatServicesCached } from "@/lib/cached-data";
 
 type SearchParams = Record<string, string | string[] | undefined>;
 
@@ -98,7 +98,7 @@ interface YatayatDirectoryState {
 
 async function loadYatayatServices(locale: Locale): Promise<YatayatService[]> {
   try {
-    const res = await newsApi.getYatayatServicesServer(undefined, locale).catch(() => null);
+    const res = await getYatayatServicesCached(undefined, locale).catch(() => null);
     if (res?.results && res.results.length > 0) {
       const liveServices: YatayatService[] = res.results.map((item: any) => ({
         id: String(item.id),

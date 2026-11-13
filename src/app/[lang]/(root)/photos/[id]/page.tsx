@@ -9,7 +9,7 @@ import { t, normalizeImageUrl } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import PhotoLightboxGallery from "@/components/photos/PhotoLightboxGallery";
 import AdBanner from "@/components/common/AdBanner";
-import { newsApi } from "@/lib/api";
+import { getPhotoStoriesCached, getPhotoStoryByIdCached } from "@/lib/cached-data";
 import { PHOTO_STORIES } from "@/data/articles";
 
 interface Props {
@@ -18,7 +18,7 @@ interface Props {
 
 export async function generateStaticParams() {
   try {
-    const res = await newsApi.getPhotoStoriesServer().catch(() => null);
+    const res = await getPhotoStoriesCached().catch(() => null);
     const photos = res?.results && res.results.length > 0 ? res.results : PHOTO_STORIES;
     return photos.flatMap((s: any) => [
       { lang: "en", id: String(s.id) },
@@ -35,7 +35,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, id } = await params;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
-  let story: any = await newsApi.getPhotoStoryByIdServer(id, locale).catch(() => null);
+  let story: any = await getPhotoStoryByIdCached(id, locale).catch(() => null);
   if (!story) {
     story = PHOTO_STORIES.find((s) => String(s.id) === String(id)) || null;
   }
@@ -61,7 +61,7 @@ export default async function PhotoStoryDetailsPage({ params }: Props) {
     : defaultLocale;
   const id = resolvedParams.id;
 
-  let story: any = await newsApi.getPhotoStoryByIdServer(id, lang as Locale).catch(() => null);
+  let story: any = await getPhotoStoryByIdCached(id, lang as Locale).catch(() => null);
   if (!story) {
     story = PHOTO_STORIES.find((s) => String(s.id) === String(id)) || null;
   }

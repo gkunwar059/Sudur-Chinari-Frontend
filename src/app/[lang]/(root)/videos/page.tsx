@@ -5,7 +5,7 @@ import FTEmptyState from "@/components/common/FTEmptyState";
 import { Play, Eye, Clock } from "lucide-react";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import { formatViews, t, normalizeImageUrl } from "@/lib/utils";
-import { newsApi } from "@/lib/api";
+import { getVideosCached } from "@/lib/cached-data";
 import { notFound } from "next/navigation";
 import { isLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
@@ -39,7 +39,7 @@ export default async function VideosPage({ params }: Props) {
   if (!isLocale(lang)) notFound();
   const dict = await getDictionary(lang as Locale);
 
-  const apiVideosRes = await newsApi.getVideosServer(undefined, lang as Locale).catch(() => null);
+  const apiVideosRes = await getVideosCached(undefined, lang as Locale).catch(() => null);
   const allVideos = apiVideosRes?.results || [];
 
   const shorts = allVideos.filter((v) => v.isShort);

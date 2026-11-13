@@ -9,6 +9,7 @@ import { newsApi } from "@/lib/api";
 
 interface ArticleReactionsProps {
   articleId: string;
+  articleSlug?: string;
   articleTitle: string;
   initialLikes?: number;
   commentsCount?: number;
@@ -16,22 +17,30 @@ interface ArticleReactionsProps {
 
 export default function ArticleReactions({
   articleId,
+  articleSlug,
   articleTitle,
-  initialLikes = 142,
+  initialLikes = 0,
   commentsCount = 0,
 }: ArticleReactionsProps) {
   const { locale } = useLanguage();
   const [likes, setLikes] = useState(initialLikes);
   const [hasLiked, setHasLiked] = useState(false);
+  const [serverIncremented, setServerIncremented] = useState(false);
   const [hasBookmarked, setHasBookmarked] = useState(false);
   const [copied, setCopied] = useState(false);
   const [likeAnimating, setLikeAnimating] = useState(false);
+  const targetSlug = articleSlug || articleId;
+
+  useEffect(() => {
+    setLikes(initialLikes);
+  }, [initialLikes]);
 
   useEffect(() => {
     try {
       const savedLike = localStorage.getItem(`article_like_${articleId}`);
       if (savedLike === "true") {
         setHasLiked(true);
+        setServerIncremented(true);
       }
       const savedBookmark = localStorage.getItem(`article_bookmark_${articleId}`);
       if (savedBookmark === "true") {
@@ -42,8 +51,8 @@ export default function ArticleReactions({
     }
 
     // Record view in backend
-    newsApi.viewArticleClient(articleId).catch(() => null);
-  }, [articleId]);
+    newsApi.viewArticleClient(targetSlug).catch(() => null);
+  }, [articleId, targetSlug]);
 
   const toggleLike = async () => {
     setLikeAnimating(true);
@@ -56,21 +65,25 @@ export default function ArticleReactions({
       try {
         localStorage.removeItem(`article_like_${articleId}`);
       } catch {}
-    } else {
-      setLikes((prev) => prev + 1);
-      setHasLiked(true);
-      try {
-        localStorage.setItem(`article_like_${articleId}`, "true");
-      } catch {}
+      return;
     }
 
+    setLikes((prev) => prev + 1);
+    setHasLiked(true);
     try {
-      const res: any = await newsApi.likeArticleClient(articleId);
-      if (res && typeof res.likes === "number") {
-        setLikes(res.likes);
+      localStorage.setItem(`article_like_${articleId}`, "true");
+    } catch {}
+
+    if (!serverIncremented) {
+      setServerIncremented(true);
+      try {
+        const res: any = await newsApi.likeArticleClient(targetSlug);
+        if (res && typeof res.likes === "number") {
+          setLikes(res.likes);
+        }
+      } catch {
+        // fallback already updated optimistically
       }
-    } catch (e) {
-      // fallback already updated optimistically
     }
   };
 

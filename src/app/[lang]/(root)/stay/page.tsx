@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import StayDirectoryView from "./StayDirectoryView";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { newsApi } from "@/lib/api";
+import { getDistrictsCached } from "@/lib/cached-data";
 import { buildMetadata } from "@/lib/seo";
 
 interface Props {
@@ -35,7 +35,7 @@ export default async function HotelsAndStayPage({ params }: Props) {
 
   // Fetch districts for the Stay directory layout
   let districtsData: any[] = [];
-  const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
+  const apiDistricts = await getDistrictsCached(locale).catch(() => null);
   if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
     districtsData = apiDistricts.results;
   }

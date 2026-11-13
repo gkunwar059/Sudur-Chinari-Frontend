@@ -14,7 +14,7 @@ import {
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import type { BilingualText } from "@/types";
-import { getDistrictsCached } from "@/lib/cached-data";
+import { getDistrictsCached, getProductsCached } from "@/lib/cached-data";
 import { localizedPath } from "@/lib/i18n/paths";
 import { t } from "@/lib/utils";
 import { DISTRICTS as FALLBACK_DISTRICTS } from "@/data/districts";
@@ -25,7 +25,6 @@ import ProductContributionModal from "@/components/products/ProductContributionM
 import ProductImage from "@/components/products/ProductImage";
 import AdBanner from "@/components/common/AdBanner";
 import PageSkeleton from "@/components/common/PageSkeleton";
-import { newsApi } from "@/lib/api";
 
 interface Props {
   params: Promise<{ lang: string; slug: string }>;
@@ -44,8 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
 
   const apiDistrict =
-    (await newsApi
-      .getDistrictsServer(locale)
+    (await getDistrictsCached(locale)
       .then((res) => res?.results?.find((d: any) => d.slug === slug))
       .catch(() => null)) ?? null;
   const district = mergeDistrict(apiDistrict, getDistrictBySlug(slug));
@@ -79,321 +77,6 @@ const CATEGORIES = [
   { id: "spices", label: { ne: "मसला/जडीबुटी", en: "Spices" }, icon: "🌿" },
 ];
 
-const PRODUCTS = [
-  // Dairy
-  {
-    slug: "ghee",
-    name: { ne: "घ्यू", en: "Ghee" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 12,
-    desc: {
-      ne: "स्थानीय गाई/भैंसीको शुद्ध घ्यू",
-      en: "Pure local cow/buffalo ghee",
-    },
-    image:
-      "https://images.unsplash.com/photo-1588195538326-c5b1e9f80a1b?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "milk",
-    name: { ne: "दुध", en: "Milk" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 45,
-    desc: {
-      ne: "ताजा र पौष्टिक गाईको दुध",
-      en: "Fresh and nutritious cow milk",
-    },
-    image:
-      "https://images.unsplash.com/photo-1550583724-b2692b85b150?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "chhurpi",
-    name: { ne: "छुर्पी", en: "Chhurpi" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 15,
-    desc: {
-      ne: "परम्परागत तरिकाले बनाएको छुर्पी",
-      en: "Traditionally made hard cheese",
-    },
-    image: "",
-  },
-  {
-    slug: "butter",
-    name: { ne: "मक्खन", en: "Butter" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 22,
-    desc: { ne: "ताजा घरको मक्खन", en: "Fresh homemade butter" },
-    image:
-      "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "yogurt",
-    name: { ne: "दही", en: "Yogurt" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 34,
-    desc: { ne: "बाक्लो परम्परागत दही", en: "Thick traditional yogurt" },
-    image: "",
-  },
-  {
-    slug: "paneer",
-    name: { ne: "पनिर", en: "Paneer" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 18,
-    desc: { ne: "ताजा पनिर", en: "Fresh cottage cheese" },
-    image: "",
-  },
-  {
-    slug: "mohi",
-    name: { ne: "मोही", en: "Buttermilk" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 28,
-    desc: { ne: "परम्परागत मोही", en: "Traditional buttermilk" },
-    image: "",
-  },
-  {
-    slug: "cheese",
-    name: { ne: "याक चिज", en: "Yak Cheese" },
-    category: { ne: "दुग्धजन्य", en: "Dairy" },
-    categoryId: "dairy",
-    farmerCount: 9,
-    desc: { ne: "हिमाली याकको चिज", en: "Himalayan yak cheese" },
-    image:
-      "https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?q=80&w=600&auto=format&fit=crop",
-  },
-
-  // Grains
-  {
-    slug: "millet",
-    name: { ne: "कोदो", en: "Millet" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 32,
-    desc: {
-      ne: "उच्च पहाडी भेगमा फलेको कोदो",
-      en: "High altitude grown millet",
-    },
-    image: "",
-  },
-  {
-    slug: "corn",
-    name: { ne: "मकै", en: "Corn" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 56,
-    desc: {
-      ne: "स्थानीय जातको अग्र्यानिक मकै",
-      en: "Local variety organic corn",
-    },
-    image:
-      "https://images.unsplash.com/photo-1551754655-cd27e38d2076?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "rice",
-    name: { ne: "स्थानीय चामल", en: "Local Rice" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 89,
-    desc: { ne: "बास्नादार स्थानीय चामल", en: "Aromatic local rice" },
-    image: "",
-  },
-  {
-    slug: "wheat",
-    name: { ne: "गहुँ", en: "Wheat" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 74,
-    desc: { ne: "अग्र्यानिक गहुँ", en: "Organic wheat grains" },
-    image:
-      "https://images.unsplash.com/photo-1574323347407-f5e1ad6d020b?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "buckwheat",
-    name: { ne: "फापर", en: "Buckwheat" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 41,
-    desc: { ne: "पौष्टिक फापर", en: "Nutritious buckwheat" },
-    image: "",
-  },
-  {
-    slug: "barley",
-    name: { ne: "जौ", en: "Barley" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 25,
-    desc: { ne: "हिमाली जौ", en: "Mountain grown barley" },
-    image: "",
-  },
-  {
-    slug: "beans",
-    name: { ne: "सिमी", en: "Local Beans" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 63,
-    desc: { ne: "पौष्टिक स्थानीय सिमी", en: "Nutritious local beans" },
-    image:
-      "https://images.unsplash.com/photo-1551462147-37885acc36f1?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "soybean",
-    name: { ne: "भटमास", en: "Soybean" },
-    category: { ne: "अन्न/धान्य", en: "Grains" },
-    categoryId: "grains",
-    farmerCount: 48,
-    desc: { ne: "अग्र्यानिक भटमास", en: "Organic soybean" },
-    image: "",
-  },
-
-  // Fruits
-  {
-    slug: "apple",
-    name: { ne: "स्याउ", en: "Apple" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 112,
-    desc: { ne: "हिमाली स्याउ", en: "Himalayan crisp apples" },
-    image:
-      "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "orange",
-    name: { ne: "सुन्तला", en: "Orange" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 86,
-    desc: { ne: "गुलियो स्थानीय सुन्तला", en: "Sweet local oranges" },
-    image:
-      "https://images.unsplash.com/photo-1582979512210-99b6a53386f9?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "lemon",
-    name: { ne: "कागती", en: "Lemon" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 54,
-    desc: { ne: "ताजा स्थानीय कागती", en: "Fresh local lemons" },
-    image: "",
-  },
-  {
-    slug: "pear",
-    name: { ne: "नासपाती", en: "Pear" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 37,
-    desc: { ne: "रसिलो स्थानीय नासपाती", en: "Juicy local pears" },
-    image: "",
-  },
-  {
-    slug: "peach",
-    name: { ne: "आरु", en: "Peach" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 29,
-    desc: { ne: "गुलियो अग्र्यानिक आरु", en: "Sweet organic peaches" },
-    image:
-      "https://images.unsplash.com/photo-1528821128474-27f963b062bf?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "plum",
-    name: { ne: "आलुबखडा", en: "Plum" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 21,
-    desc: { ne: "ताजा आलुबखडा", en: "Fresh plums" },
-    image:
-      "https://images.unsplash.com/photo-1602498456745-e9503b30470b?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    slug: "walnut",
-    name: { ne: "ओखर", en: "Walnut" },
-    category: { ne: "फलफूल", en: "Fruits" },
-    categoryId: "fruits",
-    farmerCount: 15,
-    desc: { ne: "पहाडी ओखर", en: "Mountain walnuts" },
-    image: "",
-  },
-
-  // Spices
-  {
-    slug: "honey",
-    name: { ne: "मह", en: "Honey" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 8,
-    desc: { ne: "प्राकृतिक र शुद्ध भिर मह", en: "Natural cliff honey" },
-    image: "",
-  },
-  {
-    slug: "ginger",
-    name: { ne: "अदुवा", en: "Ginger" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 67,
-    desc: { ne: "अग्र्यानिक ताजा अदुवा", en: "Organic fresh ginger" },
-    image: "",
-  },
-  {
-    slug: "turmeric",
-    name: { ne: "बेसार", en: "Turmeric" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 82,
-    desc: { ne: "शुद्ध स्थानीय बेसार", en: "Pure local turmeric" },
-    image: "",
-  },
-  {
-    slug: "garlic",
-    name: { ne: "लसुन", en: "Garlic" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 59,
-    desc: { ne: "स्थानीय लसुन", en: "Strong local garlic" },
-    image: "",
-  },
-  {
-    slug: "chili",
-    name: { ne: "सुकेको खुर्सानी", en: "Dry Chili" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 43,
-    desc: { ne: "पिरो हिमाली खुर्सानी", en: "Spicy mountain chili" },
-    image: "",
-  },
-  {
-    slug: "cardamom",
-    name: { ne: "अलैंची", en: "Cardamom" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 26,
-    desc: { ne: "उच्च स्तरको अलैंची", en: "Premium black cardamom" },
-    image: "",
-  },
-  {
-    slug: "timur",
-    name: { ne: "टिमुर", en: "Sichuan Pepper" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 14,
-    desc: { ne: "बास्नादार हिमाली टिमुर", en: "Aromatic mountain pepper" },
-    image: "",
-  },
-  {
-    slug: "mustard",
-    name: { ne: "तोरी", en: "Mustard Seeds" },
-    category: { ne: "मसला/जडीबुटी", en: "Spices" },
-    categoryId: "spices",
-    farmerCount: 31,
-    desc: { ne: "स्थानीय तोरी", en: "Local mustard seeds" },
-    image: "",
-  },
-];
-
 export default function DistrictProductsPage({ params, searchParams }: Props) {
   return (
     <Suspense fallback={<PageSkeleton variant="grid" />}>
@@ -425,40 +108,40 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
       ? resolvedSearchParams.q.trim()
       : "";
   const searchQuery = rawSearchQuery.toLowerCase();
-  // Fetch live products from backend for this district
+  // Fetch live products and district metadata in parallel
+  const [apiProductsResponse, apiDistrict] = await Promise.all([
+    getProductsCached({ district__slug: slug }, locale).catch(() => null),
+    getDistrictsCached(locale)
+      .then((res) => res?.results?.find((item: any) => item.slug === slug))
+      .catch(() => null),
+  ]);
+
   let allProducts: any[] = [];
-  try {
-    const apiProductsResponse = await newsApi
-      .getProductsServer({ district__slug: slug }, locale)
-      .catch(() => null);
-    if (apiProductsResponse?.results && apiProductsResponse.results.length > 0) {
-      allProducts = apiProductsResponse.results.map((item: any) => ({
-        slug: item.slug,
-        name:
-          typeof item.name === "object"
-            ? item.name
-            : { ne: item.name, en: item.name_en || item.name },
-        category:
-          typeof item.category_name === "object"
-            ? item.category_name
-            : {
-                ne: item.category_name || "अन्य",
-                en: item.category_slug || "Other",
-              },
-        categoryId: item.category_slug || "dairy",
-        farmerCount: item.producer_count ?? 1,
-        desc:
-          typeof item.description === "object"
-            ? item.description
-            : {
-                ne: item.description || "",
-                en: item.description_en || item.description || "",
-              },
-        image: item.image || "",
-      }));
-    }
-  } catch (e) {
-    allProducts = [];
+  if (apiProductsResponse?.results && apiProductsResponse.results.length > 0) {
+    allProducts = apiProductsResponse.results.map((item: any) => ({
+      slug: item.slug,
+      name:
+        typeof item.name === "object"
+          ? item.name
+          : { ne: item.name, en: item.name_en || item.name },
+      category:
+        typeof item.category_name === "object"
+          ? item.category_name
+          : {
+              ne: item.category_name || "अन्य",
+              en: item.category_slug || "Other",
+            },
+      categoryId: item.category_slug || "dairy",
+      farmerCount: item.producer_count ?? 1,
+      desc:
+        typeof item.description === "object"
+          ? item.description
+          : {
+              ne: item.description || "",
+              en: item.description_en || item.description || "",
+            },
+      image: item.image || "",
+    }));
   }
 
   const categoryCounts = allProducts.reduce<Record<string, number>>(
@@ -484,12 +167,10 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
     );
   }
 
-  let district: any = { name: { ne: "अछाम", en: "Achham" }, slug: slug };
-  try {
-    const apiDistricts = await getDistrictsCached(locale);
-    const found = apiDistricts?.results?.find((item) => item.slug === slug);
-    if (found) district = found;
-  } catch (error) {}
+  const district: any = mergeDistrict(
+    apiDistrict ?? null,
+    getDistrictBySlug(slug),
+  ) || { name: { ne: slug, en: slug }, slug };
 
   const districtName = t(district.name, locale);
   const activeCategory =
@@ -641,7 +322,7 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
                 <div className="mt-5 grid grid-cols-2 gap-4">
                   <div>
                     <span className="block text-3xl font-black leading-none text-foreground">
-                      {PRODUCTS.length}
+                      {allProducts.length}
                     </span>
                     <span className="mt-2 block text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                       {locale === "ne" ? "स्थानीय उत्पादन" : "Local products"}

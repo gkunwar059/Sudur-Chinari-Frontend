@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useLanguage } from "@/context/LanguageContext";
 import { useBodyScrollLock } from "@/lib/scroll-lock";
+import { newsApi } from "@/lib/api";
 
 export interface PopupAdData {
   id: number | string;
@@ -31,14 +32,9 @@ export function useRoadblockAd() {
 
   const { data: adData = null } = useQuery<PopupAdData | null>({
     queryKey: ["popup-ad-active", locale],
-    queryFn: async ({ signal }) => {
+    queryFn: async () => {
       const lang = locale === "ne" ? "ne" : "en";
-      const res = await fetch(`/api/v1/popup-ads/active/?lang=${lang}`, {
-        headers: { Accept: "application/json" },
-        signal,
-      });
-      if (!res.ok) return null;
-      const json = await res.json();
+      const json: any = await newsApi.getActivePopupAdClient(lang);
       if (!json?.active || !json?.data) return null;
       return json.data;
     },

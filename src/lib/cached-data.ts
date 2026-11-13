@@ -1,7 +1,7 @@
 import { cacheLife, cacheTag } from "next/cache";
 import { apiFetch } from "@/lib/api";
 import type { ApiDistrictRecord, ApiLang, PaginatedResponse, PartnerRecord } from "@/lib/api";
-import type { Article, Category, Hotel, VideoItem, PhotoStory, Author } from "@/types";
+import type { Article, Category, Hotel, VideoItem, PhotoStory, Author, HeroSlide } from "@/types";
 
 const ARTICLE_LIST_LIMIT = 24;
 const FULL_LIST_LIMIT = 100;
@@ -27,7 +27,12 @@ export async function getArticleBySlugCached(slug: string, lang?: ApiLang) {
   const lowerSlug = slug.toLowerCase();
   cacheTag(`article-${lowerSlug}`);
   if (lang) cacheTag(`article-${lowerSlug}-${lang}`);
-  return apiFetch(`/articles/${encodeURIComponent(lowerSlug)}/`, { lang });
+  try {
+    return await apiFetch(`/articles/${encodeURIComponent(lowerSlug)}/`, { lang });
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
 }
 
 export async function getDistrictsCached(lang?: ApiLang) {
@@ -117,7 +122,12 @@ export async function getHotelBySlugCached(slug: string, lang?: ApiLang) {
   cacheLife("minutes");
   cacheTag(`hotel-${slug}`);
   if (lang) cacheTag(`hotel-${slug}-${lang}`);
-  return apiFetch<any>(`/hotels/${encodeURIComponent(slug)}/`, { lang });
+  try {
+    return await apiFetch<any>(`/hotels/${encodeURIComponent(slug)}/`, { lang });
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
 }
 
 export async function getVideosCached(
@@ -169,4 +179,132 @@ export async function getBreakingNewsCached(lang?: ApiLang) {
   if (lang) cacheTag(`breaking-news-${lang}`);
   return apiFetch<PaginatedResponse<any>>("/breaking-news/", { lang });
 }
+
+export async function getHeroSlidesCached(params?: {
+  lang?: ApiLang;
+  [key: string]: any;
+}) {
+  "use cache";
+  cacheLife("minutes");
+  const { lang, ...rest } = params || {};
+  cacheTag("hero-slides");
+  if (lang) cacheTag(`hero-slides-${lang}`);
+  return apiFetch<PaginatedResponse<HeroSlide>>("/hero-slides/", {
+    lang,
+    params: rest,
+  });
+}
+
+export async function getAuthorBySlugCached(slug: string, lang?: ApiLang) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("authors", `author-${slug}`);
+  if (lang) cacheTag(`author-${slug}-${lang}`);
+  try {
+    return await apiFetch<Author>(`/authors/${encodeURIComponent(slug)}/`, { lang });
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function getVideoByIdCached(
+  id: string | number,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("videos", `video-${id}`);
+  try {
+    return await apiFetch<VideoItem>(`/videos/${encodeURIComponent(String(id))}/`, {
+      lang,
+    });
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function getPhotoStoryByIdCached(
+  id: string | number,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("photo-stories", `photo-story-${id}`);
+  try {
+    return await apiFetch<PhotoStory>(
+      `/photo-stories/${encodeURIComponent(String(id))}/`,
+      { lang },
+    );
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function getProductsCached(
+  params?: Record<string, any>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("products");
+  if (lang) cacheTag(`products-${lang}`);
+  return apiFetch<PaginatedResponse<any>>("/products/", {
+    lang,
+    params,
+  });
+}
+
+export async function getProductBySlugCached(slug: string, lang?: ApiLang) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag(`product-${slug}`);
+  if (lang) cacheTag(`product-${slug}-${lang}`);
+  try {
+    return await apiFetch<any>(`/products/${encodeURIComponent(slug)}/`, { lang });
+  } catch (e: any) {
+    if (e?.response?.status === 404) return null;
+    throw e;
+  }
+}
+
+export async function getProductCategoriesCached(lang?: ApiLang) {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("product-categories");
+  if (lang) cacheTag(`product-categories-${lang}`);
+  return apiFetch<PaginatedResponse<any>>("/product-categories/", { lang });
+}
+
+export async function getTrendingTopicsCached(lang?: ApiLang) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("trending-topics");
+  if (lang) cacheTag(`trending-topics-${lang}`);
+  return apiFetch<PaginatedResponse<any>>("/trending-topics/", { lang });
+}
+
+export async function getYatayatServicesCached(
+  params?: Record<string, any>,
+  lang?: ApiLang,
+) {
+  "use cache";
+  cacheLife("minutes");
+  cacheTag("yatayat");
+  if (lang) cacheTag(`yatayat-${lang}`);
+  return apiFetch<PaginatedResponse<any>>("/yatayat/", {
+    lang,
+    params,
+  });
+}
+
+export async function getSitemapCached() {
+  "use cache";
+  cacheLife("hours");
+  cacheTag("sitemap");
+  return apiFetch<any[]>("/sitemap/").catch(() => []);
+}
+
 

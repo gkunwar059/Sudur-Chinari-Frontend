@@ -11,7 +11,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { t, normalizeImageUrl } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
-import { newsApi } from "@/lib/api";
+import { getPhotoStoriesCached } from "@/lib/cached-data";
 import AdBanner from "@/components/common/AdBanner";
 
 interface Props {
@@ -39,7 +39,7 @@ export default async function PhotosPage({ params }: Props) {
   if (!isLocale(lang)) notFound();
   const dict = await getDictionary(lang as Locale);
 
-  const apiPhotosRes = await newsApi.getPhotoStoriesServer(undefined, lang as Locale).catch(() => null);
+  const apiPhotosRes = await getPhotoStoriesCached(undefined, lang as Locale).catch(() => null);
   const allPhotos = apiPhotosRes?.results || [];
 
   const [featured, ...rest] = allPhotos;

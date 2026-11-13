@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getValidAccessToken } from "@/lib/auth-session";
 
 const rawBackend = process.env.DJANGO_API_URL || "http://127.0.0.1:8001";
 const BACKEND_URL = rawBackend.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
@@ -8,7 +9,31 @@ export async function GET(request: NextRequest) {
     const { pathname, search } = request.nextUrl;
     const targetUrl = `${BACKEND_URL}${pathname}${search}`;
 
-    const res = await fetch(targetUrl);
+    const forwardHeaders = new Headers();
+    const passthroughHeaders = [
+      "accept",
+      "range",
+      "if-none-match",
+      "if-modified-since",
+    ];
+    for (const headerName of passthroughHeaders) {
+      const val = request.headers.get(headerName);
+      if (val) {
+        forwardHeaders.set(headerName, val);
+      }
+    }
+
+    const existingAuth = request.headers.get("authorization");
+    if (existingAuth) {
+      forwardHeaders.set("Authorization", existingAuth);
+    } else {
+      const token = await getValidAccessToken();
+      if (token) {
+        forwardHeaders.set("Authorization", `Bearer ${token}`);
+      }
+    }
+
+    const res = await fetch(targetUrl, { headers: forwardHeaders });
     const headers = new Headers();
     res.headers.forEach((val, key) => {
       const lower = key.toLowerCase();

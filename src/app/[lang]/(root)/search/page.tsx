@@ -1,5 +1,4 @@
 import { Suspense } from "react";
-import { newsApi } from "@/lib/api";
 import SearchClient from "./SearchClient";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -11,6 +10,7 @@ import {
   getArticlesCached,
   getCategoriesCached,
   getDistrictsCached,
+  getTrendingTopicsCached,
 } from "@/lib/cached-data";
 
 export async function generateMetadata({
@@ -35,15 +35,15 @@ export default async function SearchPage({
   if (!isLocale(lang)) notFound();
   // Fetch initial data on the server
   const [articlesData, districtsData, categoriesData, trendingData] = await Promise.all([
-    getArticlesCached({ lang: lang as Locale, limit: 100 }),
-    getDistrictsCached(lang as Locale),
-    getCategoriesCached(lang as Locale),
-    newsApi.getTrendingTopicsServer(lang as Locale).catch(() => null),
+    getArticlesCached({ lang: lang as Locale, limit: 100 }).catch(() => null),
+    getDistrictsCached(lang as Locale).catch(() => null),
+    getCategoriesCached(lang as Locale).catch(() => null),
+    getTrendingTopicsCached(lang as Locale).catch(() => null),
   ]);
 
   const initialArticles = articlesData?.results || [];
-  const districts = districtsData?.results || districtsData || [];
-  const categories = categoriesData?.results || categoriesData || [];
+  const districts = districtsData?.results || [];
+  const categories = categoriesData?.results || [];
   const trendingTopics = (trendingData?.results && trendingData.results.length > 0)
     ? trendingData.results.map((item: any) => typeof item.name === "object" ? (item.name[lang] || item.name.ne || item.name.en) : item.name)
     : undefined;

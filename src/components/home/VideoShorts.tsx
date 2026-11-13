@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
+import { useQuery } from "@tanstack/react-query";
 import { useScrollRail } from "@/hooks/useScrollRail";
 import Image from "next/image";
 import Link from "next/link";
@@ -22,6 +23,9 @@ import FTEmptyState from "@/components/common/FTEmptyState";
 import type { VideoItem } from "@/types";
 import { formatViews, normalizeImageUrl, cn } from "@/lib/utils";
 import { useLanguage } from "@/context/LanguageContext";
+import { useAuth } from "@/context/AuthContext";
+import { newsApi } from "@/lib/api";
+import AuthModal from "@/components/auth/AuthModal";
 import RelativeTime from "@/components/common/RelativeTime";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import { useBodyScrollLock } from "@/lib/scroll-lock";
@@ -50,6 +54,7 @@ export default function VideoShorts({
   videos,
 }: VideoShortsProps = {}) {
   const { t, locale } = useLanguage();
+  const { user } = useAuth();
   const {
     ref: scrollRef,
     scroll,
@@ -61,6 +66,11 @@ export default function VideoShorts({
   );
   const [isPlaying, setIsPlaying] = useState(true);
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
+  const [likesCountMap, setLikesCountMap] = useState<Record<string, number>>(
+    {},
+  );
+  const [likingMap, setLikingMap] = useState<Record<string, boolean>>({});
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   // Broadsheet local district dictionary
@@ -88,7 +98,17 @@ export default function VideoShorts({
     v8: { ne: "घोडाघोडी ताल • रामसार", en: "RAMSAR • WETLAND ECOLOGY" },
   };
 
-  const allVideos = videos || [];
+  const { data: fetchedVideosRes } = useQuery({
+    queryKey: ["videos", locale, filterDistrict || "all"],
+    queryFn: () =>
+      newsApi.getVideosClient({
+        limit: 24,
+        ...(filterDistrict ? { district__slug: filterDistrict } : {}),
+      }),
+    enabled: videos === undefined,
+  });
+
+  const allVideos = videos ?? fetchedVideosRes?.results ?? [];
   const filteredVideos = filterDistrict
     ? allVideos.filter((v) => {
         const dSlug =
@@ -143,10 +163,60 @@ export default function VideoShorts({
     setIsPlaying(true);
   };
 
+  // Sync active video view & like status from backend
+  useEffect(() => {
+    if (!activeModalVideo?.id) return;
+    const key = String(activeModalVideo.id);
+    newsApi.viewVideoClient(activeModalVideo.id).catch(() => {});
+    newsApi
+      .getVideoLikeStatusClient(activeModalVideo.id)
+      .then((res) => {
+        if (res && typeof res.has_liked === "boolean") {
+          setLikedMap((prev) => ({ ...prev, [key]: res.has_liked }));
+        }
+        if (res && typeof res.likes === "number") {
+          setLikesCountMap((prev) => ({ ...prev, [key]: res.likes }));
+        }
+      })
+      .catch(() => {});
+  }, [activeModalVideo?.id, user]);
+
   // Handle Like
-  const toggleLike = (id: string | number) => {
+  const toggleLike = async (id: string | number) => {
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     const key = String(id);
-    setLikedMap((prev) => ({ ...prev, [key]: !prev[key] }));
+    if (likingMap[key]) return;
+
+    const wasLiked = !!likedMap[key];
+    const baseLikes =
+      likesCountMap[key] ??
+      displayVideos.find((v) => String(v.id) === key)?.likes ??
+      0;
+
+    setLikingMap((prev) => ({ ...prev, [key]: true }));
+    setLikedMap((prev) => ({ ...prev, [key]: !wasLiked }));
+    setLikesCountMap((prev) => ({
+      ...prev,
+      [key]: wasLiked ? Math.max(0, baseLikes - 1) : baseLikes + 1,
+    }));
+
+    try {
+      const res = await newsApi.likeVideoClient(id);
+      if (res && typeof res.has_liked === "boolean") {
+        setLikedMap((prev) => ({ ...prev, [key]: res.has_liked }));
+      }
+      if (res && typeof res.likes === "number") {
+        setLikesCountMap((prev) => ({ ...prev, [key]: res.likes }));
+      }
+    } catch {
+      setLikedMap((prev) => ({ ...prev, [key]: wasLiked }));
+      setLikesCountMap((prev) => ({ ...prev, [key]: baseLikes }));
+    } finally {
+      setLikingMap((prev) => ({ ...prev, [key]: false }));
+    }
   };
 
   // Handle Share
@@ -516,8 +586,9 @@ export default function VideoShorts({
                   </div>
                   <span className="text-[10px] font-sans text-white/90 font-bold mt-1 drop-shadow">
                     {formatViews(
-                      (activeModalVideo.likes || 0) +
-                        (likedMap[activeModalVideo.id] ? 1 : 0),
+                      likesCountMap[String(activeModalVideo.id)] ??
+                        activeModalVideo.likes ??
+                        0,
                     )}
                   </span>
                 </button>
@@ -739,6 +810,11 @@ export default function VideoShorts({
           </div>,
           document.body,
         )}
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </section>
   );
 }

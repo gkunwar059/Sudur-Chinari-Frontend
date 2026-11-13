@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   X,
   Send,
@@ -11,13 +12,14 @@ import {
   AlertCircle,
   Loader2,
   UploadCloud,
-  ImageIcon,
   UserCheck,
-  ShieldCheck,
+  LogIn,
 } from "lucide-react";
 import FTModal from "@/components/common/FTModal";
+import AuthModal from "@/components/auth/AuthModal";
 import { useAuth } from "@/context/AuthContext";
 import { newsApi } from "@/lib/api";
+import { revalidateCacheTagsAction } from "@/app/actions/cache";
 
 interface OperatorRegistrationModalProps {
   isOpen: boolean;
@@ -32,6 +34,9 @@ export default function OperatorRegistrationModal({
 }: OperatorRegistrationModalProps) {
   const isNe = locale === "ne";
   const { user } = useAuth();
+  const router = useRouter();
+  const queryClient = useQueryClient();
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
 
   const [vehicleName, setVehicleName] = useState("");
   const [operatorName, setOperatorName] = useState("");
@@ -106,6 +111,10 @@ export default function OperatorRegistrationModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!user) {
+      setIsAuthModalOpen(true);
+      return;
+    }
     setSubmitting(true);
     setErrorMessage(null);
 
@@ -149,6 +158,13 @@ export default function OperatorRegistrationModal({
       if (selectedFile) formData.append("image", selectedFile);
 
       await newsApi.postYatayatRegistrationClient(formData);
+      await revalidateCacheTagsAction([
+        "yatayat",
+        "yatayat-ne",
+        "yatayat-en",
+      ]).catch(() => {});
+      queryClient.invalidateQueries({ queryKey: ["yatayat"] });
+      router.refresh();
 
       setSubmitted(true);
       setTimeout(() => {
@@ -246,8 +262,8 @@ export default function OperatorRegistrationModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
-            {/* Verified Contributor Account Banner */}
-            {user && (
+            {/* Verified Contributor Account Banner / Auth Prompt */}
+            {user ? (
               <div className="flex items-center justify-between gap-3 p-3 bg-surface border border-border border-l-[3px] border-l-brand rounded-none">
                 <div className="flex items-center gap-2.5">
                   <UserCheck size={18} className="text-brand shrink-0" />
@@ -263,6 +279,22 @@ export default function OperatorRegistrationModal({
                 <span className="text-[11px] font-mono px-2 py-0.5 bg-brand/10 text-brand border border-brand/20 font-semibold shrink-0">
                   {isNe ? "प्रमाणित प्रेषक" : "Verified Sender"}
                 </span>
+              </div>
+            ) : (
+              <div className="flex items-center justify-between gap-3 p-3 bg-brand/5 border border-brand/20 border-l-[3px] border-l-brand rounded-none flex-wrap">
+                <div className="text-xs sm:text-sm font-sans text-foreground">
+                  {isNe
+                    ? "यातायात विवरण पेश गर्नका लागि लगइन हुन अनिवार्य छ।"
+                    : "Please sign in to your account to submit transport service details."}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setIsAuthModalOpen(true)}
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-brand hover:underline cursor-pointer"
+                >
+                  <LogIn size={13} />
+                  <span>{isNe ? "लगइन / दर्ता गर्नुहोस्" : "Sign In / Register"}</span>
+                </button>
               </div>
             )}
 
@@ -587,6 +619,11 @@ export default function OperatorRegistrationModal({
           </form>
         )}
       </div>
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onSuccess={() => setIsAuthModalOpen(false)}
+      />
     </FTModal>
   );
 }

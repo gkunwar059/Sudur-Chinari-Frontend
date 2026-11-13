@@ -12,13 +12,19 @@ import PartnersSection, {
 import type { Article, VideoItem, PhotoStory, HeroSlide } from "@/types";
 import FTEmptyState from "@/components/common/FTEmptyState";
 import { Newspaper } from "lucide-react";
-import { newsApi } from "@/lib/api";
 import { notFound } from "next/navigation";
 import { isLocale, ogLocale } from "@/lib/i18n/config";
 import { getDictionary } from "@/lib/i18n/get-dictionary";
 import { localizedPath } from "@/lib/i18n/paths";
 import type { Locale } from "@/lib/i18n/config";
-import { getPartnersCached } from "@/lib/cached-data";
+import {
+  getArticlesCached,
+  getDistrictsCached,
+  getHeroSlidesCached,
+  getPartnersCached,
+  getPhotoStoriesCached,
+  getVideosCached,
+} from "@/lib/cached-data";
 
 const SITE_URL =
   process.env.NEXT_PUBLIC_SITE_URL || "https://sudurpashchim.com";
@@ -76,8 +82,7 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
     PhotoStory[],
     HeroSlide[],
   ] = await Promise.all([
-    newsApi
-      .getArticlesServer({ lang })
+    getArticlesCached({ lang })
       .then((res) => res?.results || [])
       .catch(() => []),
     getPartnersCached(undefined, lang)
@@ -87,20 +92,16 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           .map((p) => ({ ...p, url: p.url ?? undefined })),
       )
       .catch(() => []),
-    newsApi
-      .getDistrictsServer(lang)
+    getDistrictsCached(lang)
       .then((res) => res?.results || [])
       .catch(() => []),
-    newsApi
-      .getVideosServer(undefined, lang)
+    getVideosCached(undefined, lang)
       .then((res) => res?.results || [])
       .catch(() => []),
-    newsApi
-      .getPhotoStoriesServer(undefined, lang)
+    getPhotoStoriesCached(undefined, lang)
       .then((res) => res?.results || [])
       .catch(() => []),
-    newsApi
-      .getHeroSlidesServer({ lang })
+    getHeroSlidesCached({ lang })
       .then((res) => res?.results || [])
       .catch(() => []),
   ]);

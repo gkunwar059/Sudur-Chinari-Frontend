@@ -77,7 +77,11 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // ── 1. API and Media proxy ───────────────────────────────────────────────
-  if (pathname === '/api/v1' || pathname.startsWith('/api/v1/')) {
+  if (
+    pathname === '/api/v1' ||
+    pathname.startsWith('/api/v1/') ||
+    pathname.startsWith('/media/')
+  ) {
     const accessToken = request.cookies.get(ACCESS_COOKIE)?.value;
     const refreshToken = request.cookies.get(REFRESH_COOKIE)?.value;
 
@@ -115,26 +119,12 @@ export async function proxy(request: NextRequest) {
       return response;
     }
 
-    // No refresh token: forward whatever access token exists (if any).
-    const requestHeaders = new Headers(request.headers);
+    // No refresh token: clear any expired access token cookie rather than forwarding it.
+    const response = NextResponse.next();
     if (accessToken) {
-      requestHeaders.set('Authorization', `Bearer ${accessToken}`);
+      response.cookies.delete(ACCESS_COOKIE);
     }
-    return NextResponse.next({
-      request: { headers: requestHeaders },
-    });
-  }
-
-  if (pathname.startsWith('/media/')) {
-    const token = request.cookies.get(ACCESS_COOKIE)?.value;
-    if (token) {
-      const requestHeaders = new Headers(request.headers);
-      requestHeaders.set('Authorization', `Bearer ${token}`);
-      return NextResponse.next({
-        request: { headers: requestHeaders },
-      });
-    }
-    return NextResponse.next();
+    return response;
   }
 
   // ── 2. Locale routing ─────────────────────────────────────────────────────
@@ -160,14 +150,15 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
+    '/media/:path*',
     /*
      * Match all request paths EXCEPT:
      * - _next/static (static files)
      * - _next/image (image optimization)
      * - favicon.ico, sitemap.xml, news-sitemap.xml, robots.txt, manifest.webmanifest
-     * - files with extensions (images, fonts, etc.)
+     * - static files with extensions outside /media/ (images, fonts, etc.)
      * - api routes that are NOT /api/v1/* (Next.js internal APIs)
      */
-    '/((?!_next/static|_next/image|favicon\\.ico|news-sitemap\\.xml|sitemap\\.xml|robots\\.txt|manifest\\.webmanifest|icon\\.|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|eot|mp4|webm)$).*)',
+    '/((?!_next/static|_next/image|favicon\\.ico|news-sitemap\\.xml|sitemap\\.xml|robots\\.txt|manifest\\.webmanifest|icon\\.|(?!media/).*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?|ttf|otf|eot|mp4|webm)$).*)',
   ],
 };

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import {
   Inter,
@@ -11,6 +12,7 @@ import "../globals.css";
 import { ThemeProvider } from "@/components/common/ThemeProvider";
 import QueryProvider from "@/components/common/QueryProvider";
 import { AuthProvider } from "@/context/AuthContext";
+import AuthSeed from "@/components/auth/AuthSeed";
 import ScrollToTop from "@/components/common/ScrollToTop";
 import { Toaster } from "react-hot-toast";
 import { notFound } from "next/navigation";
@@ -21,15 +23,14 @@ import { DictionaryProvider } from "@/components/i18n/DictionaryProvider";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { NavigationProvider } from "@/context/NavigationContext";
 import { getSessionUser } from "@/lib/auth-session";
-import { newsApi } from "@/lib/api";
+import { getMenuCached } from "@/lib/cached-data";
 import type { Locale } from "@/lib/i18n/config";
 import type { Category } from "@/types";
 
-// The header renders the resolved session into the first paint (no
-// login-button flash). Reading cookies here blocks prerendering, so this
-// tree opts out of the instant/static-shell guarantee (see next docs:
-// route-segment-config/instant.md — "Disabling static shell validation").
-export const instant = false;
+async function AuthSession() {
+  const user = await getSessionUser();
+  return <AuthSeed user={user} />;
+}
 
 const mukta = Mukta({
   subsets: ["devanagari", "latin"],
@@ -125,13 +126,12 @@ export default async function LangLayout({
   // Validate locale — unknown locale → 404
   if (!isLocale(lang)) notFound();
 
-  const [dict, menu, initialUser] = await Promise.all([
+  const [dict, menu] = await Promise.all([
     getDictionary(lang as Locale),
-    newsApi.getMenuServer(lang as Locale).catch((err): Category[] => {
+    getMenuCached(lang as Locale).catch((err): Category[] => {
       console.warn("[Header menu] Failed to load categories menu:", err);
       return [];
     }),
-    getSessionUser(),
   ]);
 
   return (
@@ -163,7 +163,10 @@ export default async function LangLayout({
           disableTransitionOnChange
         >
           <QueryProvider>
-            <AuthProvider initialUser={initialUser}>
+            <AuthProvider>
+              <Suspense fallback={null}>
+                <AuthSession />
+              </Suspense>
               <DictionaryProvider lang={lang as Locale} dict={dict}>
                 <LanguageProvider>
                   <NavigationProvider menu={menu || []}>

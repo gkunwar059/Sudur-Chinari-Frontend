@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { newsApi } from "@/lib/api";
+import { getDistrictsCached, getPartnersCached } from "@/lib/cached-data";
 import PartnersSection from "@/components/home/PartnersSection";
 import { DISTRICTS as FALLBACK_DISTRICTS } from "@/data/districts";
 import { Compass } from "lucide-react";
@@ -44,7 +44,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
 
   // Fetch districts from backend API with fallback to hardcoded comprehensive dataset
   let districtsData: any[] = [];
-  const apiDistricts = await newsApi.getDistrictsServer(locale).catch(() => null);
+  const apiDistricts = await getDistrictsCached(locale).catch(() => null);
   if (apiDistricts && Array.isArray(apiDistricts.results) && apiDistricts.results.length > 0) {
     districtsData = apiDistricts.results
       .map((apiD: any) => {
@@ -61,7 +61,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
     districtsData = FALLBACK_DISTRICTS;
   }
 
-  const allPartners = await newsApi.getPartnersServer(undefined, locale).catch(() => null);
+  const allPartners = await getPartnersCached(undefined, locale);
   const districtPartners = (allPartners?.results || []).filter(
     (p: any) => p.district || p.district_slug,
   );

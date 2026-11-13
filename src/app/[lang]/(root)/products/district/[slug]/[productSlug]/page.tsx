@@ -7,15 +7,17 @@ import {
 } from "lucide-react";
 import { isLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
-import { getDistrictsCached } from "@/lib/cached-data";
+import {
+  getDistrictsCached,
+  getProductBySlugCached,
+} from "@/lib/cached-data";
+import { getDistrictBySlug, mergeDistrict } from "@/lib/districts";
 import { t } from "@/lib/utils";
 import { buildMetadata } from "@/lib/seo";
 import FTSectionDivider from "@/components/common/FTSectionDivider";
 import FTBreadcrumb from "@/components/common/FTBreadcrumb";
 import PageSkeleton from "@/components/common/PageSkeleton";
 import AdBanner from "@/components/common/AdBanner";
-
-import { newsApi } from "@/lib/api";
 
 interface Props {
   params: Promise<{ lang: string; slug: string; productSlug: string }>;
@@ -25,14 +27,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { lang, slug, productSlug } = await params;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
 
-  let district: any = { name: { ne: "अछाम", en: "Achham" }, slug };
-  try {
-    const apiDistricts = await getDistrictsCached(locale);
-    const found = apiDistricts?.results?.find((d: any) => d.slug === slug);
-    if (found) district = found;
-  } catch (error) {}
-
-  const apiProduct = await newsApi.getProductBySlugServer(productSlug, locale).catch(() => null);
+  const [apiDistrict, apiProduct] = await Promise.all([
+    getDistrictsCached(locale)
+      .then((res) => res?.results?.find((d: any) => d.slug === slug))
+      .catch(() => null),
+    getProductBySlugCached(productSlug, locale).catch(() => null),
+  ]);
+  const district: any = mergeDistrict(
+    apiDistrict ?? null,
+    getDistrictBySlug(slug),
+  ) || { name: { ne: slug, en: slug }, slug };
   const districtName = t(district.name, locale);
   const productName = apiProduct
     ? typeof apiProduct.name === "object" ? t(apiProduct.name, locale) : apiProduct.name
@@ -58,29 +62,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   });
 }
 
-const FARMERS = [
-  {
-    id: "f1",
-    name: { ne: "धन बहादुर कुँवर", en: "Dhan Bahadur Kunwar" },
-    address: { ne: "साँफेबगर - ३, अछाम", en: "Sanfebagar - 3, Achham" },
-    phone: "९८४xxx xxxx",
-    experience: { ne: "१२ वर्ष", en: "12 Years" },
-    price: { ne: "रू. ८०० / के.जी.", en: "Rs. 800 / kg" },
-    image:
-      "https://images.unsplash.com/photo-1542838132-92c53300491e?q=80&w=300&auto=format&fit=crop",
-  },
-  {
-    id: "f2",
-    name: { ne: "कमला देवी खड्का", en: "Kamala Devi Khadka" },
-    address: { ne: "चौरपाटी - ६, अछाम", en: "Chaurpati - 6, Achham" },
-    phone: "९८६xxx xxxx",
-    experience: { ne: "८ वर्ष", en: "8 Years" },
-    price: { ne: "रू. ८५० / के.जी.", en: "Rs. 850 / kg" },
-    image:
-      "https://images.unsplash.com/photo-1559583985-c80d8ad9b29f?q=80&w=300&auto=format&fit=crop",
-  },
-];
-
 export default function ProductDetailsPage({ params }: Props) {
   return (
     <Suspense fallback={<PageSkeleton variant="detail" />}>
@@ -93,16 +74,18 @@ async function ProductDetailsPageContent({ params }: Props) {
   const { lang, slug, productSlug } = await params;
   const locale: Locale = isLocale(lang) ? (lang as Locale) : defaultLocale;
 
-  let district: any = { name: { ne: "अछाम", en: "Achham" }, slug: slug };
-  try {
-    const apiDistricts = await getDistrictsCached(locale);
-    const found = apiDistricts?.results?.find((d: any) => d.slug === slug);
-    if (found) district = found;
-  } catch (error) {}
+  const [apiDistrict, apiProduct] = await Promise.all([
+    getDistrictsCached(locale)
+      .then((res) => res?.results?.find((d: any) => d.slug === slug))
+      .catch(() => null),
+    getProductBySlugCached(productSlug, locale).catch(() => null),
+  ]);
 
+  const district: any = mergeDistrict(
+    apiDistrict ?? null,
+    getDistrictBySlug(slug),
+  ) || { name: { ne: slug, en: slug }, slug };
   const districtName = t(district.name, locale);
-
-  const apiProduct = await newsApi.getProductBySlugServer(productSlug, locale).catch(() => null);
 
   const productName = apiProduct
     ? typeof apiProduct.name === "object" ? t(apiProduct.name, locale) : apiProduct.name

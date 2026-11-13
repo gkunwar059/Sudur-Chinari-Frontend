@@ -15,7 +15,9 @@ export async function getCategoryPageData(slug: string, lang: Locale) {
   if (!category) return null;
 
   const menuRes = (await getMenuCached(lang).catch(() => null)) as any;
-  const menu = menuRes?.results || [];
+  const menu: Category[] = Array.isArray(menuRes)
+    ? menuRes
+    : menuRes?.results || [];
 
   let subCategories: Category[] = [];
   let parentCategory: Category | null = (category.parent as Category) || null;

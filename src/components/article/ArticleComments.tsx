@@ -18,10 +18,10 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
 import type { ArticleComment } from "@/types";
 import {
-  fetchCommentsAction,
   createCommentAction,
   likeCommentAction,
 } from "@/app/actions/comments";
+import { newsApi } from "@/lib/api";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/auth/AuthModal";
@@ -67,8 +67,34 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     useState<PendingCommentData | null>(null);
   const [pendingAutoSubmit, setPendingAutoSubmit] = useState(false);
 
-  // Session-level liked tracker
+  // Session-level liked tracker (persisted in localStorage)
   const [likedIds, setLikedIds] = useState<Record<string, boolean>>({});
+  const [serverIncrementedIds, setServerIncrementedIds] = useState<
+    Record<string, boolean>
+  >({});
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem(`comment_likes_${articleId}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed === "object") {
+          setLikedIds(parsed);
+          setServerIncrementedIds(parsed);
+        }
+      }
+    } catch {}
+  }, [articleId]);
+
+  const userDisplayName =
+    (user as any)?.full_name ||
+    (user as any)?.name ||
+    (user?.first_name
+      ? `${user.first_name} ${user.last_name || ""}`.trim()
+      : "") ||
+    user?.username ||
+    user?.email ||
+    "Reader";
 
   // ── TanStack Query: Fetch comments from backend ──
   const {
@@ -78,11 +104,8 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   } = useQuery({
     queryKey: ["comments", articleId],
     queryFn: async () => {
-      const res = await fetchCommentsAction(articleId);
-      if (res.success && Array.isArray(res.comments)) {
-        return res.comments;
-      }
-      return [];
+      const res = await newsApi.getCommentsClient({ articleId });
+      return res?.results || (Array.isArray(res) ? res : []);
     },
     staleTime: 1000 * 30, // 30 seconds
   });
@@ -146,14 +169,15 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
   useEffect(() => {
     if (pendingAutoSubmit && user && pendingComment) {
       setPendingAutoSubmit(false);
-      const authorName = user.first_name || user.username;
+      const authorName =
+        pendingComment.authorName?.trim() || userDisplayName;
       postCommentMutation.mutate({
         ...pendingComment,
         authorName,
       });
       setPendingComment(null);
     }
-  }, [pendingAutoSubmit, user, pendingComment, postCommentMutation]);
+  }, [pendingAutoSubmit, user, pendingComment, postCommentMutation, userDisplayName]);
 
   // Build threaded comment tree
   const commentTree = useMemo(() => {
@@ -164,6 +188,14 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     rawComments.forEach((c: any) => {
       const id = String(c.id);
       const parentId = c.parent ? String(c.parent) : null;
+      const baseLikes = c.likes || 0;
+      const isLiked = !!likedIds[id];
+      const wasServerIncremented = !!serverIncrementedIds[id];
+      const adjustedLikes =
+        wasServerIncremented && !isLiked
+          ? Math.max(0, baseLikes - 1)
+          : baseLikes;
+
       map.set(id, {
         id,
         articleId: String(c.article || articleId),
@@ -171,8 +203,8 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
         authorLocation: c.authorLocation || "",
         content: c.content || "",
         createdAt: c.createdAt || new Date().toISOString(),
-        likes: c.likes || 0,
-        isLiked: !!likedIds[id],
+        likes: adjustedLikes,
+        isLiked,
         parentId,
         replies: [],
       });
@@ -206,7 +238,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
     });
 
     return roots;
-  }, [rawComments, likedIds, sortBy, articleId]);
+  }, [rawComments, likedIds, serverIncrementedIds, sortBy, articleId]);
 
   // Handle top-level comment submission
   const handleSubmitMainComment = (e: React.FormEvent) => {
@@ -223,7 +255,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
     if (!user) {
       setPendingComment({
-        authorName: "",
+        authorName: name.trim(),
         authorLocation: location.trim(),
         content: commentText.trim(),
         parentId: undefined,
@@ -233,7 +265,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       return;
     }
 
-    const authorName = user.first_name || user.username;
+    const authorName = name.trim() || userDisplayName;
     postCommentMutation.mutate({
       authorName,
       authorLocation: location.trim(),
@@ -257,7 +289,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
 
     if (!user) {
       setPendingComment({
-        authorName: "",
+        authorName: replyName.trim(),
         content: replyText.trim(),
         parentId: parentCommentId,
       });
@@ -266,7 +298,7 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       return;
     }
 
-    const authorName = user.first_name || user.username;
+    const authorName = replyName.trim() || userDisplayName;
     postCommentMutation.mutate({
       authorName,
       content: replyText.trim(),
@@ -279,11 +311,19 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       setIsAuthModalOpen(true);
       return;
     }
-    setLikedIds((prev) => ({
-      ...prev,
-      [commentId]: !prev[commentId],
-    }));
-    likeMutation.mutate(commentId);
+    const willLike = !likedIds[commentId];
+    setLikedIds((prev) => {
+      const next = { ...prev, [commentId]: willLike };
+      try {
+        localStorage.setItem(`comment_likes_${articleId}`, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+
+    if (willLike && !serverIncrementedIds[commentId]) {
+      setServerIncrementedIds((prev) => ({ ...prev, [commentId]: true }));
+      likeMutation.mutate(commentId);
+    }
   };
 
   const toggleThread = (commentId: string) => {
@@ -836,14 +876,23 @@ export default function ArticleComments({ articleId }: ArticleCommentsProps) {
       {/* ── Auth Modal Integration ── */}
       <AuthModal
         isOpen={isAuthModalOpen}
-        onClose={() => setIsAuthModalOpen(false)}
-        defaultName={pendingComment?.authorName || name.trim()}
+        onClose={() => {
+          setIsAuthModalOpen(false);
+          setPendingAutoSubmit(false);
+        }}
+        defaultName={
+          pendingComment?.authorName || replyName.trim() || name.trim()
+        }
         initialMode={
-          pendingComment?.authorName || name.trim() ? "register" : "login"
+          pendingComment?.authorName || replyName.trim() || name.trim()
+            ? "register"
+            : "login"
         }
         onSuccess={() => {
           setIsAuthModalOpen(false);
-          setPendingAutoSubmit(true);
+          if (pendingComment) {
+            setPendingAutoSubmit(true);
+          }
         }}
       />
     </section>

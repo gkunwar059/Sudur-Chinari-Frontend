@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import { useAuth } from "@/context/AuthContext";
 import FTModal from "@/components/common/FTModal";
 import AuthModal from "@/components/auth/AuthModal";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { newsApi } from "@/lib/api";
+import { revalidateCacheTagsAction } from "@/app/actions/cache";
 import {
   Play,
   CheckCircle2,
@@ -37,6 +39,7 @@ export default function VideoContributionModal({
   const { t, locale } = useLanguage();
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const router = useRouter();
 
   const { data: districtsResponse } = useQuery({
     queryKey: ["districts", locale],
@@ -173,8 +176,14 @@ export default function VideoContributionModal({
 
       await newsApi.postVideoClient(payload);
 
-      // Invalidate queries so video list refreshes immediately
+      // Invalidate server "use cache" tags and client queries so video list refreshes immediately
+      await revalidateCacheTagsAction([
+        "videos",
+        "videos-ne",
+        "videos-en",
+      ]).catch(() => {});
       queryClient.invalidateQueries({ queryKey: ["videos"] });
+      router.refresh();
 
       setIsSuccess(true);
       setTimeout(() => {
