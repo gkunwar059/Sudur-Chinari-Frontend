@@ -138,7 +138,7 @@ export default function DistrictPhotosView({
         {photoFeatures.map((art) => (
           <div
             key={art.id}
-            className="bg-background rounded-none border border-border overflow-hidden shadow-2xs h-full flex flex-col"
+            className="scroll-reveal-card bg-background rounded-none border border-border overflow-hidden shadow-2xs h-full flex flex-col"
             style={{ borderTop: `3px solid ${themePrimary}` }}
           >
             <div className="relative aspect-[16/10] shrink-0 bg-surface-hover">

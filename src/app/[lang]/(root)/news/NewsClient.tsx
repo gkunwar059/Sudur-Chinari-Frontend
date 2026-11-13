@@ -71,6 +71,7 @@ export default function NewsClient({
               metaBorder={false}
               showAuthor
               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+              className="scroll-reveal-card"
             />
           ))}
         </div>

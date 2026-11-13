@@ -166,7 +166,7 @@ async function ProductDetailsPageContent({ params }: Props) {
                 {dynamicFarmers.map((farmer: any) => (
                   <div
                     key={farmer.id}
-                    className="editorial-card-bordered border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
+                    className="editorial-card-bordered scroll-reveal-card border border-border border-t-4 border-t-brand-secondary bg-surface p-5 flex flex-col"
                   >
                   <div className="flex items-center gap-3 mb-6">
                     <div className="relative w-12 h-12 rounded-full overflow-hidden border border-border shrink-0">

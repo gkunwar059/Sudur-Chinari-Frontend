@@ -4,63 +4,112 @@ import { Suspense, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { forceUnlockBodyScroll } from "@/lib/scroll-lock";
 
+const REVEAL_SELECTOR =
+  ".scroll-reveal:not([data-revealed='true']), .scroll-reveal-fade:not([data-revealed='true']), .scroll-reveal-scale:not([data-revealed='true']), .scroll-reveal-card:not([data-revealed='true'])";
+
+function markRevealed(el: Element, staggerIndex = 0) {
+  if (el.classList.contains("scroll-reveal-card")) {
+    const htmlEl = el as HTMLElement;
+    if (staggerIndex > 0) {
+      htmlEl.style.animationDelay = `${Math.min(staggerIndex, 5) * 45}ms`;
+    }
+    const onEnd = (e: Event) => {
+      if ((e as AnimationEvent).animationName !== "cardRevealIn") return;
+      el.classList.add("reveal-done");
+      htmlEl.style.animationDelay = "";
+      el.removeEventListener("animationend", onEnd);
+    };
+    el.addEventListener("animationend", onEnd);
+  }
+  el.setAttribute("data-revealed", "true");
+  el.classList.add("is-revealed");
+}
+
+function hasRevealNode(node: Node): boolean {
+  if (node.nodeType !== Node.ELEMENT_NODE) return false;
+  const el = node as Element;
+  if (
+    el.classList.contains("scroll-reveal") ||
+    el.classList.contains("scroll-reveal-fade") ||
+    el.classList.contains("scroll-reveal-scale") ||
+    el.classList.contains("scroll-reveal-card")
+  ) {
+    return true;
+  }
+  return Boolean(
+    el.querySelector(
+      ".scroll-reveal, .scroll-reveal-fade, .scroll-reveal-scale, .scroll-reveal-card",
+    ),
+  );
+}
+
 /**
  * ScrollObserver:
- * Lightweight GPU-accelerated scroll-reveal observer.
- * Listens for elements with `.scroll-reveal`, `.scroll-reveal-fade`, or `.scroll-reveal-scale`.
- * Applies `.is-revealed` when the element intersects the viewport (12% margin).
- * Leaves Server Components 100% untouched while adding smooth broadsheet reveals.
+ * Lightweight GPU-accelerated scroll-reveal observer with rAF-coalesced DOM scans
+ * so scrolling and streaming mounts never stall the main thread.
  */
 function ScrollObserverContent() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Ensure body scroll is free whenever user transitions routes
     forceUnlockBodyScroll();
   }, [pathname]);
 
   useEffect(() => {
     if (typeof window === "undefined" || !("IntersectionObserver" in window)) {
-      // Fallback for environments without IntersectionObserver
-      document.querySelectorAll(".scroll-reveal, .scroll-reveal-fade, .scroll-reveal-scale").forEach((el) => {
-        el.classList.add("is-revealed");
-      });
+      document
+        .querySelectorAll(
+          ".scroll-reveal, .scroll-reveal-fade, .scroll-reveal-scale, .scroll-reveal-card",
+        )
+        .forEach((el) => markRevealed(el));
       return;
     }
 
     const observer = new IntersectionObserver(
       (entries, obs) => {
-        entries.forEach((entry) => {
+        let cardIdx = 0;
+        for (const entry of entries) {
           if (entry.isIntersecting) {
-            const target = entry.target as HTMLElement;
-            target.setAttribute("data-revealed", "true");
-            target.classList.add("is-revealed");
-            obs.unobserve(target);
+            const isCard = entry.target.classList.contains("scroll-reveal-card");
+            markRevealed(entry.target, isCard ? cardIdx++ : 0);
+            obs.unobserve(entry.target);
           }
-        });
+        }
       },
       {
         root: null,
-        rootMargin: "0px 0px -40px 0px", // triggers slightly before full entry for smoother experience
-        threshold: 0.08,
-      }
+        rootMargin: "0px 0px 80px 0px",
+        threshold: 0.01,
+      },
     );
 
     const observeElements = () => {
-      const targets = document.querySelectorAll(
-        ".scroll-reveal:not([data-revealed='true']), .scroll-reveal-fade:not([data-revealed='true']), .scroll-reveal-scale:not([data-revealed='true'])"
-      );
-      targets.forEach((target) => observer.observe(target));
+      const viewportBottom = window.innerHeight + 80;
+      const targets = document.querySelectorAll(REVEAL_SELECTOR);
+      let visibleCardIdx = 0;
+      targets.forEach((target) => {
+        if (target.getBoundingClientRect().top <= viewportBottom) {
+          const isCard = target.classList.contains("scroll-reveal-card");
+          markRevealed(target, isCard ? visibleCardIdx++ : 0);
+        } else {
+          observer.observe(target);
+        }
+      });
     };
 
-    // Initial scan after frame to avoid race with hydration
-    const rafId = requestAnimationFrame(() => {
-      observeElements();
-    });
+    const rafId = requestAnimationFrame(observeElements);
+    let mutationRafId: number | null = null;
 
-    // Observe dynamically mounted elements or route transitions
-    const mutationObserver = new MutationObserver(() => {
-      observeElements();
+    const mutationObserver = new MutationObserver((mutations) => {
+      if (mutationRafId !== null) return;
+      const relevant = mutations.some((m) =>
+        Array.from(m.addedNodes).some(hasRevealNode),
+      );
+      if (!relevant) return;
+      mutationRafId = requestAnimationFrame(() => {
+        mutationRafId = null;
+        observeElements();
+      });
     });
 
     mutationObserver.observe(document.body, {
@@ -70,6 +119,7 @@ function ScrollObserverContent() {
 
     return () => {
       cancelAnimationFrame(rafId);
+      if (mutationRafId !== null) cancelAnimationFrame(mutationRafId);
       observer.disconnect();
       mutationObserver.disconnect();
     };

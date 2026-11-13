@@ -92,7 +92,7 @@ export default function PhotoGallerySection({ photoStories }: PhotoGallerySectio
             <Link
               key={story.id}
               href="/photos"
-              className="group shrink-0 w-[260px] sm:w-[320px] md:w-[350px] snap-start block"
+              className="group scroll-reveal-card shrink-0 w-[260px] sm:w-[320px] md:w-[350px] snap-start block"
             >
               {/* 16:10 Photo Frame with Broadsheet Borders */}
               <div className="relative aspect-[16/10] bg-surface border border-border overflow-hidden mb-3">

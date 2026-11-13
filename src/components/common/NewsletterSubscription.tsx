@@ -21,7 +21,7 @@ export default function NewsletterSubscription({ locale }: { locale: Locale }) {
       setSuccess(true);
       setEmail("");
       setTimeout(() => setSuccess(false), 4000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Newsletter subscription error:", err);
       setError(
         locale === "ne"

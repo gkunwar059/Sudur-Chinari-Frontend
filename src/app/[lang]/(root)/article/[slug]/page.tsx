@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import ArticleContent from "@/components/article/ArticleContent";
 import ReadingProgress from "@/components/article/ReadingProgress";
+import AdBanner from "@/components/common/AdBanner";
 import PageSkeleton from "@/components/common/PageSkeleton";
 import { getArticleBySlugCached, getArticlesCached } from "@/lib/cached-data";
 import { isLocale, ogLocale, defaultLocale } from "@/lib/i18n/config";
@@ -207,6 +208,7 @@ async function ArticlePageContent({ params }: PageProps) {
             related={related}
             popular={popular}
           />
+          <AdBanner placement="billboard-mid" page="article" className="mt-10" />
         </div>
       </main>
     </>

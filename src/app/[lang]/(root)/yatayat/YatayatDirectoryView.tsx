@@ -274,7 +274,7 @@ async function YatayatDirectoryResults({
   return (
     <>
       {(activeTab === "all" || activeTab === "bus") && (
-        <section className="space-y-4 scroll-reveal">
+        <section className="space-y-4">
           <FTSectionDivider
             title={isNe ? "बस सेवा" : "Bus Services"}
             enTitle={isNe ? "Bus Services" : undefined}
@@ -325,7 +325,7 @@ async function YatayatDirectoryResults({
       )}
 
       {(activeTab === "all" || activeTab === "hiace") && (
-        <section className="space-y-4 scroll-reveal">
+        <section className="space-y-4">
           <FTSectionDivider
             title={isNe ? "हाइस सेवा" : "Hiace Services"}
             enTitle={isNe ? "Hiace Services" : undefined}
@@ -360,7 +360,7 @@ async function YatayatDirectoryResults({
       )}
 
       {(activeTab === "all" || activeTab === "jeep") && (
-        <section className="space-y-4 scroll-reveal">
+        <section className="space-y-4">
           <FTSectionDivider
             title={isNe ? "जीप सेवा" : "Jeep Services"}
             enTitle={isNe ? "Jeep Services" : undefined}
@@ -416,13 +416,13 @@ export default function YatayatDirectoryView({
               <Suspense fallback={<YatayatDirectoryResultsFallback />}>
                 <YatayatDirectoryResults locale={locale} searchParams={searchParams} />
               </Suspense>
-
-              <div className="scroll-reveal scroll-delay-100">
-                <AdBanner placement="billboard-mid" page="yatayat" className="mt-8" />
-              </div>
             </div>
 
             <YatayatSidebar locale={locale} />
+          </div>
+
+          <div className="w-full pt-2 scroll-reveal-card">
+            <AdBanner placement="billboard-mid" page="yatayat" className="!my-0" />
           </div>
         </div>
       </div>

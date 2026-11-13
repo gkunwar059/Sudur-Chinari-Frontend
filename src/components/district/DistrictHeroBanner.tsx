@@ -86,10 +86,10 @@ export default function DistrictHeroBanner({
               <div
                 key={slide.id ?? index}
                 className={cn(
-                  "absolute inset-0 w-full h-full transition-all duration-700 ease-in-out",
+                  "absolute inset-0 w-full h-full transition-[opacity,transform] duration-300 ease-out",
                   isActive
                     ? "opacity-100 scale-100 z-1"
-                    : "opacity-0 scale-105 z-0 pointer-events-none",
+                    : "opacity-0 scale-[1.02] z-0 pointer-events-none",
                 )}
               >
                 <Image

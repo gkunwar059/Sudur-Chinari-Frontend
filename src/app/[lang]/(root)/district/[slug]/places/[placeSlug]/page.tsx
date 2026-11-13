@@ -880,7 +880,7 @@ async function DistrictPlaceDetailsContent({ params }: Props) {
                     <Link
                       key={other.id ?? otherSlug}
                       href={`/district/${slug}/places/${otherSlug}`}
-                      className="editorial-card border border-border bg-background flex flex-col overflow-hidden group"
+                      className="editorial-card scroll-reveal-card border border-border bg-background flex flex-col overflow-hidden group"
                       style={{ borderTop: `3px solid ${theme.primary}` }}
                     >
                       <div className="relative aspect-[16/10] bg-surface-hover overflow-hidden">
@@ -891,7 +891,7 @@ async function DistrictPlaceDetailsContent({ params }: Props) {
                           alt={t(other.title, locale)}
                           fill
                           sizes="(max-width: 768px) 100vw, 33vw"
-                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
                         />
                         <div className="absolute top-3 left-3">
                           <span

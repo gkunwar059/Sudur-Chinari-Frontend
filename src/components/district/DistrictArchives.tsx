@@ -246,6 +246,7 @@ export default function DistrictArchives({
                 showExcerpt
                 monoTime
                 metaBorder={false}
+                className="scroll-reveal-card"
               />
             ))}
           </div>

@@ -111,7 +111,7 @@ export default async function VideosPage({ params }: Props) {
           <>
             {/* Shorts */}
             {shorts.length > 0 && (
-              <div suppressHydrationWarning className="container-editorial py-10 scroll-reveal">
+              <div suppressHydrationWarning className="container-editorial py-10">
                 <FTSectionDivider
                   title="Shorts / Reels"
                   icon={
@@ -127,7 +127,7 @@ export default async function VideosPage({ params }: Props) {
                     <Link
                       key={video.id}
                       href={`/videos/${video.id}`}
-                      className="group"
+                      className="group scroll-reveal-card"
                     >
                       <div className="relative rounded-none border border-border overflow-hidden aspect-[9/16] bg-surface">
                         <Image
@@ -160,7 +160,7 @@ export default async function VideosPage({ params }: Props) {
             </div>
 
             {regular.length > 0 && (
-              <div suppressHydrationWarning className="container-editorial pb-14 scroll-reveal">
+              <div suppressHydrationWarning className="container-editorial pb-14">
                 <FTSectionDivider
                   title={lang === "en" ? "Full Video Reports" : "विस्तृत भिडियो रिपोर्टहरू"}
                   enTitle={lang === "en" ? undefined : "Full Video Reports"}
@@ -172,7 +172,7 @@ export default async function VideosPage({ params }: Props) {
                     <Link
                       key={video.id}
                       href={`/videos/${video.id}`}
-                      className="group border border-border rounded-none overflow-hidden bg-surface hover:shadow-md transition-shadow"
+                      className="group scroll-reveal-card border border-border rounded-none overflow-hidden bg-surface hover:shadow-md transition-shadow"
                     >
                       <div className="relative aspect-video overflow-hidden">
                         <Image

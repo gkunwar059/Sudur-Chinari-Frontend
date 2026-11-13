@@ -18,7 +18,7 @@ export default function Logo({
       href="/"
       className={`flex items-center group shrink-0 select-none ${className}`}
     >
-      <div className="relative transition-all duration-300 ease-in-out group-hover:scale-105">
+      <div className="relative transition-transform duration-150 ease-out group-hover:scale-[1.03]">
         <Image
           src="/images/sudur-logo.png"
           alt="सुदूर चिनारी — हाम्रो इतिहास • हाम्रो पहिचान"
@@ -26,7 +26,7 @@ export default function Logo({
           height={171}
           priority
           className={cn(
-            "object-contain w-auto transition-all duration-300 ease-in-out",
+            "object-contain w-auto transition-[height] duration-150 ease-out",
             isScrolled
               ? "h-9 sm:h-10 md:h-11 lg:h-12"
               : "h-12 sm:h-16 md:h-[72px] lg:h-[80px]",

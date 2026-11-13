@@ -50,7 +50,7 @@ export default function ProductImage({
       fill
       sizes={sizes}
       onError={() => setFailed(true)}
-      className="object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+      className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.04]"
     />
   );
 }

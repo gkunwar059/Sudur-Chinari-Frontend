@@ -25,7 +25,7 @@ export function CommunityStoryCard({
   return (
     <div
       onClick={() => onSelect(story)}
-      className="bg-background rounded-none border border-border overflow-hidden shadow-2xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer group"
+      className="scroll-reveal-card bg-background rounded-none border border-border overflow-hidden shadow-2xs flex flex-col justify-between hover:-translate-y-1 hover:shadow-md transition-all duration-300 cursor-pointer group"
       style={{ borderTop: `3px solid ${themePrimary}` }}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden bg-surface-hover border-b border-border/40 shrink-0">

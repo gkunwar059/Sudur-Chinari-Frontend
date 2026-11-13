@@ -50,7 +50,7 @@ export default function YatayatCompactCard({
 
   return (
     <div
-      className={`group bg-card hover:bg-surface border border-border border-t-[3px] ${accentClasses.card} rounded-none p-4 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between`}
+      className={`group scroll-reveal-card bg-card hover:bg-surface border border-border border-t-[3px] ${accentClasses.card} rounded-none p-4 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col justify-between`}
     >
       <div>
         <div className="relative w-full h-36 rounded-none overflow-hidden border border-border mb-3 bg-surface">
@@ -59,7 +59,7 @@ export default function YatayatCompactCard({
             alt={service.title.en}
             fill
             sizes="(max-width: 768px) 100vw, 33vw"
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
           />
           <span
             className={`absolute top-2 left-2 px-2.5 py-0.5 rounded-none text-xs font-bold text-white shadow-2xs ${accentClasses.badge}`}

@@ -256,7 +256,7 @@ export default function CategoryPageView({
 
                   {/* 2. Grid of Secondary Stories */}
                   {gridArticles.length > 0 && (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 scroll-reveal">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                       {gridArticles.map((article: any) => (
                         <EditorialCard
                           key={article.id}
@@ -265,6 +265,7 @@ export default function CategoryPageView({
                           badgeSize="xs"
                           showExcerpt
                           showAuthor
+                          className="scroll-reveal-card"
                         />
                       ))}
                     </div>
@@ -293,7 +294,7 @@ export default function CategoryPageView({
             {/* ── Right Editorial Sidebar (4 cols) ── */}
             <aside className="lg:col-span-4 min-w-0 space-y-6 sm:space-y-8">
               {/* 1. Popular / Trending Stories */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal-card">
                 <FTSectionDivider
                   title={isEn ? "Popular Stories" : "लोकप्रिय समाचार"}
                   icon={<TrendingUp size={18} className="text-brand" />}
@@ -330,7 +331,7 @@ export default function CategoryPageView({
               </div>
 
               {/* 2. Other Categories */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal-card">
                 <FTSectionDivider
                   title={isEn ? "Other Topics" : "अन्य विषयहरू"}
                   icon={<Layers size={18} className="text-brand" />}
@@ -365,7 +366,7 @@ export default function CategoryPageView({
               </div>
 
               {/* 3. District News Quick Links */}
-              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal">
+              <div className="bg-background border border-border p-4 sm:p-6 shadow-xs scroll-reveal-card">
                 <FTSectionDivider
                   title={isEn ? "News by District" : "जिल्ला अनुसार समाचार"}
                   icon={<MapPin size={18} className="text-brand" />}
@@ -387,6 +388,8 @@ export default function CategoryPageView({
               </div>
             </aside>
           </div>
+
+          <AdBanner placement="billboard-mid" page={adPage} className="mt-10" />
         </div>
       </main>
     </div>

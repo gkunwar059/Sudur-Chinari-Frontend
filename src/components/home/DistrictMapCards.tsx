@@ -116,7 +116,7 @@ export default function DistrictMapCards({ initialDistricts }: DistrictMapCardsP
               <Link
                 key={d.slug}
                 href={`/district/${d.slug}`}
-                className="group bg-background hover:bg-surface border border-border hover:border-brand-secondary p-3.5 sm:p-4 transition-all duration-200 flex flex-col justify-between relative overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md min-w-0"
+                className="group scroll-reveal-card bg-background hover:bg-surface border border-border hover:border-brand-secondary p-3.5 sm:p-4 transition-all duration-200 flex flex-col justify-between relative overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.03)] hover:shadow-md min-w-0"
               >
                 {/* District Accent Color Top Hairline */}
                 <div

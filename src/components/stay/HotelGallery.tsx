@@ -33,7 +33,7 @@ export default function HotelGallery({ hotel, isEn, t }: Props) {
           {hotel.gallery.slice(0, 5).map((img, idx) => (
             <div
               key={img.id}
-              className={`relative aspect-square overflow-hidden rounded-none ${idx === 0 ? "row-span-2 col-span-2 aspect-auto" : ""}`}
+              className={`scroll-reveal-card relative aspect-square overflow-hidden rounded-none ${idx === 0 ? "row-span-2 col-span-2 aspect-auto" : ""}`}
             >
               <Image
                 src={getProxiedImageUrl(img.image)}

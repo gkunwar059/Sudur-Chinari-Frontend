@@ -109,7 +109,7 @@ export default async function PhotosPage({ params }: Props) {
             <>
               {/* Featured large */}
               {featured && (
-                <Link href={`/photos/${featured.id}`} className="group block mb-14 scroll-reveal">
+                <Link href={`/photos/${featured.id}`} className="group block mb-14 scroll-reveal-card">
                   <div
                     className="bg-background rounded-none border border-border overflow-hidden shadow-2xs"
                     style={{ borderTop: "3px solid var(--color-brand)" }}
@@ -162,7 +162,7 @@ export default async function PhotosPage({ params }: Props) {
 
               {/* Grid */}
               {rest.length > 0 && (
-                <div className="scroll-reveal">
+                <div>
                   <FTSectionDivider
                     title={lang === "en" ? "Recent Photo Stories" : "ताजा तस्बिर कथाहरू"}
                     enTitle={lang === "en" ? undefined : "Recent Photo Stories"}
@@ -174,7 +174,7 @@ export default async function PhotosPage({ params }: Props) {
                       <Link
                         key={story.id}
                         href={`/photos/${story.id}`}
-                        className="bg-background rounded-none border border-border overflow-hidden shadow-2xs h-full flex flex-col group cursor-pointer"
+                        className="bg-background scroll-reveal-card rounded-none border border-border overflow-hidden shadow-2xs h-full flex flex-col group cursor-pointer"
                         style={{ borderTop: `3px solid var(--color-brand)` }}
                       >
                         <div className="relative aspect-[16/10] shrink-0 overflow-hidden">

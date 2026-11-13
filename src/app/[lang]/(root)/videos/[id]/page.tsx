@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import VideoPlayerView from "@/components/video/VideoPlayerView";
+import AdBanner from "@/components/common/AdBanner";
 import { isLocale, ogLocale, defaultLocale } from "@/lib/i18n/config";
 import type { Locale } from "@/lib/i18n/config";
 import { localizedPath } from "@/lib/i18n/paths";
@@ -87,6 +88,7 @@ export default async function VideoDetailPage({ params }: Props) {
       <main className="flex-1 mobile-safe-bottom bg-surface/50 py-8">
         <div className="container-editorial">
           <VideoPlayerView video={video} otherVideos={otherVideos} />
+          <AdBanner placement="billboard-mid" page="video" className="mt-10" />
         </div>
       </main>
     </>

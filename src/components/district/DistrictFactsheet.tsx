@@ -75,7 +75,7 @@ export default function DistrictFactsheet({
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 text-xs font-sans">
         {/* Item 1 */}
         {isTravel ? (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               उचाइ (Elevation)
             </span>
@@ -84,7 +84,7 @@ export default function DistrictFactsheet({
             </strong>
           </div>
         ) : (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               क्षेत्रफल (Area)
             </span>
@@ -96,7 +96,7 @@ export default function DistrictFactsheet({
 
         {/* Item 2 */}
         {isTravel ? (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               सदरमुकाम (HQ)
             </span>
@@ -105,7 +105,7 @@ export default function DistrictFactsheet({
             </strong>
           </div>
         ) : (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               जनसंख्या (Pop.)
             </span>
@@ -117,7 +117,7 @@ export default function DistrictFactsheet({
 
         {/* Item 3 */}
         {isTravel ? (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               क्षेत्रफल (Area)
             </span>
@@ -126,7 +126,7 @@ export default function DistrictFactsheet({
             </strong>
           </div>
         ) : (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               सदरमुकाम (HQ)
             </span>
@@ -137,7 +137,7 @@ export default function DistrictFactsheet({
         )}
 
         {/* Item 4: Local Units */}
-        <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+        <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
           <span className="text-muted-foreground block text-[10.5px] font-mono">
             स्थानीय तह (Units)
           </span>
@@ -148,7 +148,7 @@ export default function DistrictFactsheet({
         </div>
 
         {/* Item 5: Major Rivers */}
-        <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+        <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
           <span className="text-muted-foreground block text-[10.5px] font-mono">
             प्रमुख नदी (Rivers)
           </span>
@@ -159,7 +159,7 @@ export default function DistrictFactsheet({
 
         {/* Item 6 */}
         {isTravel ? (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               मौसम स्थिति (Weather)
             </span>
@@ -174,7 +174,7 @@ export default function DistrictFactsheet({
             </strong>
           </div>
         ) : (
-          <div className="bg-background/90 backdrop-blur-xs p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
+          <div className="bg-background/95 p-3.5 rounded-none border border-black/[0.06] dark:border-white/[0.06] shadow-2xs">
             <span className="text-muted-foreground block text-[10.5px] font-mono">
               साक्षरता (Literacy)
             </span>

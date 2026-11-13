@@ -78,7 +78,7 @@ export default function DistrictDestinationsView({
               <Link
                 key={place.id ?? placeSlug ?? idx}
                 href={`/district/${district.slug}/places/${placeSlug}`}
-                className="editorial-card bg-background rounded-none border border-black/[0.08] dark:border-white/[0.08] flex flex-col group overflow-hidden shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                className="editorial-card scroll-reveal-card bg-background rounded-none border border-black/[0.08] dark:border-white/[0.08] flex flex-col group overflow-hidden shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
                 style={{ borderTop: `3px solid ${theme.primary}` }}
               >
                 <div className="relative aspect-[16/10] overflow-hidden bg-surface-hover">
@@ -89,7 +89,7 @@ export default function DistrictDestinationsView({
                     }
                     alt={t(place.title)}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80" />

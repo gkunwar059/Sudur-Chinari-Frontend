@@ -126,6 +126,10 @@ export default function SingleHotelLayout({ hotel }: Props) {
           <HotelSidebar hotel={hotel} isEn={isEn} t={t} />
           <AdBanner placement="sidebar" page="stay" className="!my-0" />
         </div>
+
+        <div className="lg:col-span-3 pt-4">
+          <AdBanner placement="billboard-mid" page="stay" className="!my-0" />
+        </div>
       </main>
     </div>
   );

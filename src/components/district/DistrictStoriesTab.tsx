@@ -129,6 +129,7 @@ export default function DistrictStoriesTab({
               showExcerpt
               monoTime
               metaBorder={false}
+              className="scroll-reveal-card"
             />
           ))}
         </div>
@@ -179,7 +180,7 @@ export default function DistrictStoriesTab({
             <Link
               key={art.id}
               href={`/article/${getArticleSlug(art)}`}
-              className="group block rounded-none overflow-hidden border border-black/[0.08] dark:border-white/[0.08] hover:shadow-md transition-all shadow-2xs"
+              className="group scroll-reveal-card block rounded-none overflow-hidden border border-black/[0.08] dark:border-white/[0.08] hover:shadow-md transition-all shadow-2xs"
               style={{ borderTop: `3px solid ${theme.primary}` }}
             >
               <div className="relative aspect-[16/10] overflow-hidden bg-surface-hover">

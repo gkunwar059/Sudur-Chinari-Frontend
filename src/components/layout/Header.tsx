@@ -222,9 +222,9 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 isolate border-b border-border transition-all duration-300",
+        "sticky top-0 isolate border-b border-border transition-shadow duration-150",
         isScrolled
-          ? "shadow-md bg-background/95 backdrop-blur-sm"
+          ? "shadow-md bg-background/95"
           : "shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
         menuOpen ? "z-[200]" : "z-50",
       )}
@@ -435,13 +435,13 @@ export default function Header() {
       {/* ── Bottom Row: Centered Editorial Category Navigation Bar (The Art Newspaper style) ── */}
       <div
         onMouseLeave={() => setHoveredKey(null)}
-        className="border-t border-border bg-background/95 backdrop-blur-xs relative z-10"
+        className="border-t border-border bg-background/98 relative z-10"
       >
         <div className="container-editorial">
           <div className="w-full overflow-x-auto no-scrollbar">
             <nav
               className={cn(
-                "flex items-center justify-start sm:justify-center flex-nowrap sm:flex-wrap gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 transition-all duration-300 ease-in-out",
+                "flex items-center justify-start sm:justify-center flex-nowrap sm:flex-wrap gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 transition-[padding,min-height] duration-150 ease-out",
                 isScrolled ? "py-1.5 sm:py-2 min-h-[38px]" : "py-2.5 sm:py-3 min-h-[42px]",
               )}
               aria-label="Main"
@@ -482,15 +482,15 @@ export default function Header() {
         </div>
 
         {/* ── Sub-menu Strip: sub-categories with images (hover on desktop / active section) ── */}
-        <AnimatePresence initial={false} mode="wait">
+        <AnimatePresence initial={false}>
           {stripItem && (
             <motion.div
               key={stripItem.key}
-              initial={{ opacity: 0, y: -4 }}
+              initial={{ opacity: 0, y: -3 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -4 }}
-              transition={{ duration: 0.16, ease: "easeOut" }}
-              className="border-t border-border/70 bg-background/95 backdrop-blur-md w-full overflow-hidden"
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.1, ease: "easeOut" }}
+              className="border-t border-border/70 bg-background/98 w-full overflow-hidden"
             >
               <div className="container-editorial overflow-x-auto no-scrollbar">
                 <nav
@@ -542,8 +542,9 @@ export default function Header() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
+                  transition={{ duration: 0.15 }}
                   onClick={() => setMenuOpen(false)}
-                  className="fixed inset-0 bg-black/40 z-[300] xl:hidden backdrop-blur-sm"
+                  className="fixed inset-0 bg-black/45 z-[300] xl:hidden"
                 />
 
                 {/* Sidebar */}
@@ -551,7 +552,7 @@ export default function Header() {
                   initial={{ x: "100%" }}
                   animate={{ x: 0 }}
                   exit={{ x: "100%" }}
-                  transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+                  transition={{ duration: 0.18, ease: [0.22, 1, 0.36, 1] }}
                   className="fixed top-0 right-0 bottom-0 w-[280px] bg-background z-[301] xl:hidden shadow-2xl flex flex-col"
                 >
                   <div className="flex items-center justify-between p-4 border-b border-border">

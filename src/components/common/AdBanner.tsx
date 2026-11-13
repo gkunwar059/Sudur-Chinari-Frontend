@@ -40,32 +40,36 @@ const PLACEMENT_CONFIG: Record<
   "top-leaderboard": {
     labelNe: "शीर्ष ब्यानर (Top Leaderboard)",
     labelEn: "Top Leaderboard",
-    containerClass: "h-20 sm:h-24 md:h-28 max-h-[118px]",
-    dims: "970x90 / 728x90",
+    containerClass:
+      "w-full aspect-[320/55] sm:aspect-[728/90] lg:aspect-[970/90] min-h-[60px] max-h-[120px]",
+    dims: "970×90 / 728×90 (Mobile: 320×50)",
   },
   "billboard-mid": {
     labelNe: "मुख्य ब्यानर (Billboard Mid)",
     labelEn: "Billboard Mid",
-    containerClass: "h-24 sm:h-28 md:h-32 max-h-[135px]",
-    dims: "1200x120",
+    containerClass:
+      "w-full aspect-[320/100] sm:aspect-[970/250] min-h-[100px] max-h-[250px]",
+    dims: "970×250 (Mobile: 320×100)",
   },
   sidebar: {
-    labelNe: "साइडबार ब्यानर (Sidebar Square)",
-    labelEn: "Sidebar Banner",
-    containerClass: "aspect-square max-w-[320px] mx-auto min-h-[250px]",
-    dims: "300x250",
+    labelNe: "साइडबार ब्यानर (Sidebar MREC)",
+    labelEn: "Sidebar MREC",
+    containerClass: "w-full aspect-[6/5] max-w-[336px] mx-auto min-h-[220px]",
+    dims: "300×250 / 336×280",
   },
   "in-article": {
     labelNe: "समाचार भित्रको ब्यानर (In-Article)",
     labelEn: "In-Article Banner",
-    containerClass: "h-20 sm:h-24 md:h-28 max-h-[115px]",
-    dims: "728x90",
+    containerClass:
+      "w-full aspect-[320/100] sm:aspect-[728/90] min-h-[90px] max-h-[120px]",
+    dims: "728×90 / 300×250",
   },
   "bottom-strip": {
     labelNe: "पुछारको ब्यानर (Bottom Strip)",
     labelEn: "Bottom Strip",
-    containerClass: "h-20 sm:h-24 md:h-28 max-h-[115px]",
-    dims: "1200x100",
+    containerClass:
+      "w-full aspect-[320/55] sm:aspect-[728/90] lg:aspect-[970/90] min-h-[60px] max-h-[115px]",
+    dims: "970×90 / 728×90 (Mobile: 320×50)",
   },
 };
 
@@ -257,7 +261,7 @@ function AdBannerContent({
                   handleEmptyClick();
                 }
               }}
-              className={`relative w-full ${config.containerClass} overflow-hidden rounded-none border border-dashed border-border/80 hover:border-brand/70 bg-surface/40 hover:bg-surface/70 transition-all duration-200 cursor-pointer flex items-center justify-center p-3 sm:p-4 group`}
+              className={`relative w-full ${config.containerClass} overflow-hidden rounded-none border border-dashed border-border/80 hover:border-brand/70 bg-surface/40 hover:bg-surface/70 transition-all duration-200 cursor-pointer flex flex-col items-center justify-center gap-1.5 p-3 sm:p-4 group`}
             >
               <div className="inline-flex items-center gap-2 px-3.5 py-2 bg-brand text-white text-xs font-bold uppercase tracking-wider transition-all duration-200 group-hover:bg-brand/90 group-hover:scale-105 shadow-xs">
                 <Plus size={14} strokeWidth={2.5} />
@@ -271,6 +275,9 @@ function AdBannerContent({
                       : "Advertise Here"}
                 </span>
               </div>
+              <span className="text-[10.5px] font-mono text-muted-foreground text-center">
+                {config.dims} px
+              </span>
             </div>
           )
         )}

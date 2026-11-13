@@ -37,7 +37,7 @@ export default function FTNewsMostRead({
           return (
             <div
               key={story.id}
-              className="lg:col-span-3 min-w-0 flex flex-col bg-surface border border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all h-full rounded-sm"
+              className="lg:col-span-3 min-w-0 flex flex-col bg-surface border border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all h-full rounded-sm scroll-reveal-card"
             >
               <article className="group/article flex flex-col h-full min-w-0">
                 {/* 16:10 Feature Photo */}
@@ -49,7 +49,7 @@ export default function FTNewsMostRead({
                     src={story.featuredImage}
                     alt={t(story.title)}
                     fill
-                    className="object-cover group-hover/article:scale-105 transition-transform duration-700"
+                    className="object-cover group-hover/article:scale-105 transition-transform duration-200 ease-out"
                     sizes="(max-width: 640px) 100vw, 25vw"
                   />
                 </Link>
@@ -93,7 +93,7 @@ export default function FTNewsMostRead({
               return (
                 <article
                   key={article.id}
-                  className="py-2.5 first:pt-0 group min-w-0"
+                  className="py-2.5 first:pt-0 group min-w-0 scroll-reveal-card"
                 >
                   <Link
                     href={`/article/${getArticleSlug(article)}`}

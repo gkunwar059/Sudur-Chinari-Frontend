@@ -271,6 +271,7 @@ export default function DistrictStoriesFeed({
                 showExcerpt
                 monoTime
                 metaBorder={false}
+                className="scroll-reveal-card"
               />
             ))}
           </div>

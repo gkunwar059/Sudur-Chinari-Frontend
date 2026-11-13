@@ -280,7 +280,7 @@ button, [role="button"] {
   width: 0;
   height: 1px;
   background: currentColor;
-  transition: width 0.25s ease;
+  transition: width 0.16s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .hover-underline:hover::after {
   width: 100%;
@@ -297,25 +297,25 @@ button, [role="button"] {
 
 /* Smooth image reveal */
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
 .fade-in-up {
-  animation: fadeInUp 0.5s ease forwards;
+  animation: fadeInUp 0.22s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 /* Editorial card hover */
 .editorial-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease-out;
 }
 .editorial-card:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: 0 8px 24px -8px rgba(22, 122, 82, 0.15);
 }
 
 /* Editorial bordered card hover */
 .editorial-card-bordered {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.16s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.16s ease-out;
 }
 .editorial-card-bordered:hover {
   transform: translateY(-2px);
@@ -516,30 +516,30 @@ button, [role="button"] {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(6px); }
+  from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-fadeIn {
-  animation: fadeIn 0.35s ease-out forwards;
+  animation: fadeIn 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes slideDown {
-  from { opacity: 0; transform: translateY(-12px); }
+  from { opacity: 0; transform: translateY(-8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 .animate-slideDown {
-  animation: slideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: slideDown 0.15s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes scaleUp {
-  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  from { opacity: 0; transform: scale(0.98) translateY(4px); }
   to { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 .animate-scaleUp {
-  animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: scaleUp 0.16s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes floatSlow {
@@ -592,14 +592,14 @@ button, [role="button"] {
 }
 
 /* ============================================================
-   SCROLL REVEAL ANIMATIONS (Tailwind v4 & GPU Composited)
+   SCROLL REVEAL ANIMATIONS (Fast GPU Composited)
    ============================================================ */
 
 .scroll-reveal {
   opacity: 0;
-  transform: translateY(28px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(10px);
+  transition: opacity 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
 
@@ -607,24 +607,53 @@ button, [role="button"] {
 .scroll-reveal[data-revealed="true"] {
   opacity: 1;
   transform: translateY(0);
+  will-change: auto;
+}
+
+@keyframes cardRevealIn {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.scroll-reveal-card {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+
+.scroll-reveal-card.is-revealed,
+.scroll-reveal-card[data-revealed="true"] {
+  animation: cardRevealIn 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+  will-change: auto;
+}
+
+.scroll-reveal-card.reveal-done {
+  opacity: 1;
+  animation: none;
 }
 
 .scroll-reveal-fade {
   opacity: 0;
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity;
 }
 
 .scroll-reveal-fade.is-revealed,
 .scroll-reveal-fade[data-revealed="true"] {
   opacity: 1;
+  will-change: auto;
 }
 
 .scroll-reveal-scale {
   opacity: 0;
-  transform: scale(0.96) translateY(16px);
-  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
-              transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.985) translateY(6px);
+  transition: opacity 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.22s cubic-bezier(0.22, 1, 0.36, 1);
   will-change: opacity, transform;
 }
 
@@ -632,21 +661,34 @@ button, [role="button"] {
 .scroll-reveal-scale[data-revealed="true"] {
   opacity: 1;
   transform: scale(1) translateY(0);
+  will-change: auto;
 }
 
-/* Stagger Delays */
-.scroll-delay-100 { transition-delay: 100ms; }
-.scroll-delay-200 { transition-delay: 200ms; }
-.scroll-delay-300 { transition-delay: 300ms; }
-.scroll-delay-400 { transition-delay: 400ms; }
+/* Tight Stagger Delays */
+.scroll-delay-100 { transition-delay: 40ms; }
+.scroll-delay-200 { transition-delay: 80ms; }
+.scroll-delay-300 { transition-delay: 120ms; }
+.scroll-delay-400 { transition-delay: 160ms; }
 
 /* Accessibility: User prefers reduced motion */
 @media (prefers-reduced-motion: reduce) {
   .scroll-reveal,
   .scroll-reveal-fade,
-  .scroll-reveal-scale {
+  .scroll-reveal-scale,
+  .scroll-reveal-card {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
+    will-change: auto !important;
+  }
+
+  .scroll-reveal-card,
+  .scroll-reveal-card.is-revealed,
+  .animate-fadeIn,
+  .animate-slideDown,
+  .animate-scaleUp,
+  .animate-float,
+  .fade-in-up {
+    animation: none !important;
   }
 }

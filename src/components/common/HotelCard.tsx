@@ -24,7 +24,7 @@ export default function HotelCard({
     return (
       <Link
         href={`/stay/${hotel.slug}`}
-        className="group relative rounded-none overflow-hidden border border-border border-t-[4px] transition-all duration-300 shadow-xs hover:shadow-md flex flex-col bg-surface hover:border-brand/50"
+        className="group scroll-reveal-card relative rounded-none overflow-hidden border border-border border-t-[4px] transition-all duration-300 shadow-xs hover:shadow-md flex flex-col bg-surface hover:border-brand/50"
         style={{ borderTopColor: accentColor }}
       >
         {/* Photo */}
@@ -33,7 +33,7 @@ export default function HotelCard({
             src={getProxiedImageUrl(hotel.hero_image) || "/images/placeholder-hotel.jpg"}
             alt={hotel.name || "Hotel"}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
@@ -88,7 +88,7 @@ export default function HotelCard({
   return (
     <Link
       href={`/stay/${hotel.slug}`}
-      className="group relative flex flex-col overflow-hidden bg-surface border border-border transition-all duration-300 hover:shadow-lg aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3] lg:aspect-[16/10]"
+      className="group scroll-reveal-card relative flex flex-col overflow-hidden bg-surface border border-border transition-all duration-300 hover:shadow-lg aspect-[4/3] sm:aspect-[16/10] md:aspect-[4/3] lg:aspect-[16/10]"
     >
       {/* Background Image */}
       {hotel.hero_image && (
@@ -97,7 +97,7 @@ export default function HotelCard({
           alt={tr(hotel.name) || "Hotel"}
           fill
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-          className="object-cover object-right transition-transform duration-700 group-hover:scale-105"
+          className="object-cover object-right transition-transform duration-200 ease-out group-hover:scale-105"
         />
       )}
 

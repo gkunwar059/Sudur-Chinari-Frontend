@@ -346,7 +346,7 @@ export default function VideoShorts({
                 <div
                   key={video.id}
                   onClick={() => openModal(video)}
-                  className="group shrink-0 w-[175px] sm:w-[205px] md:w-[225px] snap-start cursor-pointer select-none"
+                  className="group scroll-reveal-card shrink-0 w-[175px] sm:w-[205px] md:w-[225px] snap-start cursor-pointer select-none"
                 >
                   {/* Card Container with Broadsheet Frame */}
                   <div className="relative aspect-[9/15] bg-surface border border-border border-t-[3px] border-t-brand-secondary group-hover:border-brand-secondary transition-all duration-300 overflow-hidden rounded-none shadow-xs group-hover:shadow-md">

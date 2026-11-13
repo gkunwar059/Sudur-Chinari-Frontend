@@ -69,7 +69,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
                       src={normalizeImageUrl(op1.featuredImage)}
                       alt={tr(op1.title)}
                       fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-700"
+                      className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
                       sizes="(max-width: 1024px) 100vw, 35vw"
                     />
 
@@ -183,7 +183,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
       {/* ── 2. Bottom Row: 3 Sub-Opinion Cards + Regional Columns Directory ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-5 w-full max-w-full overflow-hidden min-w-0 pb-2">
         {/* Sub Column 1 */}
-        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all">
+        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all scroll-reveal-card">
           <Link
             href={`/article/${getArticleSlug(subOp1)}`}
             className="flex-1 block"
@@ -224,7 +224,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
         </div>
 
         {/* Sub Column 2 */}
-        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all">
+        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all scroll-reveal-card">
           <Link
             href={`/article/${getArticleSlug(subOp2)}`}
             className="flex-1 block"
@@ -265,7 +265,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
         </div>
 
         {/* Sub Column 3 */}
-        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all">
+        <div className="lg:col-span-3 min-w-0 flex flex-col justify-between h-full bg-surface border-t-2 border-t-accent border-x border-b border-border p-4 group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all scroll-reveal-card">
           <Link
             href={`/article/${getArticleSlug(subOp3)}`}
             className="flex-1 block"
@@ -297,7 +297,7 @@ export default function FTOpinionSection({ opinions, locale }: FTOpinionSectionP
         </div>
 
         {/* Testimonial Block (3 cols) */}
-        <div className="lg:col-span-3 min-w-0 bg-brand-secondary/[0.03] dark:bg-brand-secondary/5 border-t-2 border-t-brand-secondary border-x border-b border-border p-5 flex flex-col h-full justify-center text-center relative overflow-hidden group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all">
+        <div className="lg:col-span-3 min-w-0 bg-brand-secondary/[0.03] dark:bg-brand-secondary/5 border-t-2 border-t-brand-secondary border-x border-b border-border p-5 flex flex-col h-full justify-center text-center relative overflow-hidden group hover:shadow-[0_4px_12px_rgba(0,0,0,0.05)] transition-all scroll-reveal-card">
           <div className="absolute -top-2 -right-2 opacity-10 group-hover:scale-125 group-hover:opacity-20 group-hover:-rotate-6 transition-all duration-700 ease-out pointer-events-none">
             <Quote
               size={100}

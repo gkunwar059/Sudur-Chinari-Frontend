@@ -20,7 +20,7 @@ export default function DistrictQuickSwitcher({
   const otherDistricts = DISTRICTS.filter((d) => d.slug !== currentDistrictSlug);
 
   return (
-    <div className="border-t border-border bg-surface py-10 scroll-reveal">
+    <div className="border-t border-border bg-surface py-10">
       <div className="container-editorial">
         <FTSectionDivider
           title={
@@ -39,7 +39,7 @@ export default function DistrictQuickSwitcher({
               <Link
                 key={od.slug}
                 href={`/district/${od.slug}`}
-                className="group bg-background hover:bg-surface border border-border rounded-none p-3 text-center transition-all flex flex-col items-center justify-between shadow-2xs"
+                className="group scroll-reveal-card bg-background hover:bg-surface border border-border rounded-none p-3 text-center transition-all flex flex-col items-center justify-between shadow-2xs"
                 style={{ borderTop: `3px solid ${odTheme.primary}` }}
               >
                 <span className="text-sm font-bold font-headline text-foreground group-hover:text-brand-secondary transition-colors truncate w-full">

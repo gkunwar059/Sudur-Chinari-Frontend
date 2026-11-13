@@ -81,10 +81,10 @@ export default function ContactPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start scroll-reveal">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
             {/* Contact Information & Desk */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="bg-surface border border-border border-t-[3px] border-t-brand p-6 space-y-4">
+              <div className="bg-surface border border-border border-t-[3px] border-t-brand p-6 space-y-4 scroll-reveal-card">
                 <h3 className="font-bold text-base text-foreground font-headline">
                   {isNe ? "केन्द्रीय कार्यालय" : "Headquarters"}
                 </h3>
@@ -114,7 +114,7 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="bg-surface border border-border border-t-[3px] border-t-brand-secondary p-6 space-y-3">
+              <div className="bg-surface border border-border border-t-[3px] border-t-brand-secondary p-6 space-y-3 scroll-reveal-card">
                 <div className="flex items-center gap-2 text-brand-secondary font-bold text-sm">
                   <ShieldCheck size={18} />
                   <span>{isNe ? "गोप्य समाचार सूचना (News Tips)" : "Confidential Whistleblower Desk"}</span>
@@ -127,7 +127,7 @@ export default function ContactPage() {
               </div>
 
               {/* Digital Advertising Upload Portal Card */}
-              <div className="bg-surface border border-border border-t-[3px] border-t-brand p-6 space-y-3">
+              <div className="bg-surface border border-border border-t-[3px] border-t-brand p-6 space-y-3 scroll-reveal-card">
                 <div className="flex items-center gap-2 text-brand font-bold text-sm">
                   <Megaphone size={18} />
                   <span>{isNe ? "डिजिटल विज्ञापन पोर्टल" : "Digital Advertising Portal"}</span>
@@ -149,7 +149,7 @@ export default function ContactPage() {
             </div>
 
             {/* Inquiry Form */}
-            <div className="lg:col-span-7 bg-surface border border-border p-6 sm:p-8 shadow-xs">
+            <div className="lg:col-span-7 bg-surface border border-border p-6 sm:p-8 shadow-xs scroll-reveal-card">
               <h3 className="text-lg font-bold text-foreground font-headline mb-4 flex items-center gap-2">
                 <MessageSquare size={18} className="text-brand" />
                 <span>{isNe ? "हामीलाई सन्देश पठाउनुहोस्" : "Send Us a Message"}</span>
@@ -292,7 +292,7 @@ export default function ContactPage() {
         initialPlacement="billboard-mid"
         initialPath="/contact"
         slotName={isNe ? "मुख्य ब्यानर (Billboard Mid)" : "Billboard Mid"}
-        slotDims="1200x120 px"
+        slotDims="970×250 px (Mobile: 320×100 px)"
       />
     </main>
   );

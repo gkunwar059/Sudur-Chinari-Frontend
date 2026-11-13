@@ -362,12 +362,12 @@ export default function SearchClient({
 
               {/* Article Results List */}
               {results.length > 0 ? (
-                <div className="space-y-3 scroll-reveal">
+                <div className="space-y-3">
                   {results.map((article: any) => (
                     <Link
                       key={article.id}
                       href={`/article/${getArticleSlug(article)}`}
-                      className="group flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-5 rounded-none bg-background border border-border hover:border-gray-300 hover:shadow-xs transition-all"
+                      className="group scroll-reveal-card flex flex-col sm:flex-row items-start gap-4 p-4 sm:p-5 rounded-none bg-background border border-border hover:border-gray-300 hover:shadow-xs transition-all"
                     >
                       {/* Thumbnail */}
                       <div className="relative w-full sm:w-56 h-48 sm:h-36 rounded-none overflow-hidden shrink-0 bg-surface-hover">

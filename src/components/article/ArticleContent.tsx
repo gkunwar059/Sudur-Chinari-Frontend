@@ -513,7 +513,7 @@ export default function ArticleContent({
         </div>
 
         {/* Sidebar Advertisement */}
-        <div className="rounded-none border border-border overflow-hidden scroll-reveal scroll-delay-100">
+        <div className="rounded-none border border-border overflow-hidden scroll-reveal">
           <AdBanner placement="sidebar" page="article" />
         </div>
       </aside>

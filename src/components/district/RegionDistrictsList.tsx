@@ -65,7 +65,7 @@ export default function RegionDistrictsList({
         if (regionDistricts.length === 0) return null;
 
         return (
-          <section key={region.id} className="scroll-reveal">
+          <section key={region.id}>
             {/* Signature FT Section Divider */}
             <FTSectionDivider
               sectionIndex={locale === "ne" ? `०${rIdx + 1}` : `0${rIdx + 1}`}
@@ -104,7 +104,7 @@ export default function RegionDistrictsList({
                   <Link
                     key={district.slug}
                     href={`/district/${district.slug}`}
-                    className="group relative rounded-none overflow-hidden border border-border border-t-[3px] bg-card hover:bg-surface transition-all duration-300 shadow-xs hover:shadow-md min-h-[250px] flex flex-col justify-between"
+                    className="group relative rounded-none overflow-hidden border border-border border-t-[3px] bg-card hover:bg-surface transition-all duration-300 shadow-xs hover:shadow-md min-h-[250px] flex flex-col justify-between scroll-reveal-card"
                     style={{
                       borderTopColor: district.accentColor,
                     }}
@@ -118,7 +118,7 @@ export default function RegionDistrictsList({
                         }
                         alt={districtDisplayName}
                         fill
-                        className="object-cover object-right group-hover:scale-105 transition-transform duration-700"
+                        className="object-cover object-right group-hover:scale-105 transition-transform duration-200 ease-out"
                         sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 35vw"
                       />
                     </div>

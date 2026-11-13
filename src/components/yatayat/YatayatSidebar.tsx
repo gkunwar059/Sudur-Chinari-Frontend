@@ -100,7 +100,7 @@ export default function YatayatSidebar({ locale }: YatayatSidebarProps) {
                 key={action.type}
                 type={action.type}
                 locale={locale}
-                className={`p-3.5 rounded-none bg-surface border border-border border-l-[3px] ${action.borderClass} text-left hover:bg-surface-hover transition-all group cursor-pointer`}
+                className={`scroll-reveal-card p-3.5 rounded-none bg-surface border border-border border-l-[3px] ${action.borderClass} text-left hover:bg-surface-hover transition-all group cursor-pointer`}
               >
                 <div
                   className={`w-8 h-8 rounded-none text-white flex items-center justify-center mb-2 shadow-2xs ${action.iconBgClass}`}
@@ -205,7 +205,7 @@ export default function YatayatSidebar({ locale }: YatayatSidebarProps) {
           alt={isNe ? "सुदूरपश्चिम हिमाली यात्रा" : "Sudurpashchim Mountain Travel"}
           fill
           sizes="(max-width: 1024px) 100vw, 33vw"
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-transparent" />
         <div className="absolute inset-x-4 bottom-4 text-center">

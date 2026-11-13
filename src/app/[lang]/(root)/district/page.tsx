@@ -139,7 +139,7 @@ export default async function DistrictDirectoryPage({ params }: Props) {
               </div>
 
               {/* Right Ad Section */}
-              <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-[250px] lg:w-[320px]">
+              <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-full sm:w-[300px] lg:w-[336px]">
                 <AdBanner
                   placement="sidebar"
                   page="district"
@@ -169,6 +169,10 @@ export default async function DistrictDirectoryPage({ params }: Props) {
             />
           </div>
         )}
+
+        <div className="container-editorial pb-10">
+          <AdBanner placement="billboard-mid" page="district" className="!my-0" />
+        </div>
       </main>
     </>
   );

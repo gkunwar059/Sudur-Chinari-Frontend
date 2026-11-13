@@ -267,7 +267,7 @@ export default function VideoPlayerView({
               <Link
                 key={item.id}
                 href={`/videos/${item.id}`}
-                className="group flex gap-3 p-2 rounded-xl hover:bg-surface transition-colors"
+                className="group scroll-reveal-card flex gap-3 p-2 rounded-xl hover:bg-surface transition-colors"
               >
                 <div className="relative w-24 h-16 rounded-xl overflow-hidden shrink-0 bg-gray-900 shadow-2xs">
                   <Image

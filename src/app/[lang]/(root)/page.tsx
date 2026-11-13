@@ -245,17 +245,13 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           />
 
           {/* ── 2. 9 Districts Explorer (खण्ड ०१) ── */}
-          <div suppressHydrationWarning className="scroll-reveal">
-            <DistrictMapCards initialDistricts={apiDistricts} />
-          </div>
+          <DistrictMapCards initialDistricts={apiDistricts} />
           <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="billboard-mid" page="home" />
           </div>
 
           {/* ── 2.5 Archives & Voices ── */}
-          <div suppressHydrationWarning className="scroll-reveal">
-            <FTArchivesAndVoices stories={topStories} />
-          </div>
+          <FTArchivesAndVoices stories={topStories} />
           <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="bottom-strip" page="home" />
           </div>
@@ -267,21 +263,15 @@ export default async function HomePage({ params }: PageProps<"/[lang]">) {
           /> */}
 
           {/* ── 6. Opinion Section (खण्ड ०५) ── */}
-          <div suppressHydrationWarning className="scroll-reveal">
-            <FTOpinionSection opinions={opinionList} locale={lang as Locale} />
-          </div>
+          <FTOpinionSection opinions={opinionList} locale={lang as Locale} />
           <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="billboard-mid" page="home" />
           </div>
 
           {/* ── 8. Recent Video Reports (खण्ड ०७) & Photo Stories (खण्ड ०८) ── */}
-          <div suppressHydrationWarning className="scroll-reveal">
-            <VideoShorts videos={apiVideos} />
-          </div>
+          <VideoShorts videos={apiVideos} />
 
-          <div suppressHydrationWarning className="scroll-reveal">
-            <PhotoGallerySection photoStories={apiPhotos} />
-          </div>
+          <PhotoGallerySection photoStories={apiPhotos} />
           <div suppressHydrationWarning className="scroll-reveal scroll-delay-100">
             <AdBanner placement="bottom-strip" page="home" />
           </div>

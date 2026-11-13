@@ -77,7 +77,7 @@ export default function StayDirectoryView({
             </div>
 
             {/* Right Ad Section */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-[250px] lg:w-[320px]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-full sm:w-[300px] lg:w-[336px]">
               <AdBanner
                 placement="sidebar"
                 page="stay"
@@ -90,7 +90,7 @@ export default function StayDirectoryView({
 
       {/* ── Broadsheet Directory Sections Grouped by Geographical Belts ── */}
       {/* District Cards Grid - Modern Horizontal Banners */}
-      <div className="container-editorial py-10 sm:py-12 scroll-reveal">
+      <div className="container-editorial py-10 sm:py-12">
         <FTSectionDivider
           title={locale === "ne" ? "जिल्लागत होटल तथा बासस्थान" : "Hotels & Stay by District"}
           enTitle={locale === "ne" ? "Accommodations by District" : undefined}
@@ -118,7 +118,7 @@ export default function StayDirectoryView({
               <Link
                 key={district.slug}
                 href={`/stay/district/${district.slug}`}
-                className="group relative rounded-none overflow-hidden border border-border border-t-[3px] bg-card hover:bg-surface transition-all duration-300 shadow-xs hover:shadow-md min-h-[120px] sm:min-h-[140px] flex flex-col justify-between"
+                className="group relative rounded-none overflow-hidden border border-border border-t-[3px] bg-card hover:bg-surface transition-all duration-300 shadow-xs hover:shadow-md min-h-[120px] sm:min-h-[140px] flex flex-col justify-between scroll-reveal-card"
                 style={{
                   borderTopColor: district.accentColor,
                 }}
@@ -132,7 +132,7 @@ export default function StayDirectoryView({
                     }
                     alt={districtDisplayName}
                     fill
-                    className="object-cover object-right group-hover:scale-105 transition-transform duration-700"
+                    className="object-cover object-right group-hover:scale-105 transition-transform duration-200 ease-out"
                     sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 35vw"
                   />
                 </div>
@@ -187,6 +187,9 @@ export default function StayDirectoryView({
             );
           })}
         </div>
+
+        {/* Stay Page Billboard Banner */}
+        <AdBanner placement="billboard-mid" page="stay" className="mt-10" />
       </div>
     </main>
   );

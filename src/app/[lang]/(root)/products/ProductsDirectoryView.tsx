@@ -55,7 +55,7 @@ export default function ProductsDirectoryView({
               <ProductContributionModal />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-[250px] lg:w-[320px]">
+            <div className="flex flex-col sm:flex-row items-start sm:items-stretch gap-4 shrink-0 self-stretch md:self-auto w-full sm:w-[300px] lg:w-[336px]">
               <AdBanner
                 placement="sidebar"
                 page="products"
@@ -66,7 +66,7 @@ export default function ProductsDirectoryView({
         </div>
       </div>
 
-      <div className="container-editorial py-10 sm:py-12 scroll-reveal">
+      <div className="container-editorial py-10 sm:py-12">
         <FTSectionDivider
           title={locale === "ne" ? "जिल्लागत स्थानीय उत्पादनहरू" : "District Local Products"}
           enTitle={locale === "ne" ? "Local Products by District" : undefined}
@@ -85,7 +85,7 @@ export default function ProductsDirectoryView({
               <Link
                 key={district.slug}
                 href={`/products/district/${district.slug}`}
-                className="group editorial-card-bordered relative bg-card flex flex-col h-full justify-between hover:bg-surface border-t-4 border-x border-b border-border transition-all duration-300"
+                className="group editorial-card-bordered relative bg-card flex flex-col h-full justify-between hover:bg-surface border-t-4 border-x border-b border-border transition-all duration-300 scroll-reveal-card"
                 style={{ borderTopColor: district.accentColor }}
               >
                 <div className="p-5 sm:p-6 pb-4 sm:pb-5">

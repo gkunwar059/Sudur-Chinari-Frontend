@@ -468,7 +468,7 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
                 <Link
                   key={product.slug}
                   href={`/products/district/${slug}/${product.slug}`}
-                  className="group flex h-full flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-brand/40 hover:shadow-[0_14px_34px_rgba(5,150,91,0.10)]"
+                  className="group scroll-reveal-card flex h-full flex-col overflow-hidden border border-border bg-card transition-all duration-300 hover:border-brand/40 hover:shadow-[0_14px_34px_rgba(5,150,91,0.10)]"
                 >
                   <div className="relative aspect-[4/3] overflow-hidden border-b border-border bg-surface">
                     <ProductImage
@@ -517,6 +517,8 @@ async function DistrictProductsPageContent({ params, searchParams }: Props) {
             })}
           </div>
         )}
+
+        <AdBanner placement="billboard-mid" page="products" className="mt-10" />
       </section>
 
       <section className="border-t border-border bg-surface/70">

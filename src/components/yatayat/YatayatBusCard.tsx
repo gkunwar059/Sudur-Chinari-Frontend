@@ -32,14 +32,14 @@ export default function YatayatBusCard({ service, locale }: YatayatBusCardProps)
   const route = isNe ? service.route.ne : service.route.en;
 
   return (
-    <div className="group bg-card hover:bg-surface border border-border border-t-[3px] border-t-brand rounded-none p-5 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-5 items-stretch">
+    <div className="group scroll-reveal-card bg-card hover:bg-surface border border-border border-t-[3px] border-t-brand rounded-none p-5 shadow-xs hover:shadow-md transition-all duration-300 flex flex-col md:flex-row gap-5 items-stretch">
       <div className="relative w-full md:w-56 h-44 sm:h-48 md:h-auto rounded-none overflow-hidden shrink-0 border border-border">
         <Image
           src={service.image}
           alt={service.title.en}
           fill
           sizes="(max-width: 768px) 100vw, 240px"
-          className="object-cover group-hover:scale-105 transition-transform duration-700"
+          className="object-cover group-hover:scale-105 transition-transform duration-200 ease-out"
         />
       </div>
 

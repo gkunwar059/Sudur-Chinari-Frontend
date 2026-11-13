@@ -290,7 +290,7 @@ export default function FTLeadHero({
               <div
                 key={`bg-${feature.id}-${index}`}
                 className={cn(
-                  "absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out",
+                  "absolute inset-0 w-full h-full transition-opacity duration-300 ease-out",
                   isActive
                     ? "opacity-100 z-10 pointer-events-auto"
                     : "opacity-0 z-0 pointer-events-none",
@@ -307,8 +307,8 @@ export default function FTLeadHero({
                     alt={feature.title}
                     fill
                     className={cn(
-                      "object-cover transition-transform duration-1000 ease-out",
-                      isActive ? "scale-100" : "scale-105",
+                      "object-cover transition-transform duration-300 ease-out",
+                      isActive ? "scale-100" : "scale-[1.02]",
                     )}
                     sizes="(max-width: 1024px) 100vw, 75vw"
                     quality={70}

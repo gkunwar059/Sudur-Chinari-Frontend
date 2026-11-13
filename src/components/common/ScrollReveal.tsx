@@ -2,7 +2,7 @@ import React from "react";
 
 interface ScrollRevealProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  animation?: "fade-up" | "fade" | "scale";
+  animation?: "fade-up" | "fade" | "scale" | "card";
   delay?: 0 | 100 | 200 | 300 | 400;
   className?: string;
   as?: React.ElementType;
@@ -27,7 +27,9 @@ export default function ScrollReveal({
       ? "scroll-reveal-fade"
       : animation === "scale"
         ? "scroll-reveal-scale"
-        : "scroll-reveal";
+        : animation === "card"
+          ? "scroll-reveal-card"
+          : "scroll-reveal";
 
   const delayClass = delay > 0 ? `scroll-delay-${delay}` : "";
 

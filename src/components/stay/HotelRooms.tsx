@@ -29,7 +29,7 @@ export default function HotelRooms({ hotel, isEn, t }: Props) {
             {hotel.rooms.map((room) => (
               <div
                 key={room.id}
-                className="group bg-surface border border-border/50 border-t-[4px] border-t-brand hover:shadow-md transition-shadow"
+                className="group scroll-reveal-card bg-surface border border-border/50 border-t-[4px] border-t-brand hover:shadow-md transition-shadow"
               >
                 {room.image && (
                   <div className="relative aspect-[16/10] overflow-hidden">
