@@ -48,6 +48,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'ghodaghodi-lake-complex',
         title: { ne: 'घोडाघोडी ताल क्षेत्र', en: 'Ghodaghodi Lake Complex' },
         description: {
           ne: 'विश्व रामसार सूचीमा सूचीकृत २५६३ हेक्टरमा फैलिएको जैविक विविधतायुक्त पवित्र सिमसार ताल।',
@@ -58,6 +59,7 @@ export const DISTRICTS: District[] = [
         highlight: 'रामसार सिमसार • Ramsar Wetland',
       },
       {
+        slug: 'karnali-chisapani-bridge',
         title: { ne: 'कर्णाली चिसापानी पुल', en: 'Karnali Chisapani Bridge' },
         description: {
           ne: 'सुदूरपश्चिमको मुख्य प्रवेशद्वार, एसियाकै अद्वितीय एकल-स्तम्भ केबल-स्टेड इन्जिनियरिङ नमुना।',
@@ -68,6 +70,7 @@ export const DISTRICTS: District[] = [
         highlight: 'इन्जिनियरिङ धरोहर • Cable-Stayed Icon',
       },
       {
+        slug: 'tikapur-grand-botanical-park',
         title: { ne: 'टीकापुर बृहत् उद्यान', en: 'Tikapur Grand Botanical Park' },
         description: {
           ne: 'स्वर्गीय राजा महेन्द्रको स्वास्थ्य लाभका लागि निर्मित कर्णाली किनारको सुन्दर गुलाफ बगैँचा।',
@@ -78,6 +81,7 @@ export const DISTRICTS: District[] = [
         highlight: 'उद्यान तथा विश्राम • Botanical Sanctuary',
       },
       {
+        slug: 'tharu-heritage-museum',
         title: { ne: 'थारू सांस्कृतिक सङ्ग्रहालय', en: 'Tharu Heritage Museum' },
         description: {
           ne: 'परम्परागत काष्ठकला, माटोका भित्तेचित्र, मौलिक भेषभूषा र औजारहरूको जीवित अभिलेख।',
@@ -135,6 +139,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'shuklaphanta-national-park',
         title: { ne: 'शुक्लाफाँटा राष्ट्रिय निकुञ्ज', en: 'Shuklaphanta National Park' },
         description: {
           ne: 'विश्वकै ठूलो बाह्रसिङ्गे बथान, पाटेबाघ, एकसिङ्गे गैँडा र ५०० भन्दा बढी प्रजातिका चराहरूको विशाल घाँसे मैदान।',
@@ -145,6 +150,7 @@ export const DISTRICTS: District[] = [
         highlight: 'घाँसे मैदान र वन्यजन्तु • Wildlife Safari',
       },
       {
+        slug: 'dodhara-chandani-suspension-bridge',
         title: { ne: 'दोधारा-चाँदनी झोलुङ्गे पुल', en: 'Dodhara-Chandani Suspension Bridge' },
         description: {
           ne: 'महाकाली नदीमाथि बनेको १,४५२ मिटर लामो एसियाकै दोस्रो लामो बहु-स्पान पैदल झोलुङ्गे पुल।',
@@ -155,6 +161,7 @@ export const DISTRICTS: District[] = [
         highlight: 'महाकाली झोलुङ्गे पुल • 1,452m Marvel',
       },
       {
+        slug: 'jhilmila-sacred-lake',
         title: { ne: 'झिलमिला ताल', en: 'Jhilmila Sacred Lake' },
         description: {
           ne: 'चुरे पहाडको काखमा अवस्थित दिनभर रङ फेरिरहने रहस्यमय र धार्मिक पवित्र ताल।',
@@ -164,6 +171,7 @@ export const DISTRICTS: District[] = [
         highlight: 'रङ फेर्ने ताल • Mystical Alpine Tarn',
       },
       {
+        slug: 'siddhanath-temple',
         title: { ne: 'सिद्धनाथ मन्दिर', en: 'Siddhanath Temple' },
         description: {
           ne: 'महेन्द्रनगर बजारको केन्द्रमा रहेको पश्चिमाञ्चलकै परम आस्थाको शक्तिपीठ।',
@@ -221,6 +229,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'historic-amargadhi-fort',
         title: { ne: 'ऐतिहासिक अमरगढी किल्ला', en: 'Historic Amargadhi Fort' },
         description: {
           ne: 'वि.सं. १८४७ मा बडाकाजी अमरसिंह थापाद्वारा निर्मित अखण्ड ढुङ्गाको किल्ला, ऐतिहासिक तोप र बङ्करहरू।',
@@ -231,6 +240,7 @@ export const DISTRICTS: District[] = [
         highlight: 'ऐतिहासिक किल्ला • 1790 AD Stone Bastion',
       },
       {
+        slug: 'ugratara-bhagwati-temple',
         title: { ne: 'उग्रतारा भगवती मन्दिर', en: 'Ugratara Bhagwati Temple' },
         description: {
           ne: 'सुदूरपश्चिमका नौ भगवतीमध्ये सर्वाधिक पूज्य, हरेक कात्तिक पूर्णिमामा भव्य देउडा मेला लाग्ने शक्तिपीठ।',
@@ -241,6 +251,7 @@ export const DISTRICTS: District[] = [
         highlight: 'प्रसिद्ध शक्तिपीठ • Sacred Goddess Shrine',
       },
       {
+        slug: 'aalital-scenic-lake',
         title: { ne: 'आलिताल प्राकृतिक ताल', en: 'Aalital Scenic Lake' },
         description: {
           ne: 'हरियाली पहाड र घना वनस्पतिले घेरिएको डडेल्धुराको सबैभन्दा ठूलो र मनमोहक प्राकृतिक ताल।',
@@ -250,6 +261,7 @@ export const DISTRICTS: District[] = [
         highlight: 'पहाडी ताल • Natural Mountain Lake',
       },
       {
+        slug: 'ghatal-than-shrine',
         title: { ne: 'घटाल थान', en: 'Ghatal Than Shrine' },
         description: {
           ne: 'महाभारतकालीन घटोत्कचको प्रतीक मानिने लोकदेवता घटाल बाबाको पवित्र आस्था थलो।',
@@ -307,6 +319,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'tripurasundari-temple',
         title: { ne: 'त्रिपुरासुन्दरी भगवती मन्दिर', en: 'Tripurasundari Temple' },
         description: {
           ne: 'सुदूरपश्चिमकै प्रमुख शक्तिपीठ, सुन्दर प्यागोडा शैली र सुर्नया नदी किनारको पवित्र तीर्थस्थल।',
@@ -317,6 +330,7 @@ export const DISTRICTS: District[] = [
         highlight: 'प्रमुख शक्तिपीठ • Pagoda Sanctuary',
       },
       {
+        slug: 'patan-valley-historic-bazaar',
         title: { ne: 'पाटन उपत्यका', en: 'Patan Valley & Historic Bazaar' },
         description: {
           ne: 'सुदूर पहाडको सुन्दर समथर उपत्यका, परम्परागत काष्ठकला, विमानस्थल र सुर्नया नदीको संगम।',
@@ -326,6 +340,7 @@ export const DISTRICTS: District[] = [
         highlight: 'पहाडी उपत्यका • Scenic Valley Basin',
       },
       {
+        slug: 'dogadakedar-dham',
         title: { ne: 'दोगडाकेदार धाम', en: 'Dogadakedar Dham' },
         description: {
           ne: 'महादेव शिवको पवित्र बासस्थान मानिने धार्मिक पर्यटकीय पर्वत टाकुरा।',
@@ -335,6 +350,7 @@ export const DISTRICTS: District[] = [
         highlight: 'शिवधाम • Mountain Shiva Peeth',
       },
       {
+        slug: 'gwallek-ridge-sanctuary',
         title: { ne: 'ग्वाल्लेक लेक', en: 'Gwallek Ridge Sanctuary' },
         description: {
           ne: 'लालीगुँरास र बाँझ-फलाँटका घना जङ्गलले सजिएको बैतडीको सर्वोच्च डाँडा।',
@@ -392,6 +408,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'shaileshwari-goddess-temple',
         title: { ne: 'शैलेश्वरी मन्दिर', en: 'Shaileshwari Goddess Temple' },
         description: {
           ne: 'सिलगढीमा अवस्थित सुदूरपश्चिमकै परम पूज्य माता शैलेश्वरीको भव्य मन्दिर परिसर जहाँ कात्तिक पूर्णिमामा विशाल जात्रा लाग्छ।',
@@ -402,6 +419,7 @@ export const DISTRICTS: District[] = [
         highlight: 'धार्मिक शिरोमणि • Holy Shakti Peeth',
       },
       {
+        slug: 'ancient-doti-royal-palace',
         title: { ne: 'ऐतिहासिक डोटी दरबार (सिलगढी कोट)', en: 'Ancient Doti Royal Palace' },
         description: {
           ne: 'मध्यकालीन डोटी राज्यको राजदरबारका भग्नावशेष, ऐतिहासिक तोप र सेती नदी उपत्यकाको विहङ्गम दृश्य।',
@@ -411,6 +429,7 @@ export const DISTRICTS: District[] = [
         highlight: 'राजकीय भग्नावशेष • Medieval Citadel',
       },
       {
+        slug: 'khaptad-gateway-at-jhigrana',
         title: { ne: 'खप्तड प्रवेशद्वार (झिग्राना)', en: 'Khaptad Gateway at Jhigrana' },
         description: {
           ne: 'खप्तड राष्ट्रिय निकुञ्ज प्रवेश गर्ने प्रमुख परम्परागत पदमार्ग, सल्लेरी वन र चिसो हिमाली हावा।',
@@ -421,6 +440,7 @@ export const DISTRICTS: District[] = [
         highlight: 'खप्तड ट्रेक • Trekking Gateway',
       },
       {
+        slug: 'badikedar-high-mountain-dham',
         title: { ne: 'बडीकेदार धाम', en: 'Badikedar High Mountain Dham' },
         description: {
           ne: 'दक्षिण डोटीको उच्च पहाडमा अवस्थित मनोकामना पूरा हुने शिवजीको अद्वितीय लेकाली शक्तिपीठ।',
@@ -478,6 +498,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'ramaroshan-12-lakes-18-meadows',
         title: { ne: 'रामारोशन क्षेत्र (१२ बण्ड १८ खण्ड)', en: 'Ramaroshan 12 Lakes & 18 Meadows' },
         description: {
           ne: 'समुद्री सतहबाट २५०० मिटर उचाइमा रहेका १२ वटा सुन्दर ताल र १८ वटा हरियाली घाँसे मैदान (पाटन) को प्राकृतिक स्वर्ग।',
@@ -488,6 +509,7 @@ export const DISTRICTS: District[] = [
         highlight: '१२ ताल १८ पाटन • 12 Lakes Complex',
       },
       {
+        slug: 'baidyanath-dham',
         title: { ne: 'वैद्यनाथ धाम', en: 'Baidyanath Dham' },
         description: {
           ne: 'नेपालका चार प्रमुख धाममध्ये एक, बूढीगंगा र सरस्वती नदीको पवित्र संगममा अवस्थित प्राचीन शिव मन्दिर।',
@@ -498,6 +520,7 @@ export const DISTRICTS: District[] = [
         highlight: 'चार धाममध्ये एक • Sacred Shiva Dham',
       },
       {
+        slug: 'panchadeval-of-vinayak',
         title: { ne: 'पञ्चदेवल विनायक', en: 'Panchadeval of Vinayak' },
         description: {
           ne: '१३ औँ शताब्दीमा कुँदिएका प्राचीन कलात्मक पाँचवटा अखण्ड ढुङ्गाका शिखर शैलीका देवलहरू।',
@@ -507,6 +530,7 @@ export const DISTRICTS: District[] = [
         highlight: '१३औँ शताब्दीको सम्पदा • Monolithic Shrines',
       },
       {
+        slug: 'mangalsen-palace',
         title: { ne: 'मंगलसेन ऐतिहासिक दरबार', en: 'Mangalsen Palace' },
         description: {
           ne: 'अछामी राजाको ऐतिहासिक प्रशासनिक केन्द्र, परम्परागत वास्तुकलाको भव्य नमुना।',
@@ -564,6 +588,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'badimalika-alpine-sanctuary',
         title: { ne: 'बडीमालिका देवी मन्दिर', en: 'Badimalika Alpine Sanctuary' },
         description: {
           ne: '४,२०० मिटर उचाइमा हरियाली घाँसे मैदानमा अवस्थित सुदूरपश्चिमकै सर्वोच्च र सर्वाधिक आस्थाको शक्तिपीठ।',
@@ -574,30 +599,36 @@ export const DISTRICTS: District[] = [
         highlight: '४,२००m उच्च शक्तिपीठ • 4,200m Alpine Sanctuary',
       },
       {
+        slug: 'budhinanda-glacial-tarn',
         title: { ne: 'बुढीनन्दा ताल', en: 'Budhinanda Glacial Tarn' },
         description: {
           ne: 'उच्च हिमाली काखमा रहेको निलो कञ्चन पवित्र हिमताल, जहाँ जनैपूर्णिमामा विशेष पूजाआजा हुन्छ।',
           en: 'A pristine high-altitude glacial lake at 4,500m revered by shepherds and holy ascetics.',
         },
         category: 'nature',
+        image: '/images/himalaya_banner.jpg',
         highlight: 'पवित्र हिमताल • Glacial Tarn (4,500m)',
       },
       {
+        slug: 'chhepe-lake',
         title: { ne: 'छेपे दह', en: 'Chhepe Lake' },
         description: {
           ne: 'धार्मिक र प्राकृतिक सौन्दर्यले भरिपूर्ण बाजुराको मनोरम लेकाली ताल।',
           en: 'Tranquil mountain tarn situated amid virgin conifer forests and grazing grounds.',
         },
         category: 'nature',
+        image: '/images/himalaya_banner.jpg',
         highlight: 'लेकाली ताल • Mountain Tarn',
       },
       {
+        slug: 'karnali-canyon-martadi',
         title: { ne: 'कर्णाली नदी गल्छी र मार्तडी उपत्यका', en: 'Karnali Canyon & Martadi' },
         description: {
           ne: 'गहिरो कर्णाली नदीको खोँच र हरियाली पहाडले घेरिएको सदरमुकाम मार्तडीको दृश्य।',
           en: 'Dramatic rugged canyons carved by the ferocious Karnali river surrounding the valley town of Martadi.',
         },
         category: 'nature',
+        image: '/images/himalaya_banner.jpg',
         highlight: 'नदी खोँच • Wild Karnali Canyon',
       },
     ],
@@ -649,6 +680,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'mount-saipal-7031m',
         title: { ne: 'साइपाल हिमाल (७,०३१ मिटर)', en: 'Mount Saipal (7,031m)' },
         description: {
           ne: 'सुदूरपश्चिमको दोस्रो सर्वोच्च भव्य शिखर, जसलाई स्थानीय बासिन्दा देवीको रूपमा पूजा गर्छन्।',
@@ -659,6 +691,7 @@ export const DISTRICTS: District[] = [
         highlight: '७,०३१m हिमाल • Saipal Giant Peak',
       },
       {
+        slug: 'surma-sarovar-sacred-lake',
         title: { ne: 'सुर्मा सरोवर पवित्र ताल', en: 'Surma Sarovar Sacred Lake' },
         description: {
           ne: 'समुद्री सतहबाट ४,३०० मिटर उचाइमा रहेको देवी सुर्माको पावन सरोवर, जहाँ हजारौँ श्रद्धालु नाङ्गो खुट्टा हिमपातबीच पुग्छन्।',
@@ -669,6 +702,7 @@ export const DISTRICTS: District[] = [
         highlight: 'पवित्र तीर्थ • 4,300m Pilgrimage Lake',
       },
       {
+        slug: 'khaptad-plateau-north-section',
         title: { ne: 'खप्तड राष्ट्रिय निकुञ्ज (उत्तरी भेग)', en: 'Khaptad Plateau (North Section)' },
         description: {
           ne: '२२ वटा घाँसे मैदान (पाटन), त्रिवेणी र खप्तड दहले भरिएको बझाङको सिमानामा पर्ने स्वर्गीय पाटन।',
@@ -679,6 +713,7 @@ export const DISTRICTS: District[] = [
         highlight: '२२ पाटन • Rolling Alpine Downs',
       },
       {
+        slug: 'chainpur-seti-valley',
         title: { ne: 'चैनपुर बजार र सेती नदी उपत्यका', en: 'Chainpur & Seti Valley' },
         description: {
           ne: 'सेती नदी र बाहुलीगाडको संगममा रहेको ऐतिहासिक काष्ठकलाले भरिएको बझाङको सदरमुकाम।',
@@ -736,6 +771,7 @@ export const DISTRICTS: District[] = [
     },
     places: [
       {
+        slug: 'mount-api-7132m',
         title: { ne: 'अपि हिमाल (७,१३२ मिटर)', en: 'Mount Api (7,132m)' },
         description: {
           ne: 'सुदूरपश्चिम प्रदेशको सर्वोच्च हिमशिखर र अपि नाम्पा संरक्षण क्षेत्रको मुख्य आकर्षण।',
@@ -746,6 +782,7 @@ export const DISTRICTS: District[] = [
         highlight: '७,१३२m सर्वोच्च शिखर • Highest Summit of Far-West',
       },
       {
+        slug: 'malikarjun-rashtriya-dham',
         title: { ne: 'मालिकार्जुन राष्ट्रिय धाम', en: 'Malikarjun Rashtriya Dham' },
         description: {
           ne: 'शैल्यशिखर डाँडामा अवस्थित नेपाल सरकारद्वारा राष्ट्रिय धाम घोषित परम पवित्र शिव तीर्थस्थल।',
@@ -755,6 +792,7 @@ export const DISTRICTS: District[] = [
         highlight: 'राष्ट्रिय धाम • Official National Dham',
       },
       {
+        slug: 'byas-tinkar-valley',
         title: { ne: 'ब्यास तथा तिंकर उपत्यका', en: 'Byas & Tinkar Valley' },
         description: {
           ne: 'नेपाल, भारत र चीनको त्रिदेशीय सीमावर्ती हिमाली उपत्यका, जहाँ सौका जातिको मौलिक संस्कृति र यार्चागुम्बु पाइन्छ।',
@@ -764,6 +802,7 @@ export const DISTRICTS: District[] = [
         highlight: 'त्रिदेशीय सीमा • Trans-Himalayan Valley',
       },
       {
+        slug: 'api-nampa-conservation-area',
         title: { ne: 'अपि नाम्पा संरक्षण क्षेत्र', en: 'Api Nampa Conservation Area' },
         description: {
           ne: '१,९०३ वर्ग कि.मी.मा फैलिएको हिमचितुवा, कस्तुरी मृग, डाँफे र हिमाली जडीबुटीको विशाल अभयारण्य।',

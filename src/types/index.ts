@@ -26,11 +26,31 @@ export interface DistrictTheme {
 
 export interface DistrictPlace {
   id?: number | string;
+  district?: number | string;
+  district_slug?: string;
+  slug?: string;
   title: BilingualText;
   description: BilingualText;
   category: 'nature' | 'heritage' | 'spiritual' | 'culture';
   image?: string;
-  highlight?: string;
+  highlight?: BilingualText;
+  overview?: BilingualText;
+  history?: BilingualText;
+  location?: BilingualText;
+  elevation?: BilingualText;
+  area_or_size?: BilingualText;
+  best_time_to_visit?: BilingualText;
+  opening_hours?: BilingualText;
+  entry_fee?: BilingualText;
+  weather_summary?: BilingualText;
+  how_to_reach?: BilingualText;
+  latitude?: number | null;
+  longitude?: number | null;
+  festivals?: BilingualText;
+  local_cuisine?: BilingualText;
+  traditions?: BilingualText;
+  languages?: BilingualText;
+  travel_advisory?: BilingualText;
 }
 
 export interface DistrictCulture {

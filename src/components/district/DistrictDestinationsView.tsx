@@ -1,8 +1,10 @@
 "use client";
 
 import Image from "next/image";
+import Link from "@/components/i18n/LocalizedLink";
 import { Compass, MapPin, ArrowRight } from "lucide-react";
-import type { District } from "@/types";
+import type { BilingualText, District } from "@/types";
+import { getDistrictPlaceSlug, getPlaceCategoryMeta } from "@/lib/districts";
 import { normalizeImageUrl, t as translate } from "@/lib/utils";
 import DistrictFactsheet from "./DistrictFactsheet";
 
@@ -23,7 +25,8 @@ export default function DistrictDestinationsView({
   locale,
   isDark,
 }: DistrictDestinationsViewProps) {
-  const t = (val: any) => translate(val, locale as "ne" | "en");
+  const t = (val: BilingualText | undefined) =>
+    translate(val, locale as "ne" | "en");
   const stats = district.stats;
   const places = district.places || [];
 
@@ -68,73 +71,80 @@ export default function DistrictDestinationsView({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {places.map((place, idx) => (
-            <div
-              key={idx}
-              className="bg-background rounded-none border border-black/[0.08] dark:border-white/[0.08] hover:shadow-lg transition-all flex flex-col group overflow-hidden shadow-2xs"
-              style={{ borderTop: `3px solid ${theme.primary}` }}
-            >
-              <div className="relative aspect-[16/10] overflow-hidden bg-surface-hover">
-                <Image
-                  src={
-                    normalizeImageUrl(place.image) ||
-                    normalizeImageUrl(district.heroImage)
-                  }
-                  alt={t(place.title)}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-700"
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80" />
-                <div className="absolute top-3 left-3">
-                  <span
-                    className="text-xs font-bold font-sans px-3 py-1 text-white rounded-none shadow-2xs"
-                    style={{ backgroundColor: theme.primary }}
-                  >
-                    {place.category === "nature"
-                      ? "प्राकृतिक • Nature"
-                      : place.category === "spiritual"
-                        ? "धार्मिक • Shrine"
-                        : place.category === "heritage"
-                          ? "ऐतिहासिक • Heritage"
-                          : "संस्कृति • Culture"}
-                  </span>
-                </div>
-                {place.highlight && (
-                  <div className="absolute bottom-3 left-3 right-3 text-white text-xs font-mono font-semibold">
-                    {place.highlight}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-xl font-bold font-headline text-foreground group-hover:text-brand-secondary transition-colors mb-2.5">
-                    {t(place.title)}
-                  </h3>
-                  <p className="text-sm text-foreground leading-relaxed font-sans mb-4">
-                    {t(place.description)}
-                  </p>
-                </div>
-
-                <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="flex items-center gap-1 font-sans">
-                    <MapPin size={13} style={{ color: theme.primary }} />
-                    <span>{t(district.name)} जिल्ला</span>
-                  </span>
-                  <span
-                    className="font-bold flex items-center gap-1"
-                    style={{ color: theme.primary }}
-                  >
-                    <span>
-                      {locale === "ne" ? "विस्तृत विवरण" : "Read More"}
+          {places.map((place, idx) => {
+            const placeSlug = getDistrictPlaceSlug(place, undefined, idx);
+            const categoryMeta = getPlaceCategoryMeta(place.category);
+            return (
+              <Link
+                key={place.id ?? placeSlug ?? idx}
+                href={`/district/${district.slug}/places/${placeSlug}`}
+                className="editorial-card bg-background rounded-none border border-black/[0.08] dark:border-white/[0.08] flex flex-col group overflow-hidden shadow-2xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                style={{ borderTop: `3px solid ${theme.primary}` }}
+              >
+                <div className="relative aspect-[16/10] overflow-hidden bg-surface-hover">
+                  <Image
+                    src={
+                      normalizeImageUrl(place.image) ||
+                      normalizeImageUrl(district.heroImage)
+                    }
+                    alt={t(place.title)}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent opacity-80" />
+                  <div className="absolute top-3 left-3">
+                    <span
+                      className="text-xs font-bold font-sans px-3 py-1 text-white rounded-none shadow-2xs"
+                      style={{ backgroundColor: theme.primary }}
+                    >
+                      {categoryMeta.combined}
                     </span>
-                    <ArrowRight size={13} className="shrink-0 transition-transform duration-200 group-hover:translate-x-1" />
-                  </span>
+                  </div>
+                  {place.highlight && t(place.highlight) && (
+                    <div className="absolute bottom-3 left-3 right-3 text-white text-xs font-mono font-semibold">
+                      {t(place.highlight)}
+                    </div>
+                  )}
                 </div>
-              </div>
-            </div>
-          ))}
+
+                <div className="p-5 sm:p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold font-headline text-foreground group-hover:text-brand-secondary transition-colors mb-2.5">
+                      {t(place.title)}
+                    </h3>
+                    <p className="text-sm text-foreground leading-relaxed font-sans mb-4">
+                      {t(place.description)}
+                    </p>
+                  </div>
+
+                  <div className="pt-3 border-t border-border flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="flex items-center gap-1 font-sans min-w-0 truncate">
+                      <MapPin size={13} className="shrink-0" style={{ color: theme.primary }} />
+                      <span className="truncate">
+                        {t(place.location) ||
+                          (locale === "ne"
+                            ? `${t(district.name)} जिल्ला`
+                            : `${t(district.name)} District`)}
+                      </span>
+                    </span>
+                    <span
+                      className="font-bold flex items-center gap-1"
+                      style={{ color: theme.primary }}
+                    >
+                      <span>
+                        {locale === "ne" ? "विस्तृत विवरण" : "Read More"}
+                      </span>
+                      <ArrowRight
+                        size={13}
+                        className="shrink-0 transition-transform duration-200 group-hover:translate-x-1"
+                      />
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
         </div>
 
         {/* Travel Advisory / Tip box */}

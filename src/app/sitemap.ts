@@ -6,6 +6,7 @@ import type { Locale } from "@/lib/i18n/config";
 import { getHotelsCached, getSitemapCached } from "@/lib/cached-data";
 import { SITE_URL } from "@/lib/seo";
 import { DISTRICTS } from "@/data/districts";
+import { getDistrictPlaceSlug } from "@/lib/districts";
 
 const staticPages = [
   "/",
@@ -60,12 +61,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     localizedEntries(page, now)
   );
 
-  // Every district has a profile, stays and products directory page
+  // Every district has a profile, stays, products, and places detail pages
   const districtEntries = DISTRICTS.flatMap((d) =>
     [
       `/district/${d.slug}`,
       `/stay/district/${d.slug}`,
       `/products/district/${d.slug}`,
+      ...(d.places || []).map(
+        (place, idx) =>
+          `/district/${d.slug}/places/${getDistrictPlaceSlug(place, undefined, idx)}`,
+      ),
     ].flatMap((path) => localizedEntries(path, now))
   );
 
