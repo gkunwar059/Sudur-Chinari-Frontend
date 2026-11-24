@@ -116,23 +116,40 @@ export default function Header() {
   const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
   const { user, logout } = useAuth();
   const menu = useNavigationMenu();
-  const [hoveredKey, setHoveredKey] = useState<string | null>(null);
+  const [openSubmenuKey, setOpenSubmenuKey] = useState<string | null>(null);
+  const navigationRef = useRef<HTMLDivElement>(null);
   const [expandedMobileKey, setExpandedMobileKey] = useState<string | null>(
     null,
   );
   const [isScrolled, setIsScrolled] = useState(false);
+  const isCompact = isScrolled && !searchOpen && !menuOpen;
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useBodyScrollLock(menuOpen);
 
   useEffect(() => {
+    let frame: number | null = null;
+    let scrolled = false;
+
+    const updateScrollState = () => {
+      frame = null;
+      // Separate thresholds prevent tiny scroll movements from toggling the header.
+      const nextScrolled = scrolled ? window.scrollY > 16 : window.scrollY > 64;
+      if (nextScrolled !== scrolled) {
+        scrolled = nextScrolled;
+        setIsScrolled(nextScrolled);
+      }
+    };
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 25);
+      if (frame === null) frame = window.requestAnimationFrame(updateScrollState);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    updateScrollState();
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (frame !== null) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const navItems = useMemo<NavItem[]>(() => {
@@ -154,18 +171,9 @@ export default function Header() {
     });
   }, [menu]);
 
-  // Sub-menu strip: hovered item wins (desktop); otherwise the active section's children stay visible
-  const activeItem = navItems.find((item) =>
-    isNavItemActive(item, unprefixedPath),
+  const stripItem = navItems.find(
+    (item) => item.key === openSubmenuKey && item.children.length > 0,
   );
-  const hoveredItem = hoveredKey
-    ? navItems.find((item) => item.key === hoveredKey)
-    : undefined;
-  const stripItem = hoveredItem?.children.length
-    ? hoveredItem
-    : activeItem?.children.length
-      ? activeItem
-      : undefined;
 
   useEffect(() => {
     setMounted(true);
@@ -173,9 +181,34 @@ export default function Header() {
 
   // Reset transient menu state on navigation
   useEffect(() => {
-    setHoveredKey(null);
+    setOpenSubmenuKey(null);
     setProfileOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    if (!openSubmenuKey) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (!navigationRef.current?.contains(event.target as Node)) {
+        setOpenSubmenuKey(null);
+      }
+    };
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      const submenu = document.getElementById(`header-submenu-${openSubmenuKey}`);
+      if (submenu?.contains(document.activeElement)) {
+        document.getElementById(`header-nav-${openSubmenuKey}`)?.focus();
+      }
+      setOpenSubmenuKey(null);
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [openSubmenuKey]);
 
   useEffect(() => {
     if (!profileOpen) return;
@@ -222,7 +255,9 @@ export default function Header() {
   return (
     <header
       className={cn(
-        "sticky top-0 isolate border-b border-border transition-shadow duration-150",
+        // Keep flow dimensions stable: only transforms change during scrolling.
+        "sticky top-0 isolate border-b border-border [--header-collapse:0.5rem] sm:[--header-collapse:1rem] lg:[--header-collapse:1.25rem] transition-[translate,box-shadow] duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] will-change-[translate] motion-reduce:transition-none",
+        isCompact ? "-translate-y-[var(--header-collapse)]" : "translate-y-0",
         isScrolled
           ? "shadow-md bg-background/95"
           : "shadow-[0_1px_3px_rgba(0,0,0,0.03)]",
@@ -252,15 +287,15 @@ export default function Header() {
       </div>
 
       {/* ── Top Bar: Logo & Utility Row ── */}
-      <div
-        className={cn(
-          "container-editorial transition-all duration-300 ease-in-out",
-          isScrolled ? "py-1.5 sm:py-2" : "py-3 sm:py-3.5",
-        )}
-      >
-        <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
+      <div className={cn("container-editorial", searchOpen && "pb-2")}>
+        <div
+          className={cn(
+            "flex min-h-14 sm:min-h-16 lg:min-h-[4.25rem] items-center justify-between gap-2 sm:gap-4 min-w-0 transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            isCompact ? "translate-y-[calc(var(--header-collapse)/2)]" : "translate-y-0",
+          )}
+        >
           {/* Logo with Mountain Emblem */}
-          <Logo isScrolled={isScrolled} />
+          <Logo isScrolled={isCompact} />
 
           {/* Right controls */}
           <div className="flex items-center gap-1.5 sm:gap-4 text-sm shrink-0">
@@ -408,7 +443,7 @@ export default function Header() {
         {searchOpen && (
           <form
             onSubmit={handleSearchSubmit}
-            className="mt-3 relative max-w-xl mx-auto animate-fadeIn"
+            className="relative max-w-xl mx-auto animate-fadeIn"
           >
             <input
               autoFocus
@@ -434,31 +469,38 @@ export default function Header() {
 
       {/* ── Bottom Row: Centered Editorial Category Navigation Bar (The Art Newspaper style) ── */}
       <div
-        onMouseLeave={() => setHoveredKey(null)}
+        ref={navigationRef}
+        onMouseLeave={() => setOpenSubmenuKey(null)}
+        onBlur={(event) => {
+          if (!event.currentTarget.contains(event.relatedTarget)) {
+            setOpenSubmenuKey(null);
+          }
+        }}
         className="border-t border-border bg-background/98 relative z-10"
       >
         <div className="container-editorial">
           <div className="w-full overflow-x-auto no-scrollbar">
             <nav
-              className={cn(
-                "flex items-center justify-start sm:justify-center flex-nowrap sm:flex-wrap gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12 transition-[padding,min-height] duration-150 ease-out",
-                isScrolled ? "py-1.5 sm:py-2 min-h-[38px]" : "py-2.5 sm:py-3 min-h-[42px]",
-              )}
+              className="flex min-h-11 sm:min-h-12 items-center justify-start sm:justify-center flex-nowrap sm:flex-wrap gap-x-6 sm:gap-x-8 md:gap-x-10 lg:gap-x-12"
               aria-label="Main"
             >
               {navItems.map((item) => {
                 const isActive = isNavItemActive(item, unprefixedPath);
                 const hasChildren = item.children.length > 0;
+                const isExpanded = stripItem?.key === item.key;
 
                 return (
                   <LocalizedLink
                     key={item.key}
+                    id={`header-nav-${item.key}`}
                     href={item.href}
-                    onMouseEnter={() => setHoveredKey(item.key)}
-                    onFocus={() => setHoveredKey(item.key)}
-                    aria-haspopup={hasChildren ? "true" : undefined}
+                    onMouseEnter={() => setOpenSubmenuKey(hasChildren ? item.key : null)}
+                    onFocus={() => setOpenSubmenuKey(hasChildren ? item.key : null)}
+                    onClick={() => setOpenSubmenuKey(null)}
+                    aria-expanded={hasChildren ? isExpanded : undefined}
+                    aria-controls={isExpanded ? `header-submenu-${item.key}` : undefined}
                     className={cn(
-                      "text-[13.5px] sm:text-[14.5px] tracking-normal transition-colors py-1 whitespace-nowrap shrink-0 relative group",
+                      "relative inline-flex min-h-10 items-center text-[13.5px] sm:text-[14.5px] tracking-normal transition-colors whitespace-nowrap shrink-0 group",
                       isActive
                         ? "text-brand font-bold"
                         : "text-foreground/80 hover:text-brand font-normal sm:font-medium",
@@ -468,7 +510,7 @@ export default function Header() {
                     {/* Thicker broadsheet active / hover border bottom in nav */}
                     <span
                       className={cn(
-                        "absolute -bottom-1.5 left-0 right-0 h-[3.5px] bg-brand rounded-none transition-all duration-200",
+                        "absolute bottom-0.5 left-0 right-0 h-[3.5px] bg-brand rounded-none transition-all duration-200",
                         isActive
                           ? "opacity-100 scale-x-100"
                           : "opacity-0 scale-x-0 group-hover:opacity-60 group-hover:scale-x-100",
@@ -486,11 +528,12 @@ export default function Header() {
           {stripItem && (
             <motion.div
               key={stripItem.key}
+              id={`header-submenu-${stripItem.key}`}
               initial={{ opacity: 0, y: -3 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -3 }}
               transition={{ duration: 0.1, ease: "easeOut" }}
-              className="border-t border-border/70 bg-background/98 w-full overflow-hidden"
+              className="absolute top-full left-0 border-t border-border/70 bg-background w-full overflow-hidden shadow-md"
             >
               <div className="container-editorial overflow-x-auto no-scrollbar">
                 <nav
@@ -505,6 +548,7 @@ export default function Header() {
                       <LocalizedLink
                         key={child.slug}
                         href={childHref}
+                        onClick={() => setOpenSubmenuKey(null)}
                         className={cn(
                           "group flex items-center gap-2 px-3 py-1 rounded-none text-xs sm:text-sm font-medium transition-colors shrink-0 whitespace-nowrap",
                           isChildActive

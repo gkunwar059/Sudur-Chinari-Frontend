@@ -28,7 +28,7 @@ export default function DistrictMapCards({ initialDistricts }: DistrictMapCardsP
   const [activeDistrictSlug, setActiveDistrictSlug] =
     useState<string>("kailali");
   const [viewMode, setViewMode] = useState<"cards" | "map">("map");
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(true);
 
   const { data: apiDistricts } = useQuery({
     queryKey: ["districts", locale],

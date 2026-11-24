@@ -10,9 +10,9 @@ import type { Locale } from "@/lib/i18n/config";
 function HeaderSkeleton() {
   return (
     <header className="sticky top-0 z-50 bg-background border-b border-border shadow-[0_1px_3px_rgba(0,0,0,0.03)]">
-      <div className="container-editorial py-3.5">
-        <div className="flex items-center justify-between gap-2 sm:gap-4 min-w-0">
-          <div className="h-10 w-40 sm:w-48 bg-muted animate-pulse" />
+      <div className="container-editorial">
+        <div className="flex min-h-14 sm:min-h-16 lg:min-h-[4.25rem] items-center justify-between gap-2 sm:gap-4 min-w-0">
+          <div className="h-10 sm:h-12 lg:h-14 aspect-[364/171] bg-muted animate-pulse" />
           <div className="flex items-center gap-3">
             <div className="hidden md:block h-4 w-28 bg-muted animate-pulse" />
             <div className="hidden sm:block h-7 w-20 bg-muted animate-pulse" />
@@ -21,7 +21,7 @@ function HeaderSkeleton() {
         </div>
       </div>
       <div className="border-t border-border/60">
-        <div className="container-editorial flex items-center gap-6 py-3 overflow-hidden">
+        <div className="container-editorial flex min-h-11 sm:min-h-12 items-center gap-6 overflow-hidden">
           {[72, 56, 64, 48, 60, 68].map((w, i) => (
             <div
               key={i}

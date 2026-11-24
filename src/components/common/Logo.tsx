@@ -26,10 +26,8 @@ export default function Logo({
           height={171}
           priority
           className={cn(
-            "object-contain w-auto transition-[height] duration-150 ease-out",
-            isScrolled
-              ? "h-9 sm:h-10 md:h-11 lg:h-12"
-              : "h-12 sm:h-16 md:h-[72px] lg:h-[80px]",
+            "object-contain w-auto h-10 sm:h-12 lg:h-14 origin-left transition-transform duration-400 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none",
+            isScrolled ? "scale-80" : "scale-100",
             imageClassName
           )}
         />

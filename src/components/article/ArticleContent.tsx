@@ -470,9 +470,14 @@ export default function ArticleContent({
       </article>
 
       {/* ── Sidebar Column (4 cols) ── */}
-      <aside className="lg:col-span-4 space-y-6">
+      <aside className="flex min-w-0 flex-col gap-6 lg:col-span-4 lg:gap-4">
+        {/* Sidebar Advertisement */}
+        <div className="overflow-hidden border border-border bg-background">
+          <AdBanner placement="sidebar" page="article" />
+        </div>
+
         {/* Popular News Card (Authentic Broadsheet Styling) */}
-        <div className="sticky top-20 bg-background p-5 sm:p-6 border border-border shadow-xs rounded-none relative">
+        <div className="relative border border-border bg-background shadow-xs lg:top-32 lg:[@media(min-height:52rem)]:sticky">
           {/* Top Hairline in Brand Green */}
           <div className="absolute top-0 left-0 right-0 h-[2px] bg-brand" />
 
@@ -480,10 +485,10 @@ export default function ArticleContent({
           <FTSectionDivider
             title={tr("popularNews")}
             as="h3"
-            className="!my-0 mb-4"
+            className="!my-0 px-5 pt-5 pb-3 sm:px-6 sm:pt-6"
           />
 
-          <div className="flex flex-col divide-y divide-gray-100">
+          <div className="divide-y divide-gray-100 px-5 pb-5 sm:px-6 sm:pb-6">
             {popular.map((a, i) => (
               <Link
                 key={a.id}
@@ -510,11 +515,6 @@ export default function ArticleContent({
               </Link>
             ))}
           </div>
-        </div>
-
-        {/* Sidebar Advertisement */}
-        <div className="rounded-none border border-border overflow-hidden scroll-reveal">
-          <AdBanner placement="sidebar" page="article" />
         </div>
       </aside>
     </div>

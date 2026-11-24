@@ -279,7 +279,7 @@ export default function FTLeadHero({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-stretch mb-8">
         {/* ── 1. LEFT & MIDDLE: Hero Banner (9 cols) ── */}
         <div
-          className="lg:col-span-9 min-w-0 flex flex-col h-[450px] sm:h-[500px] lg:h-[550px] relative group overflow-hidden border border-border shadow-sm bg-black"
+          className="lg:col-span-9 min-w-0 flex flex-col justify-end min-h-[460px] sm:h-[500px] lg:h-[550px] relative group overflow-hidden border border-border shadow-sm bg-black"
           onMouseEnter={() => setIsPaused(true)}
           onMouseLeave={() => setIsPaused(false)}
         >
@@ -322,137 +322,139 @@ export default function FTLeadHero({
             );
           })}
 
-          {/* Foreground Text Overlay - rendered once so slides NEVER overlap */}
-          {provinceFeatures[currentSlide] && (() => {
-            const feature = provinceFeatures[currentSlide];
-            return (
-              <div
-                key={`content-${currentSlide}-${feature.id}`}
-                className="relative z-20 p-5 sm:p-6 lg:p-8 flex flex-col justify-end h-full w-full sm:w-[90%] lg:w-[80%] pointer-events-none animate-fadeIn"
-              >
-                <div className="mb-2 sm:mb-3 pointer-events-auto">
-                  <FTCategoryBadge
-                    category={feature.category as any}
-                    size="sm"
-                    className="!bg-white/20 !border-white/30 !text-white hover:!bg-white hover:!text-brand"
-                  />
-                </div>
-
-                <Link
-                  href={feature.link}
-                  className="block pointer-events-auto"
+          {/* Foreground Text Overlay & Controls - separate slots prevent overlap */}
+          <div className="relative z-20 mt-auto p-5 pt-10 sm:p-6 lg:p-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 pointer-events-none">
+            {provinceFeatures[currentSlide] && (() => {
+              const feature = provinceFeatures[currentSlide];
+              return (
+                <div
+                  key={`content-${currentSlide}-${feature.id}`}
+                  className="min-w-0 flex-1 max-w-2xl flex flex-col animate-fadeIn"
                 >
-                  {currentSlide === 0 ? (
-                    <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
-                      {feature.title}
-                    </h1>
-                  ) : (
-                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
-                      {feature.title}
-                    </h2>
-                  )}
-                  <p className="text-[13px] sm:text-sm text-white/90 leading-snug font-sans line-clamp-3 sm:line-clamp-4 mb-1.5 drop-shadow break-words max-w-2xl">
-                    {feature.excerpt}
-                  </p>
-                </Link>
+                  <div className="mb-2 sm:mb-3 pointer-events-auto">
+                    <FTCategoryBadge
+                      category={feature.category as any}
+                      size="sm"
+                      className="!bg-white/20 !border-white/30 !text-white hover:!bg-white hover:!text-brand"
+                    />
+                  </div>
 
-                {/* Optional Buttons */}
-                {(feature as any).buttons && (
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4 pointer-events-auto">
-                    {(feature as any).buttons.map((btn: any, i: number) => {
-                      const btnClass = cn(
-                        "inline-flex items-center justify-center rounded-none px-4 py-1.5 sm:px-5 sm:py-2 font-sans font-semibold text-[13px] sm:text-[14px] transition-all group",
-                        btn.primary
-                          ? "bg-surface text-foreground hover:bg-card shadow-md"
-                          : "bg-transparent border border-white/40 text-white hover:bg-white/10 cursor-pointer",
-                      );
+                  <Link
+                    href={feature.link}
+                    className="block pointer-events-auto"
+                  >
+                    {currentSlide === 0 ? (
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
+                        {feature.title}
+                      </h1>
+                    ) : (
+                      <h2 className="text-2xl sm:text-3xl lg:text-4xl font-black font-headline text-white hover:text-gray-200 transition-colors leading-[1.15] mb-2 sm:mb-3 drop-shadow-md break-words whitespace-pre-line">
+                        {feature.title}
+                      </h2>
+                    )}
+                    <p className="text-[13px] sm:text-sm text-white/90 leading-snug font-sans line-clamp-3 sm:line-clamp-4 mb-1.5 drop-shadow break-words max-w-2xl">
+                      {feature.excerpt}
+                    </p>
+                  </Link>
 
-                      if (btn.onClick) {
+                  {/* Optional Buttons */}
+                  {(feature as any).buttons && (
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mt-3 sm:mt-4 pointer-events-auto">
+                      {(feature as any).buttons.map((btn: any, i: number) => {
+                        const btnClass = cn(
+                          "inline-flex items-center justify-center rounded-none px-4 py-1.5 sm:px-5 sm:py-2 font-sans font-semibold text-[13px] sm:text-[14px] transition-all group",
+                          btn.primary
+                            ? "bg-surface text-foreground hover:bg-card shadow-md"
+                            : "bg-transparent border border-white/40 text-white hover:bg-white/10 cursor-pointer",
+                        );
+
+                        if (btn.onClick) {
+                          return (
+                            <button
+                              key={i}
+                              type="button"
+                              onClick={btn.onClick}
+                              className={btnClass}
+                            >
+                              {btn.label}
+                              {btn.icon && (
+                                <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
+                              )}
+                            </button>
+                          );
+                        }
+
                         return (
-                          <button
-                            key={i}
-                            type="button"
-                            onClick={btn.onClick}
-                            className={btnClass}
-                          >
+                          <Link key={i} href={btn.href} className={btnClass}>
                             {btn.label}
                             {btn.icon && (
                               <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
                             )}
-                          </button>
+                          </Link>
                         );
-                      }
+                      })}
+                    </div>
+                  )}
 
-                      return (
-                        <Link key={i} href={btn.href} className={btnClass}>
-                          {btn.label}
-                          {btn.icon && (
-                            <ArrowRight size={14} className="ml-1.5 transition-transform duration-200 group-hover:translate-x-1 shrink-0" />
-                          )}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                )}
+                  {/* Optional Stats */}
+                  {(feature as any).stats && (
+                    <div className="mt-4 sm:mt-5 pt-4 border-t border-white/20 flex flex-wrap items-center gap-x-6 gap-y-3 sm:gap-x-10 pointer-events-auto w-full">
+                      {(feature as any).stats.map((stat: any, i: number) => (
+                        <div key={i} className="flex flex-col">
+                          <span className="text-xl sm:text-2xl font-bold font-headline text-white leading-none mb-1">
+                            {stat.value}
+                          </span>
+                          <span className="text-[11px] sm:text-xs font-sans text-white/70 font-semibold tracking-wide">
+                            {stat.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
 
-                {/* Optional Stats */}
-                {(feature as any).stats && (
-                  <div className="mt-4 sm:mt-5 pt-4 border-t border-white/20 flex items-center gap-6 sm:gap-10 pointer-events-auto w-full max-w-2xl">
-                    {(feature as any).stats.map((stat: any, i: number) => (
-                      <div key={i} className="flex flex-col">
-                        <span className="text-xl sm:text-2xl font-bold font-headline text-white leading-none mb-1">
-                          {stat.value}
-                        </span>
-                        <span className="text-[11px] sm:text-xs font-sans text-white/70 font-semibold tracking-wide">
-                          {stat.label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+            {/* Slider Controls */}
+            {provinceFeatures.length > 1 && (
+              <div className="shrink-0 self-end z-30 flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 px-2 py-1 rounded-none text-white pointer-events-auto shadow-xl">
+                <button
+                  type="button"
+                  onClick={handlePrevSlide}
+                  aria-label={locale === "ne" ? "अघिल्लो" : "Previous"}
+                  className="p-1 rounded-none hover:bg-white/20 active:scale-95 transition-all text-white/90 hover:text-white"
+                >
+                  <ChevronLeft size={16} strokeWidth={2.5} />
+                </button>
+
+                <div className="flex items-center gap-1.5 px-1">
+                  {provinceFeatures.map((_, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setCurrentSlide(idx)}
+                      aria-label={`Slide ${idx + 1}`}
+                      className={cn(
+                        "h-1.5 rounded-none transition-all duration-300",
+                        idx === currentSlide
+                          ? "w-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
+                          : "w-1.5 bg-white/40 hover:bg-white/70",
+                      )}
+                    />
+                  ))}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleNextSlide}
+                  aria-label={locale === "ne" ? "पछिल्लो" : "Next"}
+                  className="p-1 rounded-none hover:bg-white/20 active:scale-95 transition-all text-white/90 hover:text-white"
+                >
+                  <ChevronRight size={16} strokeWidth={2.5} />
+                </button>
               </div>
-            );
-          })()}
-
-          {/* Slider Controls */}
-          {provinceFeatures.length > 1 && (
-            <div className="absolute bottom-6 right-6 lg:bottom-10 lg:right-10 z-30 flex items-center gap-1.5 bg-black/40 backdrop-blur-md border border-white/10 px-2 py-1 rounded-none text-white pointer-events-auto shadow-xl">
-              <button
-                type="button"
-                onClick={handlePrevSlide}
-                aria-label={locale === "ne" ? "अघिल्लो" : "Previous"}
-                className="p-1 rounded-none hover:bg-white/20 active:scale-95 transition-all text-white/90 hover:text-white"
-              >
-                <ChevronLeft size={16} strokeWidth={2.5} />
-              </button>
-
-              <div className="flex items-center gap-1.5 px-1">
-                {provinceFeatures.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setCurrentSlide(idx)}
-                    aria-label={`Slide ${idx + 1}`}
-                    className={cn(
-                      "h-1.5 rounded-none transition-all duration-300",
-                      idx === currentSlide
-                        ? "w-5 bg-white shadow-[0_0_8px_rgba(255,255,255,0.6)]"
-                        : "w-1.5 bg-white/40 hover:bg-white/70",
-                    )}
-                  />
-                ))}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleNextSlide}
-                aria-label={locale === "ne" ? "पछिल्लो" : "Next"}
-                className="p-1 rounded-none hover:bg-white/20 active:scale-95 transition-all text-white/90 hover:text-white"
-              >
-                <ChevronRight size={16} strokeWidth={2.5} />
-              </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {/* ── 2. RIGHT COLUMN: Advertisement (3 cols) ── */}
