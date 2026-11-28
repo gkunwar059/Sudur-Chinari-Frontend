@@ -1,3 +1,4 @@
+
 import Link from "@/components/i18n/LocalizedLink";
 import Image from "next/image";
 import { MapPin, Phone, Mail } from "lucide-react";
@@ -380,6 +381,7 @@ export default function Footer({ locale }: { locale: Locale }) {
           </div>
         </div>
       </div>
+
       {/* ── 4. Editorial Team ── */}
       <div className="border-b border-border py-8">
         <div className="container-editorial">
@@ -423,6 +425,38 @@ export default function Footer({ locale }: { locale: Locale }) {
         </div>
 
         <BackToTopButton />
+      </div>
+
+      {/* ── 6. Responsive Abstract Wave ── */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none relative h-24 w-full overflow-hidden sm:h-32 lg:h-40"
+      >
+        <svg
+          viewBox="0 0 1440 180"
+          preserveAspectRatio="none"
+          className="absolute inset-0 h-full w-full"
+          xmlns="http://www.w3.org/2000/svg"
+        >
+          <path
+            d="M0 85 C180 145 300 15 500 65 S850 150 1050 70 S1300 25 1440 80 L1440 180 L0 180 Z"
+            className="fill-brand/10"
+          />
+          <path
+            d="M0 115 C200 35 360 155 560 100 S900 35 1100 105 S1300 155 1440 100 L1440 180 L0 180 Z"
+            className="fill-brand-secondary/15"
+          />
+          <path
+            d="M0 140 C220 85 400 175 650 125 S1000 80 1200 135 S1350 165 1440 125 L1440 180 L0 180 Z"
+            className="fill-brand/20"
+          />
+          <path
+            d="M0 155 C250 120 430 180 700 150 S1050 115 1250 155 S1370 175 1440 150"
+            fill="none"
+            className="stroke-brand-secondary/40"
+            strokeWidth="1.5"
+          />
+        </svg>
       </div>
     </footer>
   );
