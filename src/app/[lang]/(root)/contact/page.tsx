@@ -94,21 +94,21 @@ export default function ContactPage() {
                     <MapPin size={17} className="text-brand shrink-0 mt-0.5" />
                     <span>
                       {isNe
-                        ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश, नेपाल"
-                        : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province, Nepal"}
+                        ? "काठमाडौँ महानगरपालिका-४, काठमाडौँ, बागमती प्रदेश, नेपाल"
+                        : "Kathmandu Metropolitan City-4, Kathmandu, Bagmati Province, Nepal"}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Phone size={17} className="text-brand shrink-0" />
-                    <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
+                    <span>+९७७ ९८१०२२८६६९ / +९७७ ९८६५७६८५३७</span>
                   </div>
                   <div className="flex items-center gap-3">
                     <Mail size={17} className="text-brand shrink-0" />
                     <a
-                      href="mailto:editorial@sudurchinari.com"
+                      href="mailto:chinarisudur@gmail.com"
                       className="text-foreground hover:text-brand font-medium transition-colors"
                     >
-                      editorial@sudurchinari.com
+                      chinarisudur@gmail.com
                     </a>
                   </div>
                 </div>

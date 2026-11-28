@@ -61,21 +61,21 @@ export default function Footer({ locale }: { locale: Locale }) {
                     <MapPin size={16} className="text-brand-secondary shrink-0" />
                     <span>
                       {locale === "ne"
-                        ? "धनगढी उपमहानगरपालिका-१, कैलाली, सुदूरपश्चिम प्रदेश"
-                        : "Dhangadhi Sub-Metropolitan City-1, Kailali, Far-West Province"}
+                        ? "काठमाडौँ महानगरपालिका-४, काठमाडौँ, बागमती प्रदेश"
+                        : "Kathmandu Metropolitan City-4, Kathmandu, Bagmati Province"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Phone size={16} className="text-brand-secondary shrink-0" />
-                    <span>+९७७ ९८०००००००० / ०९१-५०००००</span>
+                    <span>+९७७ ९८१०२२८६६९ / +९७७ ९८६५७६८५३७</span>
                   </div>
                   <div className="flex items-center gap-2.5">
                     <Mail size={16} className="text-brand-secondary shrink-0" />
                     <a
-                      href="mailto:info@sudurchinari.com"
+                      href="mailto:chinarisudur@gmail.com"
                       className="hover:text-brand-secondary transition-colors"
                     >
-                      info@sudurchinari.com
+                      chinarisudur@gmail.com
                     </a>
                   </div>
                 </div>
@@ -332,7 +332,7 @@ export default function Footer({ locale }: { locale: Locale }) {
             </p>
             <div className="flex flex-col space-y-3 text-xs font-bold mt-1">
               <a
-                href="https://facebook.com"
+                href="https://www.facebook.com/profile.php?id=61594927261039"
                 target="_blank"
                 rel="noreferrer"
                 className="hover:text-brand-secondary transition-colors flex items-center gap-2"
@@ -397,7 +397,7 @@ export default function Footer({ locale }: { locale: Locale }) {
                 {locale === "ne" ? "सम्पादक" : "Editor"}
               </h5>
               <p className="font-serif text-sm">
-                {locale === "ne" ? "जीवन श्रेष्ठ" : "Jeevan Shrestha"}
+                {locale === "ne" ? "गायत्री कुँवर" : "Gayatri Kunwar"}
               </p>
             </div>
             <div>
@@ -405,7 +405,7 @@ export default function Footer({ locale }: { locale: Locale }) {
                 {locale === "ne" ? "सम्वाददाता" : "Correspondent"}
               </h5>
               <p className="font-serif text-sm">
-                {locale === "ne" ? "गणेश कुँवर" : "Ganesh Kunwar"}
+                {locale === "ne" ? "गायत्री कुँवर" : "Gayatri Kunwar"}
               </p>
             </div>
           </div>
